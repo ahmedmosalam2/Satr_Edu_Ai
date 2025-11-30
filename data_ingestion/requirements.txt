@@ -1,0 +1,14 @@
+!pip install torch==2.6.0
+!pip install addict
+!pip install transformers==4.46.3
+!pip install tokenizers==0.20.3
+!pip install einops
+!pip install addict
+!pip install easydict
+!pip uninstall flash-attn
+!pip install torchvision
+!pip install git+https://github.com/deepseek-ai/DeepSeek-VL.git
+
+
+!pip install -q git+https://github.com/deepseek-ai/DeepSeek-VL.git
+!pip install -q bitsandbytes accelerate
