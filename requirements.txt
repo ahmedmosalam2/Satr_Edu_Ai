@@ -1,6 +1,6 @@
 fastapi
-unicorn
-python-multipart
+uvicorn
+python-multipart==0.0.12
 python-dotenv
 torch
 transformers
@@ -8,3 +8,5 @@ pillow
 einops
 accelerate
 timm
+
+pydantic_settings
