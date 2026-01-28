@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers.generation import GenerationConfig
 import torch
@@ -9,21 +10,32 @@ from src.models.enums.Response import Response
 class OCRHelper:
     def __init__(self):
         self.model_path = get_settings().OCR_MODEL 
-        
-        # Checking device
+   
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.model = None
+        self.tokenizer = None
+        self._initialized = False
+    
+    def _initialize_model(self):
+        """Lazy load the model only when first needed"""
+        if self._initialized:
+            return
         
-
         try:
              self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
              self.model = AutoModelForCausalLM.from_pretrained(self.model_path, trust_remote_code=True, torch_dtype=torch.bfloat16 if self.device == "cuda" else torch.float32).to(self.device)
              self.model.eval()
+             self._initialized = True
+             print(f"✅ OCR Model loaded successfully: {self.model_path}")
         except Exception as e:
-            print(f"Error loading model {self.model_path}: {e}")
+            print(f"❌ Error loading model {self.model_path}: {e}")
             # Fallback or re-raise
-            raise HTTPException(status_code=500, detail=Response.FILE_UPLOAD_FAILED.value)
+            raise HTTPException(status_code=500, detail=f"OCR model loading failed: {str(e)}")
 
     def process_image(self, image_bytes: bytes) -> str:
+        # Ensure model is loaded before processing
+        self._initialize_model()
+        
         try:
             pil_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
@@ -40,3 +52,10 @@ class OCRHelper:
 
         except Exception as e:
             return f"Error processing image: {str(e)}"
+
+ocr_helper_instance = None
+def get_ocr_helper():
+    global ocr_helper_instance
+    if ocr_helper_instance is None:
+        ocr_helper_instance = OCRHelper()
+    return ocr_helper_instance
