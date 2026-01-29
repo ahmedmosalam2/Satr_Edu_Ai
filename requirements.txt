@@ -12,6 +12,7 @@ timm
 pydantic_settings
 PyPDF2
 pypdf
+sentence-transformers
 langchain_community
 langchain_text_splitters
 unstructured

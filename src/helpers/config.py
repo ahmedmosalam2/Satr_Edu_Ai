@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     APP_VERSION:str
     OPENAI_API_KEY:str
     FILE_ALLOWED_EXTION:list[str]
+    IMAGE_ALLOWED_EXTION:list[str]
     FILE_MAX_SIZE:int
     FILE_DEFALUTE_CHUNK:int
     OCR_MODEL:str

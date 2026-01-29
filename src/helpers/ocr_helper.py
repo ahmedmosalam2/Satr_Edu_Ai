@@ -1,9 +1,5 @@
 from fastapi import HTTPException
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from transformers.generation import GenerationConfig
-import torch
-from PIL import Image
-import io
+
 from src.helpers.config import get_settings
 from src.models.enums.Response import Response
 
@@ -11,7 +7,8 @@ class OCRHelper:
     def __init__(self):
         self.model_path = get_settings().OCR_MODEL 
    
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+    
+        self.device = None
         self.model = None
         self.tokenizer = None
         self._initialized = False
@@ -22,6 +19,12 @@ class OCRHelper:
             return
         
         try:
+             # Import here to avoid startup lag
+             import torch
+             from transformers import AutoModelForCausalLM, AutoTokenizer
+             
+             self.device = "cuda" if torch.cuda.is_available() else "cpu"
+             
              self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
              self.model = AutoModelForCausalLM.from_pretrained(self.model_path, trust_remote_code=True, torch_dtype=torch.bfloat16 if self.device == "cuda" else torch.float32).to(self.device)
              self.model.eval()
@@ -37,9 +40,12 @@ class OCRHelper:
         self._initialize_model()
         
         try:
+            import torch
+            from PIL import Image
+            from transformers import AutoProcessor
+            
             pil_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
-            from transformers import AutoProcessor
             processor = AutoProcessor.from_pretrained(self.model_path, trust_remote_code=True)
             
             inputs = processor(images=pil_image, text="OCR this image.", return_tensors="pt").to(self.device)
