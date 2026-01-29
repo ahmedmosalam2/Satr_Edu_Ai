@@ -1,0 +1,56 @@
+# Byte-code files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+*.egg-info/
+*.egg
+
+# Distributions and packaging
+dist/
+build/
+wheels/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-line.txt
+
+# Unit test / coverage reports
+.coverage
+.tox/
+htmlcov/
+.nox/
+
+# Editors and IDEs
+.idea/          # For PyCharm
+.vscode/        # For VS Code (can be merged with global gitignore)
+*.swp
+*~
+.sess/
+
+# OS-generated files
+.DS_Store       # macOS
+Thumbs.db       # Windows
+ehthumbs.db     # Windows
+
+# Virtual environments
+venv/
+env/
+/bin/
+/include/
+/lib/
+/lib64/
+__venv/
+
+# Environment variables
+.env            # file for storing API keys/passwords
+.flaskenv
+
+# PyInstaller
+# See https://pyinstaller.org
+*.layout
+*.spec
+
+# Jupyter Notebook
+.ipynb_checkpoints
+

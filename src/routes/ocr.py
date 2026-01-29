@@ -1,6 +1,9 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, status
 from src.helpers.ocr_helper import OCRHelper
 from src.models.enums.Response import Response
+import torch
+from PIL import Image
+import io
 
 router = APIRouter(
     prefix="/ocr",
