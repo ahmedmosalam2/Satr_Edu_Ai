@@ -12,11 +12,5 @@ class DataChunk(BaseModel):
     chunk_created_at: str
     chunk_updated_at: str
     chunk_project_id: ObjectId
-    @validator('chunk_id'):
-        def chunk_id_must_be_unique(cls, v):
-            if v in cls._id:
-                raise ValueError('chunk_id must be unique')
-            return v
-
-class Config:
-    arbitrary_types_allowed = True
+    class Config:
+        arbitrary_types_allowed = True
