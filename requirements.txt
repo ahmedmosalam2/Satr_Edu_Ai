@@ -22,3 +22,4 @@ networkx
 openpyxl
 langchain_experimental
 motor
+pymongo

@@ -10,6 +10,7 @@ import logging
 from src.routes.schemes.data import ProcessRequest
 from src.controllers import ProcessController
 from src.models.ProjectModel import ProjectModel
+from src.models.ChunkModel import ChunkModel
 
 
 logger=logging.getLogger("unicorn error")
@@ -22,7 +23,7 @@ router=APIRouter(
 
 
 @router.post("/upload/{project_id}")
-async def upload(request:Request,project_id: str,file:UploadFile,app_settings: Settings = Depends(get_settings)):
+async def upload(project_id: str,file:UploadFile,app_settings: Settings = Depends(get_settings)):
     data_controller=DataController()
     is_valied=data_controller.valied_upload(project_id,file=file)
 
@@ -51,7 +52,7 @@ async def upload(request:Request,project_id: str,file:UploadFile,app_settings: S
         
         # Save to MongoDB
         await project_controller.project_model.get_project(project_id=project_id)
-        print("💾 Project saved to MongoDB")
+        print(" Project saved to MongoDB")
     except Exception as e:
         logger.error(f"Error during file upload: {str(e)}")
         print(f" Error saving file: {e}")
@@ -83,27 +84,63 @@ async def upload(request:Request,project_id: str,file:UploadFile,app_settings: S
         }
     }
 
-    
-
 @router.post("/process/{project_id}")
-def process(project_id: str,request: ProcessRequest,app_settings: Settings = Depends(get_settings)):
-    file_id=request.file_id
-    chunk_size=request.chunk_size
-    chunk_overlap=request.chunk_overlap
+async def process(request: Request, project_id: str, body: ProcessRequest, app_settings: Settings = Depends(get_settings)):
+    from src.models.scheme_db.data_chunk import DataChunk
+    from datetime import datetime
+    
+    file_id = body.file_id
+    chunk_size = body.chunk_size
+    chunk_overlap = body.chunk_overlap
 
-    process_controller=ProcessController(project_id=project_id)
-    file_content=process_controller.get_file_content(file_id=file_id)
+    process_controller = ProcessController(project_id=project_id)
+    file_content = process_controller.get_file_content(file_id=file_id)
 
-    file_chunks=process_controller.process_file_content(file_content=file_content,
-    chunk_size=chunk_size,
-    chunk_overlap=chunk_overlap)
+    file_chunks = process_controller.process_file_content(
+        file_content=file_content,
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap
+    )
+
+    # Convert Document objects to DataChunk objects for MongoDB
+    now = datetime.now().isoformat()
+    chunks_to_save = [
+        DataChunk(
+            chunk_id=f"{project_id}_{file_id}_{i}",
+            chunk_text=chunk.page_content,
+            chunk_metadata=chunk.metadata,
+            chunk_order=i,
+            chunk_created_at=now,
+            chunk_updated_at=now,
+            chunk_project_id=project_id
+        )
+        for i, chunk in enumerate(file_chunks)
+    ]
+
+    # Save chunks to MongoDB
+    chunk_model = ChunkModel(client=request.app.client, project_id=project_id)
+    if chunk_model.collection is not None and len(chunks_to_save) > 0:
+        await chunk_model.insert_many_chunks(project_id=project_id, chunks=chunks_to_save)
+        print(f"💾 Saved {len(chunks_to_save)} chunks to MongoDB")
+
+    # Convert for JSON response
+    chunks_data = [
+        {
+            "content": chunk.page_content,
+            "metadata": chunk.metadata,
+            "index": i
+        }
+        for i, chunk in enumerate(file_chunks)
+    ]
+
     return {
-        "status":Response.SUCCESS.value,
-        "message":"File is processed successfully",
-        "data":{
-            "project_id":project_id,
-            "file_id":file_id,
-            "chunks":file_chunks
-       }
-    }  
-
+        "status": Response.SUCCESS.value,
+        "message": "File is processed successfully",
+        "data": {
+            "project_id": project_id,
+            "file_id": file_id,
+            "chunks_count": len(chunks_data),
+            "chunks_saved_to_db": len(chunks_to_save),
+            "chunks": chunks_data
+        }
+    }
