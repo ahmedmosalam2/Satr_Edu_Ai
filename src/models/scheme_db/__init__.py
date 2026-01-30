@@ -1,2 +1,2 @@
-from .project import Project
+from .Project import Project
 from .data_chunk import DataChunk

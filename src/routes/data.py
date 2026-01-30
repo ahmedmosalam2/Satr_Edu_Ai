@@ -1,4 +1,4 @@
-from fastapi import FastAPI,APIRouter,UploadFile,Depends,status
+from fastapi import FastAPI,APIRouter,UploadFile,Depends,status,Request
 from src.helpers.config import get_settings, Settings
 from src.helpers.ocr_helper import get_ocr_helper
 import os
@@ -9,6 +9,8 @@ import aiofiles
 import logging
 from src.routes.schemes.data import ProcessRequest
 from src.controllers import ProcessController
+from src.models.ProjectModel import ProjectModel
+
 
 logger=logging.getLogger("unicorn error")
 
@@ -20,7 +22,7 @@ router=APIRouter(
 
 
 @router.post("/upload/{project_id}")
-async def upload(project_id: str,file:UploadFile,app_settings: Settings = Depends(get_settings)):
+async def upload(request:Request,project_id: str,file:UploadFile,app_settings: Settings = Depends(get_settings)):
     data_controller=DataController()
     is_valied=data_controller.valied_upload(project_id,file=file)
 
@@ -100,3 +102,4 @@ def process(project_id: str,request: ProcessRequest,app_settings: Settings = Dep
             "chunks":file_chunks
        }
     }  
+
