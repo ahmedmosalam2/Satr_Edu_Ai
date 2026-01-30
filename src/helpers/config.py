@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     FILE_MAX_SIZE:int
     FILE_DEFALUTE_CHUNK:int
     OCR_MODEL:str
+    MONGODB_URL:str
+    MONGODB_DATABASE:str
     class Config:
         env_file=".env"
         env_file_encoding="utf-8"
