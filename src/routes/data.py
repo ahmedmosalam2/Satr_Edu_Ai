@@ -121,7 +121,7 @@ async def process(request: Request, project_id: str, body: ProcessRequest, app_s
     chunk_model = ChunkModel(client=request.app.client, project_id=project_id)
     if chunk_model.collection is not None and len(chunks_to_save) > 0:
         await chunk_model.insert_many_chunks(project_id=project_id, chunks=chunks_to_save)
-        print(f"💾 Saved {len(chunks_to_save)} chunks to MongoDB")
+        print(f" Saved {len(chunks_to_save)} chunks to MongoDB")
 
     # Convert for JSON response
     chunks_data = [
