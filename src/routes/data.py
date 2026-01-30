@@ -37,7 +37,7 @@ async def upload(request:Request,project_id: str,file:UploadFile,app_settings: S
                 "file_content_type":file.content_type
             }
          }
-    project_controller=ProjectController()
+    project_controller=ProjectController(db_client=request.app.client)
     project_dir_path=project_controller.get_project_path(project_id=project_id)
     file_path,file_id=data_controller.generate_file_name(file.filename,project_id)
 
@@ -48,6 +48,10 @@ async def upload(request:Request,project_id: str,file:UploadFile,app_settings: S
         async with aiofiles.open(file_path, "wb") as f:
             await f.write(content)
         print(" File saved successfully")
+        
+        # Save to MongoDB
+        await project_controller.project_model.get_project(project_id=project_id)
+        print("💾 Project saved to MongoDB")
     except Exception as e:
         logger.error(f"Error during file upload: {str(e)}")
         print(f" Error saving file: {e}")

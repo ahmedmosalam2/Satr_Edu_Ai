@@ -3,9 +3,9 @@ from src.models.enums.Response import Response
 from src.controllers.BaseController import BaseController
 import os
 class ProjectController(BaseController):
-    def __init__(self):
+    def __init__(self, db_client=None):
         super().__init__()
-        self.project_model=ProjectModel()
+        self.project_model = ProjectModel(client=db_client)
     
     def get_project_path(self,project_id:str):
         project_path=os.path.join(self.base_path,project_id)

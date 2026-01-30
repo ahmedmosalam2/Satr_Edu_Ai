@@ -3,11 +3,12 @@ from src.models.enums.DataBaseEnumProject import DataBaseEnumProject
 from src.models.scheme_db import Project
 import math
 class ProjectModel(BaseDataModel):
-    def __init__(self, client: object, project_id: str = None):
+    def __init__(self, client: object = None, project_id: str = None):
         super().__init__(client)
         self.project_id = project_id
-        self.collection=self.db[DataBaseEnumProject.PROJECT.value]
-        self.chunk_collection=self.db[DataBaseEnumProject.CHUNK.value]
+        # Only set collections if db is available (MongoDB connected)
+        self.collection = self.db[DataBaseEnumProject.PROJECT.value] if self.db is not None else None
+        self.chunk_collection = self.db[DataBaseEnumProject.CHUNK.value] if self.db is not None else None
     async def create_project(self,project:Project):
         result= await self.collection.insert_one(project.dict())
         return result.inserted_id
