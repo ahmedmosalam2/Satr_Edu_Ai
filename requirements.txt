@@ -21,3 +21,4 @@ python-pptx
 networkx 
 openpyxl
 langchain_experimental
+motor
