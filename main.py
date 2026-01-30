@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from src.routes import base
 from src.routes import data
 from dotenv import load_dotenv
-from src.routes import ocr
+# from src.routes import ocr
 from motor.motor_asyncio import AsyncIOMotorClient 
 from src.helpers.config import get_settings
 
@@ -20,4 +20,4 @@ async def shutdown():
 
 app.include_router(base.router)
 app.include_router(data.router)
-app.include_router(ocr.router)
+# app.include_router(ocr.router)
