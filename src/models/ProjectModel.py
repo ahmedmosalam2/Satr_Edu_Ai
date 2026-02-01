@@ -9,6 +9,32 @@ class ProjectModel(BaseDataModel):
         
         self.collection = self.db[DataBaseEnumProject.PROJECT.value] if self.db is not None else None
         self.chunk_collection = self.db[DataBaseEnumProject.CHUNK.value] if self.db is not None else None
+
+    @classmethod
+    async def create_index(cls,db_client:object):
+        instance=cls(client=db_client)
+        await instance.init_collection()
+        return instance
+        
+        
+
+#fehres for project_id
+    async def init_collection(self): 
+        all_collections= await self.db.list_collection_names()
+        if DataBaseEnumProject.PROJECT.value not in all_collections:
+            self.collection=self.db[DataBaseEnumProject.PROJECT.value]
+            indexes=Project.get_indexes()
+
+            for index in indexes:
+                await self.collection.create_index(
+                    index["key"],
+                    unique=index["unique"],
+                    name=index["name"]
+                    )
+            
+
+
+  
     async def create_project(self,project:Project):
         result= await self.collection.insert_one(project.dict())
         return result.inserted_id
@@ -23,9 +49,11 @@ class ProjectModel(BaseDataModel):
                 filter={"project_id":project_id})
         return Project(**result)
     async def update_project(self,project_id:str,project:Project):
+        print(f"DEBUG: update_project called for {project_id}. Payload: {project.dict()}")
         result= await self.collection.update_one(
             filter={"project_id":project_id},
             update={"$set":project.dict()})
+        print(f"DEBUG: update_project result: matched={result.matched_count}, modified={result.modified_count}")
         return result
     async def delete_project(self,project_id:str):
         result= await self.collection.delete_one( {"project_id":project_id})

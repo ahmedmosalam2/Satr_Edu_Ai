@@ -23,9 +23,13 @@ router=APIRouter(
 
 
 @router.post("/upload/{project_id}")
-async def upload(project_id: str,file:UploadFile,app_settings: Settings = Depends(get_settings)):
+async def upload(request: Request, project_id: str,file:UploadFile,app_settings: Settings = Depends(get_settings)):
     data_controller=DataController()
     is_valied=data_controller.valied_upload(project_id,file=file)
+    project_model=await ProjectModel.create_index(db_client=request.app.client)
+    chunk_model=await ChunkModel.create_index(db_client=request.app.client)
+
+
 
     if not is_valied:
          return {
@@ -49,9 +53,7 @@ async def upload(project_id: str,file:UploadFile,app_settings: Settings = Depend
         async with aiofiles.open(file_path, "wb") as f:
             await f.write(content)
         print(" File saved successfully")
-        
-        # Save to MongoDB
-        await project_controller.project_model.get_project(project_id=project_id)
+        await project_controller.add_file_to_project(project_id=project_id, file_name=file.filename)
         print(" Project saved to MongoDB")
     except Exception as e:
         logger.error(f"Error during file upload: {str(e)}")
@@ -93,6 +95,8 @@ async def process(request: Request, project_id: str, body: ProcessRequest, app_s
     chunk_size = body.chunk_size
     chunk_overlap = body.chunk_overlap
 
+    chunk_model=await ChunkModel.create_index(db_client=request.app.client)
+
     process_controller = ProcessController(project_id=project_id)
     file_content = process_controller.get_file_content(file_id=file_id)
 
@@ -102,7 +106,6 @@ async def process(request: Request, project_id: str, body: ProcessRequest, app_s
         chunk_overlap=chunk_overlap
     )
 
-    # Convert Document objects to DataChunk objects for MongoDB
     now = datetime.now().isoformat()
     chunks_to_save = [
         DataChunk(
@@ -117,13 +120,14 @@ async def process(request: Request, project_id: str, body: ProcessRequest, app_s
         for i, chunk in enumerate(file_chunks)
     ]
 
-    # Save chunks to MongoDB
+
     chunk_model = ChunkModel(client=request.app.client, project_id=project_id)
     if chunk_model.collection is not None and len(chunks_to_save) > 0:
         await chunk_model.insert_many_chunks(project_id=project_id, chunks=chunks_to_save)
         print(f" Saved {len(chunks_to_save)} chunks to MongoDB")
 
-    # Convert for JSON response
+
+
     chunks_data = [
         {
             "content": chunk.page_content,
