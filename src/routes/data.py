@@ -11,6 +11,15 @@ from src.routes.schemes.data import ProcessRequest
 from src.controllers import ProcessController
 from src.models.ProjectModel import ProjectModel
 from src.models.ChunkModel import ChunkModel
+from src.models.AssetModel import AssetModel
+from src.models.scheme_db.asset import Asset
+from src.models.scheme_db.data_chunk import DataChunk
+from src.models.scheme_db.Project import Project
+from src.models.enums.AssetType import AssetType
+from datetime import datetime
+from bson import ObjectId
+
+
 
 
 logger=logging.getLogger("unicorn error")
@@ -72,6 +81,18 @@ async def upload(request: Request, project_id: str,file:UploadFile,app_settings:
         except Exception as e:
             logger.error(f"Error during OCR processing: {str(e)}")
             ocr_text = f"OCR Failed: {str(e)}"
+
+    now = datetime.now()
+    asset_model=AssetModel(client=request.app.client, project_id=project_id)
+    resource_asset=Asset(
+        asset_id=file_id,
+        asset_name=file.filename,
+        asset_size=os.path.getsize(file_path),
+        asset_type=AssetType.FILE.value,
+        asset_project_id=project_id,
+        asset_created_at=now
+    )
+    await asset_model.create_asset(resource_asset)
 
     return {
         "status":Response.SUCCESS.value,
