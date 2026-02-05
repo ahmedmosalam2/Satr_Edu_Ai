@@ -94,6 +94,8 @@ async def upload(request: Request, project_id: str,file:UploadFile,app_settings:
     )
     await asset_model.create_asset(resource_asset)
 
+     
+
     return {
         "status":Response.SUCCESS.value,
         "message":"File is uploaded successfully",
@@ -120,6 +122,33 @@ async def process(request: Request, project_id: str, body: ProcessRequest, app_s
 
     process_controller = ProcessController(project_id=project_id)
     file_content = process_controller.get_file_content(file_id=file_id)
+
+
+    project_file_id=[]
+    if file_id:
+        project_file_id=[file_id]
+    else:
+        asset_model=await AssetModel.create_index(
+            db_client=request.app.client,
+            project_id=project_id
+            )
+        project_file_id=asset_model.get_project_files(
+            project_id=project_id
+            )
+        project_file_id=[
+            asset.asset_name for asset in project_file_id
+            ]
+    if len(project_file_id)==0:
+        return {
+            "status":Response.BAD_REQUEST.value,
+            "message":"No file found",
+            "data":{
+                "project_id":project_id,
+                "file_id":file_id
+            }
+        }
+
+
 
     file_chunks = process_controller.process_file_content(
         file_content=file_content,

@@ -39,9 +39,10 @@ class AssetModel(BaseDataModel):
             return None
         return Asset(**result)
     
-    async def get_all_assets(self,project_id:str):
+    async def get_all_assets(self,project_id:str,asset_type:str):
         result= await self.collection.find({
-            "asset_project_id":project_id
+            "asset_project_id":project_id,
+            "asset_type":asset_type
             })
         return [Asset(**asset) async for asset in result]  
 
