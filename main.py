@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 # from src.routes import ocr
 from motor.motor_asyncio import AsyncIOMotorClient 
 from src.helpers.config import get_settings
+from src.story.llm.LLMproviderfactory import LLMProviderFactory
 
 load_dotenv(".env")
 
@@ -15,6 +16,12 @@ async def startup():
     settings=get_settings()
     app.client=AsyncIOMotorClient(settings.MONGODB_URL)
     app.db=app.client[settings.MONGODB_DATABASE]
+    #-------------------------
+    llm_provider=LLMProviderFactory(settings)
+    app.llm_provider=llm_provider.create_provider(LLMEnums.ProviderType.OPENAI)
+    app.llm_provider.set_generate_model(settings.GENERATION_MODEL_ID)
+    app.llm_provider.set_embedding_model(settings.EMBEDDING_MODEL_ID
+    ,settings.EMBEDDING_MODEL_SIZE)
 @app.on_event("shutdown")
 async def shutdown():
     app.client.close()

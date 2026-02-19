@@ -23,3 +23,5 @@ openpyxl
 langchain_experimental
 motor
 pymongo
+qdrant-client
+

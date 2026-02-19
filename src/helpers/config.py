@@ -11,6 +11,11 @@ class Settings(BaseSettings):
     OCR_MODEL:str
     MONGODB_URL:str
     MONGODB_DATABASE:str
+    INPUT_DEFAULT_MAX_CHARACTERS:int
+    GENERATION_DEFAULT_MAX_OUTPUT_TOKENS:int
+    GENERATION_DEFAULT_TEMPERATURE:float
+    EMBEDDING_MODEL_ID:str
+    EMBEDDING_MODEL_SIZE:int
     class Config:
         env_file=".env"
         env_file_encoding="utf-8"
