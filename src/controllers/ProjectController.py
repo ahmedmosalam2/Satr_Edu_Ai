@@ -1,5 +1,5 @@
 from src.models.ProjectModel import ProjectModel
-from src.models.enums.Response import Response
+from src.models.enums.Response import ResponseSignal as Response
 from src.controllers.BaseController import BaseController
 import os
 class ProjectController(BaseController):

@@ -4,7 +4,7 @@ from src.helpers.ocr_helper import get_ocr_helper
 import os
 from src.controllers import DataController
 from src.controllers import ProjectController
-from src.models.enums.Response import Response
+from src.models.enums.Response import ResponseSignal as Response
 import aiofiles
 import logging
 from src.routes.schemes.data import ProcessRequest
@@ -58,9 +58,11 @@ async def upload(request: Request, project_id: str,file:UploadFile,app_settings:
     try:
         print(f"📂 Saving file to: {file_path}")
 
+        await file.seek(0)
         content = await file.read()
-        async with aiofiles.open(file_path, "wb") as f:
-            await f.write(content)
+        print(f"[DEBUG] Content length received: {len(content)} bytes")
+        with open(file_path, "wb") as f:
+            f.write(content)
         print(" File saved successfully")
         await project_controller.add_file_to_project(project_id=project_id, file_name=file.filename)
         print(" Project saved to MongoDB")

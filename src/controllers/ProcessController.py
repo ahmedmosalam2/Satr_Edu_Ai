@@ -1,7 +1,7 @@
 from .BaseController import BaseController
 from .ProjectController import ProjectController
 from src.models.enums.Processing import Processing
-from src.models.enums.Response import Response
+from src.models.enums.Response import ResponseSignal as Response
 from src.utils.content_processor import DirectPDFLoader, RecursiveTextSplitter
 import os
 
@@ -47,7 +47,7 @@ class ProcessController(BaseController):
             raise ValueError(Response.FILE_TYPE_NOT_SUPPORTED.value)
     
     def get_file_content(self,file_id:str):
-        print(f"🔄 Loading file content for: {file_id}")
+        print(f" Loading file content for: {file_id}")
         loader=self.get_file_loader(file_id=file_id)
         content = loader.load()
         print(f"File loaded successfully. Content length: {len(content)}")
@@ -59,7 +59,7 @@ class ProcessController(BaseController):
         # Reverting to Smart RecursiveTextSplitter due to stability issues with Semantic/ML libs
         text_splitter = RecursiveTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
 
-        print("✂️ Splitting text into chunks (Smart Recursive Splitter)...")
+        print(" Splitting text into chunks (Smart Recursive Splitter)...")
         file_content_text=[
             rec.page_content
             for rec in file_content

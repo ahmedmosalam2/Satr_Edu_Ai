@@ -1,5 +1,5 @@
 from .BaseController import BaseController
-from src.models.enums.Response import Response
+from src.models.enums.Response import ResponseSignal as Response
 from fastapi import HTTPException,UploadFile
 from .ProjectController import ProjectController
 import re
@@ -13,7 +13,7 @@ class DataController(BaseController):
     def valied_upload(self,project_id:str, file:UploadFile):
         file_ext = os.path.splitext(file.filename)[1].lower()
         if file_ext not in self.settings.FILE_ALLOWED_EXTION and file_ext not in self.settings.IMAGE_ALLOWED_EXTION: # Assuming check both or just FILE based on your logic, let's fix the basic check first
-             # Fallback to checking just extension if configured that way
+             
              if file_ext not in self.settings.FILE_ALLOWED_EXTION:
                 raise HTTPException(status_code=400,detail=Response.FILE_TYPE_NOT_SUPPORTED.value)
 

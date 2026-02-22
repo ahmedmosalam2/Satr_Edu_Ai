@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import List,Optional
 
-class NLPRequest(BaseModel):
-    project_id:str
-    text:str
+class PushRequest(BaseModel):
+    do_reset:Optional[int]=0
+    

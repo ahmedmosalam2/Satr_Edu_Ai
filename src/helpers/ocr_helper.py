@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
 from src.helpers.config import get_settings
-from src.models.enums.Response import Response
+from src.models.enums.Response import ResponseSignal as Response
 
 class OCRHelper:
     def __init__(self):

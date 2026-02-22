@@ -1,2 +1,2 @@
-from .Response import Response
+from .Response import ResponseSignal
 from .Processing import Processing

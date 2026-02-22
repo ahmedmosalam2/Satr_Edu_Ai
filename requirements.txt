@@ -24,4 +24,8 @@ langchain_experimental
 motor
 pymongo
 qdrant-client
+cohere
+openai
+
+
 
