@@ -1,42 +1,57 @@
 import os
 
 class DirectPDFLoader:
-    """
-    A manual PDF loader using 'pypdf' directly.
-    Replaces langchain_community.document_loaders.PyPDFLoader to avoid Bus Error in WSL.
-    """
+    
     def __init__(self, file_path):
         self.file_path = file_path
     
     def load(self):
-        try:
-            import pypdf
-        except ImportError:
-            raise ImportError("pypdf is required. Please install it with `pip install pypdf`.")
-
+        docs = []
+        
         class SimpleDocument:
             def __init__(self, page_content, metadata):
                 self.page_content = page_content
                 self.metadata = metadata
 
-        docs = []
         try:
+            import fitz
+            doc = fitz.open(self.file_path)
+            for i in range(len(doc)):
+                text = doc.load_page(i).get_text()
+                if text and text.strip():
+                    docs.append(SimpleDocument(page_content=text, metadata={"source": self.file_path, "page": i}))
+            if docs: return docs
+        except Exception as e:
+            print(f"fitz failed: {e}")
+
+        try:
+            import pdfplumber
+            with pdfplumber.open(self.file_path) as pdf:
+                for i, page in enumerate(pdf.pages):
+                    text = page.extract_text()
+                    if text and text.strip():
+                        docs.append(SimpleDocument(page_content=text, metadata={"source": self.file_path, "page": i}))
+            if docs: return docs
+        except Exception as e:
+            print(f"pdfplumber failed: {e}")
+
+        try:
+            import pypdf
             reader = pypdf.PdfReader(self.file_path)
             for i, page in enumerate(reader.pages):
                 text = page.extract_text()
-                if text:
+                if text and text.strip():
                     docs.append(SimpleDocument(page_content=text, metadata={"source": self.file_path, "page": i}))
         except Exception as e:
-            print(f"Error reading PDF with pypdf: {e}")
+            print(f"pypdf failed: {e}")
+
+        print("[PDF] All text extraction methods failed or returned no text. The PDF might be an image without a text layer.")
+        docs.append(SimpleDocument(page_content="[System Note: This PDF appears to be an image or scanned document without a text layer. Since OCR is disabled, no text could be extracted.]", metadata={"source": self.file_path, "page": 0}))
         return docs
 
 
 class RecursiveTextSplitter:
-    """
-    A manual text splitter implementing recursive splitting logic (Paragraphs -> Sentences -> Words).
-    Replaces langchain_text_splitters to avoid crashes.
-    Stable, fast, and does not require heavy ML libraries.
-    """
+
     def __init__(self, chunk_size, chunk_overlap, separators=None):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
@@ -60,14 +75,15 @@ class RecursiveTextSplitter:
         if len(text) <= self.chunk_size:
             return [text]
 
-        # Find the best separator that exists in the text
-        separator = self.separators[-1] # Default to last one (char/space)
+
+        separator = self.separators[-1] 
         for sep in self.separators:
             if sep in text:
                 separator = sep
                 break
         
-        # Split by the separator
+
+        
         if separator:
             splits = text.split(separator)
         else:

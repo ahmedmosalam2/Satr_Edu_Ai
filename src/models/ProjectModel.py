@@ -40,6 +40,7 @@ class ProjectModel(BaseDataModel):
         return result.inserted_id
 
     async def get_project(self,project_id:str):
+        project_id = str(project_id)
         result= await self.collection.find_one(
             filter={"project_id":project_id})
         if result is None:

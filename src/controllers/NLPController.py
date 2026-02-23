@@ -1,6 +1,7 @@
 from .BaseController import BaseController
-from models.db_schemes import Project, DataChunk
-from stores.llm.LLMEnums import DocumentTypeEnum
+from src.models.scheme_db.Project import Project
+from src.models.scheme_db.data_chunk import DataChunk
+from src.story.llm.LLMEnums import LLMEnums
 from typing import List
 import json
 
@@ -34,23 +35,21 @@ class NLPController(BaseController):
                                    chunks_ids: List[int], 
                                    do_reset: bool = False):
         
-        # step1: get collection name
+       
         collection_name = self.create_collection_name(project_id=project.project_id)
 
-        # step2: manage items
+        
         texts = [ c.chunk_text for c in chunks ]
         metadata = [ c.chunk_metadata for c in  chunks]
         vectors = self.embedding_client.embed_text(text=texts, 
-                                                  document_type=DocumentTypeEnum.DOCUMENT.value)
+                                                   document_type=LLMEnums.DocumentTypeEnum.DOCUMENT.value)
 
-        # step3: create collection if not exists
         _ = await self.vectordb_client.create_collection(
             collection_name=collection_name,
             embedding_size=self.embedding_client.embedding_size,
             do_reset=do_reset,
         )
 
-        # step4: insert into vector db
         _ = await self.vectordb_client.insert_many(
             collection_name=collection_name,
             texts=texts,
@@ -63,13 +62,11 @@ class NLPController(BaseController):
 
     async def search_vector_db_collection(self, project: Project, text: str, limit: int = 10):
 
-        # step1: get collection name
         query_vector = None
         collection_name = self.create_collection_name(project_id=project.project_id)
 
-        # step2: get text embedding vector
         vectors = self.embedding_client.embed_text(text=text, 
-                                                 document_type=DocumentTypeEnum.QUERY.value)
+                                                 document_type=LLMEnums.DocumentTypeEnum.QUERY.value)
 
         if not vectors or len(vectors) == 0:
             return False
@@ -80,7 +77,6 @@ class NLPController(BaseController):
         if not query_vector:
             return False    
 
-        # step3: do semantic search
         results = await self.vectordb_client.search_by_vector(
             collection_name=collection_name,
             vector=query_vector,
@@ -96,7 +92,6 @@ class NLPController(BaseController):
         
         answer, full_prompt, chat_history = None, None, None
 
-        # step1: retrieve related documents
         retrieved_documents = await self.search_vector_db_collection(
             project=project,
             text=query,
@@ -106,7 +101,6 @@ class NLPController(BaseController):
         if not retrieved_documents or len(retrieved_documents) == 0:
             return answer, full_prompt, chat_history
         
-        # step2: Construct LLM prompt
         system_prompt = self.template_parser.get("rag", "system_prompt")
 
         documents_prompts = "\n".join([

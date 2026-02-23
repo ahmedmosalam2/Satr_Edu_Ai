@@ -47,6 +47,7 @@ class LLMEnums:
         OPENAI = "openai"
         COHERE = "cohere"
         HUGGINGFACE = "huggingface"
+        OLLAMA = "ollama"
 
     class OpenAiEnums(Enum):
         SYSTEM = "system"

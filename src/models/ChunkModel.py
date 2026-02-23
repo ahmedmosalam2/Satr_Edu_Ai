@@ -62,6 +62,6 @@ class ChunkModel(BaseDataModel):
         return result 
 
     async def get_project_chunks(self,project_id:ObjectId ,page:int=1,page_size:int=10,):
-        result= await self.collection.find({"chunk_project_id":project_id}).skip((page-1)*page_size).limit(page_size)
+        result= await self.collection.find({"chunk_project_id":project_id}).skip((page-1)*page_size).limit(page_size).to_list(length=page_size)
         return [DataChunk(**chunk) for chunk in result]
     

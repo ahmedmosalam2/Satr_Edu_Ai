@@ -17,7 +17,7 @@ class DataController(BaseController):
              if file_ext not in self.settings.FILE_ALLOWED_EXTION:
                 raise HTTPException(status_code=400,detail=Response.FILE_TYPE_NOT_SUPPORTED.value)
 
-        if file.size > self.file_max_size:
+        if file.size > self.file_max_size * 1024 * 1024:
             raise HTTPException(status_code=400,detail=Response.FILE_SIZE_EXCEEDED.value)
 
         return True

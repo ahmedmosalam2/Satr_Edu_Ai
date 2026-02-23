@@ -1,9 +1,9 @@
-from ..LLMInterface import LLMInterface
-from ..LLMEnums import CoHereEnums, DocumentTypeEnum
+from src.story.llm.LLMinfernce import LLMInference
+from src.story.llm.LLMEnums import LLMEnums
 import cohere
 import logging
 
-class CoHereProvider(LLMInterface):
+class CoHereProvider(LLMInference):
 
     def __init__(self, api_key: str,
                        default_input_max_characters: int=1000,
@@ -72,9 +72,9 @@ class CoHereProvider(LLMInterface):
             self.logger.error("Embedding model for CoHere was not set")
             return None
         
-        input_type = CoHereEnums.DOCUMENT
-        if document_type == DocumentTypeEnum.QUERY:
-            input_type = CoHereEnums.QUERY
+        input_type = "search_document"
+        if document_type == LLMEnums.DocumentTypeEnum.QUERY.value:
+            input_type = "search_query"
 
         response = self.client.embed(
             model = self.embedding_model_id,
@@ -94,3 +94,20 @@ class CoHereProvider(LLMInterface):
             "role": role,
             "text": self.process_text(prompt)
         }
+
+    def generate_story(self, prompt: str, max_tokens: int = None,
+                       temperature: float = None, chat_history: list = None) -> str:
+        return self.generate_text(prompt, chat_history=chat_history or [],
+                                  max_output_tokens=max_tokens, temperature=temperature)
+
+    def set_generate_model(self, model_id: str):
+        self.generation_model_id = model_id
+
+    def generate_embedding(self, text: str):
+        result = self.embed_text(text)
+        if result:
+            return result
+        return None
+
+    def stream_generate_text(self, prompt: str):
+        raise NotImplementedError("Streaming not implemented for CoHere")

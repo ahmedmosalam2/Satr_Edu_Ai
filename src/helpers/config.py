@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     GENERATION_DAFAULT_MAX_TOKENS: int = 200
     GENERATION_DAFAULT_TEMPERATURE: float = 0.1
 
+    # Ollama (local)
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
+
     # Vector DB
     VECTOR_DB_BACKEND: str = "QDRANT"
     VECTOR_DB_PATH: str = "qdrant_db"
