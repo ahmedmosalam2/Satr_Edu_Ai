@@ -1,5 +1,5 @@
 from .BaseController import BaseController
-from src.models.scheme_db.Project import Project
+from src.models.scheme_db.project import Project
 from src.models.scheme_db.data_chunk import DataChunk
 from src.story.llm.LLMEnums import LLMEnums
 from typing import List
@@ -26,9 +26,8 @@ class NLPController(BaseController):
     async def get_vector_db_collection_info(self, project: Project):
         collection_name = self.create_collection_name(project_id=project.project_id)
         collection_info = await self.vectordb_client.get_collection_info(collection_name=collection_name)
-
         return json.loads(
-            json.dumps(collection_info, default=lambda x: x.__dict__)
+            json.dumps(collection_info, default=lambda x: x.__dict__ if hasattr(x, '__dict__') else str(x))
         )
     
     async def index_into_vector_db(self, project: Project, chunks: List[DataChunk],

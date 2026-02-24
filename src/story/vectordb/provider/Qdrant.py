@@ -104,12 +104,7 @@ class Qdrant(VectorDBinferance):
     async def get_collection_info(self, collection_name: str):
         if not self.is_collection_existed(collection_name):
             return {}
-        info = self.client.get_collection(collection_name=collection_name)
-        return {
-            "name": collection_name,
-            "vectors_count": info.vectors_count,
-            "status": str(info.status)
-        }
+        return self.client.get_collection(collection_name=collection_name)
 
     async def delete_collection(self, collection_name: str):
         if self.is_collection_existed(collection_name):
@@ -119,8 +114,9 @@ class Qdrant(VectorDBinferance):
     async def search_by_vector(self, collection_name: str, vector, limit: int):
         if not self.is_collection_existed(collection_name):
             return []
-        return self.client.search(
+        result = self.client.query_points(
             collection_name=collection_name,
-            query_vector=vector,
+            query=vector,
             limit=limit
         )
+        return result.points

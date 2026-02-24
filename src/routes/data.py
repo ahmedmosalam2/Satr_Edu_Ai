@@ -14,7 +14,7 @@ from src.models.ChunkModel import ChunkModel
 from src.models.AssetModel import AssetModel
 from src.models.scheme_db.asset import Asset
 from src.models.scheme_db.data_chunk import DataChunk
-from src.models.scheme_db.Project import Project
+from src.models.scheme_db.project import Project
 from src.models.enums.AssetType import AssetType
 from datetime import datetime
 from bson import ObjectId
