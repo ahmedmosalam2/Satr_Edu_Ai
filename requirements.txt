@@ -26,6 +26,8 @@ pymongo
 qdrant-client
 cohere
 openai
+arabic-reshaper
+python-bidi
 
 
 

@@ -1,5 +1,16 @@
 import os
 
+def fix_arabic_text(text: str) -> str:
+    """Fix reversed/garbled Arabic text from old PDFs."""
+    try:
+        import arabic_reshaper
+        from bidi.algorithm import get_display
+        reshaped = arabic_reshaper.reshape(text)
+        return get_display(reshaped)
+    except Exception:
+        return text
+
+
 class DirectPDFLoader:
     
     def __init__(self, file_path):
@@ -19,6 +30,7 @@ class DirectPDFLoader:
             for i in range(len(doc)):
                 text = doc.load_page(i).get_text()
                 if text and text.strip():
+                    text = fix_arabic_text(text)
                     docs.append(SimpleDocument(page_content=text, metadata={"source": self.file_path, "page": i}))
             if docs: return docs
         except Exception as e:
@@ -30,6 +42,7 @@ class DirectPDFLoader:
                 for i, page in enumerate(pdf.pages):
                     text = page.extract_text()
                     if text and text.strip():
+                        text = fix_arabic_text(text)
                         docs.append(SimpleDocument(page_content=text, metadata={"source": self.file_path, "page": i}))
             if docs: return docs
         except Exception as e:
@@ -41,6 +54,7 @@ class DirectPDFLoader:
             for i, page in enumerate(reader.pages):
                 text = page.extract_text()
                 if text and text.strip():
+                    text = fix_arabic_text(text)
                     docs.append(SimpleDocument(page_content=text, metadata={"source": self.file_path, "page": i}))
         except Exception as e:
             print(f"pypdf failed: {e}")

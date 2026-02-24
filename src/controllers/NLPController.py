@@ -34,14 +34,14 @@ class NLPController(BaseController):
                                    chunks_ids: List[int], 
                                    do_reset: bool = False):
         
-       
         collection_name = self.create_collection_name(project_id=project.project_id)
 
-        
-        texts = [ c.chunk_text for c in chunks ]
-        metadata = [ c.chunk_metadata for c in  chunks]
-        vectors = self.embedding_client.embed_text(text=texts, 
-                                                   document_type=LLMEnums.DocumentTypeEnum.DOCUMENT.value)
+        texts = [c.chunk_text for c in chunks]
+        metadata = [c.chunk_metadata for c in chunks]
+        vectors = self.embedding_client.embed_text(
+            text=texts,
+            document_type=LLMEnums.DocumentTypeEnum.DOCUMENT.value
+        )
 
         _ = await self.vectordb_client.create_collection(
             collection_name=collection_name,
@@ -64,8 +64,10 @@ class NLPController(BaseController):
         query_vector = None
         collection_name = self.create_collection_name(project_id=project.project_id)
 
-        vectors = self.embedding_client.embed_text(text=text, 
-                                                 document_type=LLMEnums.DocumentTypeEnum.QUERY.value)
+        vectors = self.embedding_client.embed_text(
+            text=text,
+            document_type=LLMEnums.DocumentTypeEnum.QUERY.value
+        )
 
         if not vectors or len(vectors) == 0:
             return False
@@ -74,7 +76,7 @@ class NLPController(BaseController):
             query_vector = vectors[0]
 
         if not query_vector:
-            return False    
+            return False
 
         results = await self.vectordb_client.search_by_vector(
             collection_name=collection_name,
@@ -114,7 +116,6 @@ class NLPController(BaseController):
             "query": query
         })
 
-        # step3: Construct Generation Client Prompts
         chat_history = [
             self.generation_client.construct_prompt(
                 prompt=system_prompt,
@@ -122,9 +123,8 @@ class NLPController(BaseController):
             )
         ]
 
-        full_prompt = "\n\n".join([ documents_prompts,  footer_prompt])
+        full_prompt = "\n\n".join([documents_prompts, footer_prompt])
 
-        # step4: Retrieve the Answer
         answer = self.generation_client.generate_text(
             prompt=full_prompt,
             chat_history=chat_history
