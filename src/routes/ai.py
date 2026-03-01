@@ -1,13 +1,4 @@
-"""
-AI Routes — the main AI endpoints:
 
-POST /api/v1/ai/exam/generate          — generate exam from text or project chunks
-POST /api/v1/ai/exam/generate/file     — upload PDF/image → OCR → generate exam
-POST /api/v1/ai/summarize              — summarize text or project chunks
-POST /api/v1/ai/summarize/file         — upload file → OCR → summarize
-POST /api/v1/ai/grade/essay            — grade a student essay answer with LLM
-POST /api/v1/ai/ocr/extract            — extract text from uploaded PDF or image
-"""
 
 import logging
 from fastapi import APIRouter, Request, HTTPException, UploadFile, File, status
@@ -123,7 +114,8 @@ async def generate_exam_from_file(
     })
 
 
-═════════════════════════════════════════════════════════════
+
+
 
 
 @ai_router.post("/summarize")
