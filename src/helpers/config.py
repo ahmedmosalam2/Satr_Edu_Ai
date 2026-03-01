@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     FILE_MAX_SIZE: int = 10
     FILE_DEFALUTE_CHUNK: int = 512000
 
+    # OCR Model
+    OCR_MODEL: str = "microsoft/Florence-2-base"
+
     # MongoDB
     MONGODB_URL: str = "mongodb://admin:admin@localhost:27017"
     MONGODB_DATABASE: str = "Satr-Edu"

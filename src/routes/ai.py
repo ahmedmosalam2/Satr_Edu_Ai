@@ -1,5 +1,3 @@
-
-
 import logging
 from fastapi import APIRouter, Request, HTTPException, UploadFile, File, status
 from fastapi.responses import JSONResponse
@@ -37,14 +35,12 @@ def get_ocr_controller() -> OCRController:
     return _ocr_controller
 
 
-
 @ai_router.post("/exam/generate")
 async def generate_exam_from_text(request: Request, body: ExamGenerateRequest):
 
     ai = get_ai_controller()
     content = body.content
 
-    # If project_id provided, fetch chunks from MongoDB
     if not content and body.project_id:
         content = await _fetch_project_content(request, body.project_id)
 

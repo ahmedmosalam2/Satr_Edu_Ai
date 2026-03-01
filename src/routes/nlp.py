@@ -78,6 +78,16 @@ async def index_project(request: Request, project_id: str, push_request: PushReq
 
         chunks_ids = list(range(indexed_count, indexed_count + len(chunks)))
 
+        # ── Enrich each chunk's metadata with source info for RAG citations ──
+        for chunk in chunks:
+            if not chunk.chunk_metadata:
+                chunk.chunk_metadata = {}
+            chunk.chunk_metadata["chunk_id"]    = chunk.chunk_id
+            chunk.chunk_metadata["chunk_order"] = chunk.chunk_order
+            # source_file: pick from existing metadata keys or chunk_id prefix
+            if "source" not in chunk.chunk_metadata and "source_file" not in chunk.chunk_metadata:
+                chunk.chunk_metadata["source_file"] = chunk.chunk_id.split("_")[2] if chunk.chunk_id.count("_") >= 2 else chunk.chunk_id
+
         _ = await nlp_controller.index_into_vector_db(
             project=project,
             chunks=chunks,
@@ -180,7 +190,7 @@ async def answer_rag(request: Request, project_id: str, search_request: SearchRe
         template_parser=template_parser,
     )
 
-    answer, full_prompt, chat_history = await nlp_controller.answer_rag_question(
+    answer, full_prompt, chat_history, sources = await nlp_controller.answer_rag_question(
         project=project,
         query=search_request.text,
         limit=search_request.limit,
@@ -198,6 +208,7 @@ async def answer_rag(request: Request, project_id: str, search_request: SearchRe
         content={
             "signal": Response.RAG_ANSWER_SUCCESS.value,
             "answer": answer,
+            "sources": sources,           # ← citations: chunk_id, source_file, chunk_order, score, snippet
             "full_prompt": full_prompt,
             "chat_history": chat_history
         }

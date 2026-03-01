@@ -36,7 +36,14 @@ class ChunkModel(BaseDataModel):
         return result.inserted_id
 
     async def get_chunks(self,project_id:str):
-        result = await self.collection.find_one({"chunk_project_id":ObjectId(project_id)})
+        from bson import ObjectId
+        query_conditions = [{"chunk_project_id": project_id}]
+        try:
+            query_conditions.append({"chunk_project_id": ObjectId(project_id)})
+        except:
+            pass
+        
+        result = await self.collection.find_one({"$or": query_conditions})
         if result is None:
             return None
         return DataChunk(**result)
@@ -61,7 +68,13 @@ class ChunkModel(BaseDataModel):
         result= await self.collection.delete_one({"chunk_id":chunk_id})
         return result 
 
-    async def get_project_chunks(self,project_id:ObjectId ,page:int=1,page_size:int=10,):
-        result= await self.collection.find({"chunk_project_id":project_id}).skip((page-1)*page_size).limit(page_size).to_list(length=page_size)
+    async def get_project_chunks(self,project_id:str ,page:int=1,page_size:int=10,):
+        from bson import ObjectId
+        query_conditions = [{"chunk_project_id": project_id}]
+        try:
+            query_conditions.append({"chunk_project_id": ObjectId(project_id)})
+        except:
+            pass
+            
+        result = await self.collection.find({"$or": query_conditions}).skip((page-1)*page_size).limit(page_size).to_list(length=page_size)
         return [DataChunk(**chunk) for chunk in result]
-    

@@ -1,12 +1,3 @@
-"""
-OCR Controller — handles text extraction from:
-- Images (JPG, PNG, etc.)
-- PDFs (converts pages to images, then OCR)
-- Video frames (extracts key frames, then OCR)
-
-Uses the existing OCRHelper for single-image processing.
-Falls back to PyMuPDF for PDF text extraction if OCR model not available.
-"""
 
 import os
 import io

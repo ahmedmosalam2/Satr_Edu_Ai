@@ -90,8 +90,12 @@ class NLPController(BaseController):
         return results
     
     async def answer_rag_question(self, project: Project, query: str, limit: int = 10):
-        
-        answer, full_prompt, chat_history = None, None, None
+        """
+        RAG answer with source citations.
+        Returns: (answer, full_prompt, chat_history, sources)
+        sources: list of dicts with chunk_id, source_file, chunk_order, score
+        """
+        answer, full_prompt, chat_history, sources = None, None, None, []
 
         retrieved_documents = await self.search_vector_db_collection(
             project=project,
@@ -100,8 +104,21 @@ class NLPController(BaseController):
         )
 
         if not retrieved_documents or len(retrieved_documents) == 0:
-            return answer, full_prompt, chat_history
-        
+            return answer, full_prompt, chat_history, sources
+
+        # ── Extract source citations from Qdrant payloads ──────────────────
+        sources = []
+        for idx, doc in enumerate(retrieved_documents):
+            payload = doc.payload if hasattr(doc, "payload") else {}
+            sources.append({
+                "doc_num": idx + 1,
+                "chunk_id":    payload.get("chunk_id", ""),
+                "source_file": payload.get("source", payload.get("source_file", "")),
+                "chunk_order": payload.get("chunk_order", payload.get("page", idx)),
+                "score":       round(doc.score, 4) if hasattr(doc, "score") else None,
+                "snippet":     (payload.get("text", ""))[:200],  # first 200 chars preview
+            })
+
         system_prompt = self.template_parser.get("rag", "system_prompt")
 
         documents_prompts = "\n".join([
@@ -130,4 +147,4 @@ class NLPController(BaseController):
             chat_history=chat_history
         )
 
-        return answer, full_prompt, chat_history
+        return answer, full_prompt, chat_history, sources

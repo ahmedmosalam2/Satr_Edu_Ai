@@ -29,9 +29,9 @@ class OCRHelper:
              self.model = AutoModelForCausalLM.from_pretrained(self.model_path, trust_remote_code=True, torch_dtype=torch.bfloat16 if self.device == "cuda" else torch.float32).to(self.device)
              self.model.eval()
              self._initialized = True
-             print(f"✅ OCR Model loaded successfully: {self.model_path}")
+             print(f" OCR Model loaded successfully: {self.model_path}")
         except Exception as e:
-            print(f"❌ Error loading model {self.model_path}: {e}")
+            print(f"Error loading model {self.model_path}: {e}")
             # Fallback or re-raise
             raise HTTPException(status_code=500, detail=f"OCR model loading failed: {str(e)}")
 

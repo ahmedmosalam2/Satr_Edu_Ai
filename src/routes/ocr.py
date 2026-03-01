@@ -1,8 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, status
 from src.helpers.ocr_helper import OCRHelper
 from src.models.enums.Response import ResponseSignal as Response
-import torch
-from PIL import Image
 import io
 import logging
 

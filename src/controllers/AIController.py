@@ -110,9 +110,7 @@ class AIController:
     def __init__(self):
         self.generation_client = get_generation_client()
 
-    # ──────────────────────────────────────────────────────
-    # EXAM GENERATION
-    # ──────────────────────────────────────────────────────
+ 
     def generate_exam_questions(
         self,
         content: str,
