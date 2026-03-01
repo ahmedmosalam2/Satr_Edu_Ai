@@ -43,6 +43,11 @@ class Settings(BaseSettings):
     VECTOR_DB_PATH: str = "qdrant_db"
     VECTOR_DB_DISTANCE_METHOD: str = "cosine"
 
+    # Auth / JWT
+    JWT_SECRET_KEY: str = "satr-edu-super-secret-key-change-in-production"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

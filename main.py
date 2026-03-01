@@ -2,8 +2,10 @@ from fastapi import FastAPI
 from src.routes import base
 from src.routes import data
 from src.routes import nlp
+from src.routes import ocr
+from src.routes import auth
+from src.routes import ai
 from dotenv import load_dotenv
-# from src.routes import ocr
 from motor.motor_asyncio import AsyncIOMotorClient 
 from src.helpers.config import get_settings
 from src.story.llm.LLMproviderfactory import LLMProviderFactory
@@ -31,4 +33,6 @@ async def shutdown():
 app.include_router(base.router)
 app.include_router(data.router)
 app.include_router(nlp.nlp_router)
-# app.include_router(ocr.router)
+app.include_router(ocr.router)
+app.include_router(auth.auth_router)
+app.include_router(ai.ai_router)

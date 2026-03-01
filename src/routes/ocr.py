@@ -6,7 +6,7 @@ from PIL import Image
 import io
 import logging
 
-logger=logging.getlogger('unicorn error')
+logger=logging.getLogger('unicorn error')
 
 router = APIRouter(
     prefix="/api/v1/ocr",

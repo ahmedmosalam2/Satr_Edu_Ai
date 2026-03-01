@@ -29,5 +29,14 @@ openai
 arabic-reshaper
 python-bidi
 
+# AI / OCR extras
+pymupdf
+opencv-python
+python-jose[cryptography]
+passlib[bcrypt]
+email-validator
+aiofiles
+
+
 
 
