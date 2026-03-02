@@ -196,17 +196,6 @@ Satr_Edu_Ai/
 
 <br/>
 
-## �️ Tech Stack
-
-| Category | Technologies |
-|----------|-------------|
-| **Backend** | FastAPI, Uvicorn, Pydantic |
-| **AI/ML** | PyTorch, Transformers, LangChain |
-| **Database** | MongoDB, Motor |
-| **Documents** | PyPDF2, python-docx, Unstructured |
-
-<br/>
-
 ## � License
 
 MIT License © 2024
@@ -218,3 +207,4 @@ MIT License © 2024
 **Built with ❤️ for the future of education**
 
 </div>
+
