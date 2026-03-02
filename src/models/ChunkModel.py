@@ -37,13 +37,7 @@ class ChunkModel(BaseDataModel):
 
     async def get_chunks(self,project_id:str):
         from bson import ObjectId
-        query_conditions = [{"chunk_project_id": project_id}]
-        try:
-            query_conditions.append({"chunk_project_id": ObjectId(project_id)})
-        except:
-            pass
-        
-        result = await self.collection.find_one({"$or": query_conditions})
+        result = await self.collection.find_one({"chunk_project_id":ObjectId(project_id)})
         if result is None:
             return None
         return DataChunk(**result)
@@ -52,10 +46,14 @@ class ChunkModel(BaseDataModel):
         for i in range(0,len(chunks),batch_size):
             batch_chunks=chunks[i:i+batch_size]
             operations=[
-                InsertOne(chunk.dict())
+                InsertOne(chunk.dict(exclude_none=True))
                  for chunk in batch_chunks
                  ]
-            await self.collection.bulk_write(operations)
+            try:
+                await self.collection.bulk_write(operations)
+            except Exception as e:
+                import logging
+                logging.getLogger('uvicorn.error').error(f"insert_many_chunks error: {e}")
 
             
     
@@ -69,12 +67,5 @@ class ChunkModel(BaseDataModel):
         return result 
 
     async def get_project_chunks(self,project_id:str ,page:int=1,page_size:int=10,):
-        from bson import ObjectId
-        query_conditions = [{"chunk_project_id": project_id}]
-        try:
-            query_conditions.append({"chunk_project_id": ObjectId(project_id)})
-        except:
-            pass
-            
-        result = await self.collection.find({"$or": query_conditions}).skip((page-1)*page_size).limit(page_size).to_list(length=page_size)
+        result= await self.collection.find({"chunk_project_id":project_id}).skip((page-1)*page_size).limit(page_size).to_list(length=page_size)
         return [DataChunk(**chunk) for chunk in result]

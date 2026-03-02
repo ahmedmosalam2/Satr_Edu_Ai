@@ -42,6 +42,7 @@ def get_or_init_generation():
 
 @nlp_router.post("/index/push/{project_id}")
 async def index_project(request: Request, project_id: str, push_request: PushRequest):
+    project_id = project_id.strip()
 
     project_model = await ProjectModel.create_index(
         db_client=request.app.client
@@ -208,8 +209,9 @@ async def answer_rag(request: Request, project_id: str, search_request: SearchRe
         content={
             "signal": Response.RAG_ANSWER_SUCCESS.value,
             "answer": answer,
+       
             "sources": sources,           # ← citations: chunk_id, source_file, chunk_order, score, snippet
-            "full_prompt": full_prompt,
-            "chat_history": chat_history
+            
+
         }
     )

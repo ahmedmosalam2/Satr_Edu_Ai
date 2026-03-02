@@ -57,7 +57,7 @@ async def generate_exam_from_text(request: Request, body: ExamGenerateRequest):
         question_types=body.question_types,
     )
 
-    if "error" in result and not result.get("questions"):
+    if "error" in result and not result.get("questions") and not result.get("raw_text"):
         raise HTTPException(status_code=500, detail=result["error"])
 
     return JSONResponse(content={

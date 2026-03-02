@@ -54,3 +54,8 @@ __venv/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+__pycache__/
+*.pyc
+docker/data/
+qdrant_db/
+.env

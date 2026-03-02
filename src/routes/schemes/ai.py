@@ -5,7 +5,7 @@ from typing import List, Optional
 # ─── Exam Generation ──────────────────────────────────────────
 
 class ExamGenerateRequest(BaseModel):
-    content: Optional[str] = None       # جlب النص مباشرة OR
+    content: Optional[str] = None       
     project_id: Optional[str] = None    # جلب من Vector DB/chunks
     num_questions: int = 10
     difficulty: str = "mixed"           # easy / medium / hard / mixed
@@ -34,7 +34,7 @@ class GradeEssayRequest(BaseModel):
     max_score: float = 10.0
 
 
-# ─── OCR ──────────────────────────────────────────────────────
+
 
 class OCRTextRequest(BaseModel):
-    text: str   # Raw text to process (if already extracted)
+    text: str  

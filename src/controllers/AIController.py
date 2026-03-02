@@ -7,54 +7,26 @@ from src.helpers.nlp_clients import get_generation_client, get_embedding_client,
 logger = logging.getLogger("uvicorn.error")
 
 
-EXAM_GENERATION_PROMPT = """You are an expert educational exam creator.
+EXAM_GENERATION_PROMPT = """<SYSTEM>You are a JSON API. You MUST respond with ONLY a valid JSON object. No explanations, no markdown, no extra text before or after the JSON.</SYSTEM>
 
-Based on the following lecture content, generate {num_questions} exam questions.
+Generate {num_questions} exam questions from the lecture content below.
+Difficulty: {difficulty}
+Question types to include: {question_types}
 
-DIFFICULTY: {difficulty}
-QUESTION TYPES: {question_types}
+Respond with ONLY this JSON structure (no other text):
+{{"questions": [{{
+  "question_text": "question here",
+  "question_type": "MCQ",
+  "options": ["A) option1", "B) option2", "C) option3", "D) option4"],
+  "correct_answer": "A",
+  "explanation": "why correct",
+  "difficulty": "medium"
+}}]}}
 
 LECTURE CONTENT:
 {content}
 
-OUTPUT FORMAT — return ONLY valid JSON, no extra text:
-{{
-  "questions": [
-    {{
-      "question_text": "...",
-      "question_type": "MCQ",
-      "options": ["A) ...", "B) ...", "C) ...", "D) ..."],
-      "correct_answer": "A",
-      "explanation": "Why this answer is correct...",
-      "difficulty": "medium"
-    }},
-    {{
-      "question_text": "...",
-      "question_type": "ESSAY",
-      "options": [],
-      "correct_answer": "Model answer...",
-      "explanation": "",
-      "difficulty": "hard"
-    }},
-    {{
-      "question_text": "... True or False?",
-      "question_type": "TRUE_FALSE",
-      "options": ["True", "False"],
-      "correct_answer": "True",
-      "explanation": "...",
-      "difficulty": "easy"
-    }}
-  ]
-}}
-
-Rules:
-- MCQ must have exactly 4 options (A, B, C, D)
-- correct_answer for MCQ is the letter only (A/B/C/D)
-- Questions must be directly based on the provided content
-- Mix difficulty levels appropriately
-- Arabic content → generate questions in Arabic
-- English content → generate questions in English
-"""
+JSON OUTPUT:"""
 
 
 ESSAY_GRADING_PROMPT = """You are an expert educational grader.
@@ -125,8 +97,8 @@ class AIController:
         if question_types is None:
             question_types = ["MCQ", "TRUE_FALSE", "ESSAY"]
 
-        # Truncate content if too long (stay within token limits)
-        max_chars = 6000
+        # Truncate content if too long (local LLMs are slow with large inputs)
+        max_chars = 2000
         if len(content) > max_chars:
             content = content[:max_chars] + "\n\n[Content truncated...]"
 
@@ -249,8 +221,8 @@ class AIController:
     # ──────────────────────────────────────────────────────
     def _extract_json(self, text: str) -> str:
         """Extract JSON from LLM response (handle markdown code blocks)."""
-        # Remove markdown code fences if present
         text = text.strip()
+        # Try markdown code fences first
         patterns = [
             r"```json\s*([\s\S]*?)\s*```",
             r"```\s*([\s\S]*?)\s*```",
@@ -266,4 +238,8 @@ class AIController:
         if start != -1 and end != -1 and end > start:
             return text[start:end + 1]
 
-        return text
+        # Fallback: LLM returned markdown text (not JSON)
+        # Build a JSON from the raw markdown as a single text question
+        logger.warning("LLM returned non-JSON response, using raw text fallback")
+        safe = text.replace('"', "'").replace('\n', ' ')
+        return f'{{"questions": [], "raw_text": "{safe[:1000]}", "error": "LLM returned text not JSON"}}'

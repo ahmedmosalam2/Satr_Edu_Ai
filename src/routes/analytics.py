@@ -1,7 +1,6 @@
 import logging
 from fastapi import APIRouter, Request, HTTPException, Depends
 from fastapi.responses import JSONResponse
-
 from src.models.ExamResultModel import ExamResultModel
 from src.models.ExamModel import ExamModel
 from src.controllers.AnalyticsController import AnalyticsController
@@ -38,6 +37,7 @@ async def get_student_analytics(
     - Students can only view their own analytics
     - Teachers and Operations can view any student
     """
+    student_id = student_id.strip()
     role = current_user.get("user_role")
     uid  = current_user.get("user_id")
 
@@ -87,10 +87,7 @@ async def get_exam_analytics(
     request: Request,
     current_user: dict = Depends(require_roles(UserRole.TEACHER.value)),
 ):
-    """
-    Teacher: AI-powered analysis of all student results for a specific exam.
-    Shows class average, pass rate, hardest questions, recommendations.
-    """
+
     exam_model  = ExamModel(client=request.app.client)
     result_model = ExamResultModel(client=request.app.client)
 
@@ -134,4 +131,5 @@ async def get_exam_analytics(
         "exam_title": exam.exam_title,
         "total_submissions": len(all_results),
         "analysis": analysis,
-    })
+    }
+)
