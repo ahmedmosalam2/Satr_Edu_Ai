@@ -1,6 +1,6 @@
 <div align="center">
 
-# ✨ Satr Edu AI
+[!Satar EDU Logo](./Satar-EDU-logo.png)
 
 ### AI-Powered Document Intelligence Platform
 
