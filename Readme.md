@@ -1,6 +1,6 @@
 <div align="center">
 
-[!Satar EDU Logo](./Satar-EDU-logo.png)
+<img src="./Satar-EDU-logo.png" alt="Satar EDU Logo" width="300"/>
 
 ### AI-Powered Document Intelligence Platform
 
