@@ -1,8 +1,8 @@
-# ── Satr Edu AI — FastAPI App Dockerfile ─────────────────────────────────────
+
 
 FROM python:3.11-slim
 
-# System dependencies
+
 RUN apt-get update && apt-get install -y \
     build-essential \
     libglib2.0-0 \
