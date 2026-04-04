@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./satr-banner.svg" alt="Satr EDU AI" width="600"/>
+<img src="./satr-banner.svg" alt="Satr EDU AI" width="250"/>
 
 <p><em>Transform your documents into intelligent, searchable knowledge using cutting-edge AI</em></p>
 
