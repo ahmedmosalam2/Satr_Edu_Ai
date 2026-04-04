@@ -36,6 +36,7 @@ python-jose[cryptography]
 passlib[bcrypt]
 email-validator
 aiofiles
+celery[redis]
 
 
 

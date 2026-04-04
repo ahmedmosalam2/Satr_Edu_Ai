@@ -113,92 +113,74 @@ async def upload(request: Request, project_id: str,file:UploadFile,app_settings:
     }
 
 @router.post("/process/{project_id}")
-async def process(request: Request, project_id: str, body: ProcessRequest, app_settings: Settings = Depends(get_settings)):
-    from src.models.scheme_db.data_chunk import DataChunk
-    from datetime import datetime
-    
-    file_id = body.file_id
-    chunk_size = body.chunk_size
-    chunk_overlap = body.chunk_overlap
+async def process(
+    request: Request,
+    project_id: str,
+    body: ProcessRequest,
+    app_settings: Settings = Depends(get_settings),
+):
+    """
+    رفع مهمة معالجة الملف لـ Celery في الخلفية.
+    يرجع task_id فوراً بدل ما يستنى.
 
-    chunk_model=await ChunkModel.create_index(db_client=request.app.client)
+    قبل:  POST /process → يستني دقايق → يرجع النتيجة
+    بعد:  POST /process → يرجع task_id فوراً ✅
+    """
+    from src.tasks.process_tasks import process_file_task
 
-    process_controller = ProcessController(project_id=project_id)
-    file_content = process_controller.get_file_content(file_id=file_id)
-
-
-    project_file_id=[]
-    if file_id:
-        project_file_id=[file_id]
-    else:
-        asset_model=await AssetModel.create_index(
-            db_client=request.app.client,
-            project_id=project_id
-            )
-        project_file_id=asset_model.get_project_files(
-            project_id=project_id
-            )
-        project_file_id=[
-            asset.asset_name for asset in project_file_id
-            ]
-    if len(project_file_id)==0:
-        return {
-            "status":Response.BAD_REQUEST.value,
-            "message":"No file found",
-            "data":{
-                "project_id":project_id,
-                "file_id":file_id
-            }
-        }
-
-
-
-    file_chunks = process_controller.process_file_content(
-        file_content=file_content,
-        chunk_size=chunk_size,
-        chunk_overlap=chunk_overlap
+    task = process_file_task.delay(
+        project_id=project_id,
+        file_id=body.file_id,
+        chunk_size=body.chunk_size,
+        chunk_overlap=body.chunk_overlap,
+        mongodb_url=app_settings.MONGODB_URL,
+        mongodb_database=app_settings.MONGODB_DATABASE,
     )
 
-    now = datetime.now().isoformat()
-    chunks_to_save = [
-        DataChunk(
-            chunk_id=f"{project_id}_{file_id}_{i}",
-            chunk_text=chunk.page_content,
-            chunk_metadata=chunk.metadata,
-            chunk_order=i,
-            chunk_created_at=now,
-            chunk_updated_at=now,
-            chunk_project_id=project_id
-        )
-        for i, chunk in enumerate(file_chunks)
-    ]
-
-
-    chunk_model = ChunkModel(client=request.app.client, project_id=project_id)
-    if chunk_model.collection is not None and len(chunks_to_save) > 0:
-        await chunk_model.insert_many_chunks(project_id=project_id, chunks=chunks_to_save)
-        print(f" Saved {len(chunks_to_save)} chunks to MongoDB")
-
-
-
-    chunks_data = [
-        {
-            "content": chunk.page_content,
-            "metadata": chunk.metadata,
-            "index": i
-        }
-        for i, chunk in enumerate(file_chunks)
-    ]
+    logger.info(f"Dispatched process_file_task: {task.id} for file {body.file_id}")
 
     return {
         "status": Response.SUCCESS.value,
-        "message": "File is processed successfully",
+        "message": "✅ الملف اتبعت للمعالجة في الخلفية",
         "data": {
+            "task_id": task.id,
             "project_id": project_id,
-            "file_id": file_id,
-            "chunks_count": len(chunks_data),
-            "chunks_saved_to_db": len(chunks_to_save),
-            "chunks": chunks_data
-        }
+            "file_id": body.file_id,
+            "hint": f"GET /api/v1/process/status/{task.id}",
+        },
     }
 
+
+@router.get("/process/status/{task_id}")
+async def get_process_status(task_id: str):
+    """
+    تابع حالة مهمة المعالجة.
+
+    الحالات الممكنة:
+    - PENDING    → في الطابور لسه
+    - PROCESSING → جاري المعالجة
+    - SUCCESS    → خلصت بنجاح
+    - FAILURE    → فشلت
+    """
+    from src.tasks.process_tasks import celery_app
+
+    task_result = celery_app.AsyncResult(task_id)
+
+    response = {
+        "task_id": task_id,
+        "state": task_result.state,
+    }
+
+    if task_result.state == "SUCCESS":
+        response["result"] = task_result.result
+        response["message"] = "Process is SUCCESS"
+    elif task_result.state == "FAILURE":
+        response["error"] = str(task_result.result)
+        response["message"] = "Process is FAILURE"
+    elif task_result.state == "PROCESSING":
+        response["progress"] = task_result.info
+        response["message"] = " PROCESSING ....."
+    else:
+        response["message"] = "Process is PENDING"
+
+    return response

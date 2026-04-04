@@ -15,6 +15,7 @@ class DummyTemplateParser:
         return ""
 
 
+
 class LLMWrapper:
     """Wraps any LLM provider to expose embed_text / generate_text / construct_prompt."""
 
@@ -40,10 +41,10 @@ class LLMWrapper:
             return [self.provider.generate_embedding(t) for t in text]
         return [self.provider.generate_embedding(text)]
 
-    def generate_text(self, prompt, chat_history=None):
+    def generate_text(self, prompt, chat_history=None, max_tokens: int = None, temperature: float = None):
         if hasattr(self.provider, "generate_text"):
-            return self.provider.generate_text(prompt, chat_history=chat_history)
-        return self.provider.generate_story(prompt, chat_history=chat_history)
+            return self.provider.generate_text(prompt, chat_history=chat_history, max_tokens=max_tokens, temperature=temperature)
+        return self.provider.generate_story(prompt, chat_history=chat_history, max_tokens=max_tokens, temperature=temperature)
 
     def construct_prompt(self, prompt, role):
         return self.provider.construct_prompt(prompt, role)

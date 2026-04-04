@@ -58,7 +58,8 @@ class OllamaProvider(LLMInference):
             return None
 
         messages = list(chat_history or [])
-        messages.append({"role": "user", "content": self.process_text(prompt)})
+        # \u0646\u0628\u0639\u062a \u0627\u0644\u0640 prompt \u0643\u0627\u0645\u0644\u0627\u064b \u2014 \u0627\u0644\u062a\u0642\u0637\u064a\u0639 \u0628\u064a\u0643\u0648\u0646 \u0641\u0642\u0637 \u0641\u064a \u0627\u0644\u0640 RAG chunk previews \u0639\u0628\u0631 process_text()
+        messages.append({"role": "user", "content": prompt})
 
         payload = {
             "model": self.generation_model_id,

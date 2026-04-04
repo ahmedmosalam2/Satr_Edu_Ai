@@ -7,6 +7,7 @@ from src.routes import auth
 from src.routes import ai
 from src.routes import exam
 from src.routes import analytics
+from src.routes import admin
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient 
 from src.helpers.config import get_settings
@@ -68,3 +69,4 @@ app.include_router(auth.auth_router)
 app.include_router(ai.ai_router)
 app.include_router(exam.exam_router)
 app.include_router(analytics.analytics_router)
+app.include_router(admin.admin_router)

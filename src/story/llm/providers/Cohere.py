@@ -52,7 +52,7 @@ class CoHereProvider(LLMInference):
         response = self.client.chat(
             model = self.generation_model_id,
             chat_history = chat_history,
-            message = self.process_text(prompt),
+            message = prompt,  # بنبعت الـ prompt كاملاً بدون تقطيع
             temperature = temperature,
             max_tokens = max_output_tokens
         )

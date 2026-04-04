@@ -13,13 +13,26 @@ Generate {num_questions} exam questions from the lecture content below.
 Difficulty: {difficulty}
 Question types to include: {question_types}
 
+STRICT RULES you MUST follow:
+1. DISTRIBUTE correct answers across A, B, C, D — do NOT put all correct answers as "A".
+   Example for 4 questions: first→"B", second→"D", third→"A", fourth→"C".
+2. The explanation MUST start with the correct_answer letter and justify WHY it is right, then briefly why the others are wrong.
+   Example: "B is correct because ... A is wrong because ... C is wrong because ..."
+   The letter at the start of the explanation MUST match correct_answer exactly.
+3. Make options plausible — wrong options should seem reasonable, not obviously fake.
+4. Vary question depth: include recall, comprehension, AND application questions.
+5. correct_answer must be ONLY the letter: "A", "B", "C", or "D" (no extra text).
+6. NEVER ask about ISBN numbers, page numbers, copyright dates, or any publication metadata.
+   Focus ONLY on the educational content — concepts, ideas, events, people's roles.
+7. If question_type is "MCQ" or "TRUE_FALSE", you MUST include options. If question_type is "Essay", do NOT include options (set options to null).
+
 Respond with ONLY this JSON structure (no other text):
 {{"questions": [{{
   "question_text": "question here",
   "question_type": "MCQ",
   "options": ["A) option1", "B) option2", "C) option3", "D) option4"],
-  "correct_answer": "A",
-  "explanation": "why correct",
+  "correct_answer": "B",
+  "explanation": "B is correct because ... A is wrong because ... C is wrong because ...",
   "difficulty": "medium"
 }}]}}
 
@@ -98,7 +111,7 @@ class AIController:
             question_types = ["MCQ", "TRUE_FALSE", "ESSAY"]
 
         # Truncate content if too long (local LLMs are slow with large inputs)
-        max_chars = 2000
+        max_chars = 3000
         if len(content) > max_chars:
             content = content[:max_chars] + "\n\n[Content truncated...]"
 
@@ -110,7 +123,14 @@ class AIController:
         )
 
         try:
-            raw_response = self.generation_client.generate_text(prompt=prompt)
+            # كل سؤال يحتاج ~400 token (question + options + explanation)
+            # نضيف 500 token buffer للـ JSON structure والـ prompt overhead
+            tokens_needed = max(2000, num_questions * 400 + 500)
+            raw_response = self.generation_client.generate_text(
+                prompt=prompt,
+                max_tokens=tokens_needed,
+                temperature=0.7,   # عشوائية عالية = أسئلة مختلفة كل مرة
+            )
             logger.info(f"LLM exam generation response length: {len(raw_response) if raw_response else 0}")
 
             if not raw_response:
@@ -124,7 +144,10 @@ class AIController:
             if "questions" not in result:
                 result = {"questions": result} if isinstance(result, list) else {"questions": []}
 
-            logger.info(f"Generated {len(result['questions'])} questions")
+            # Post-generation validation: remove bad questions, warn on bias
+            result["questions"] = self._validate_questions(result["questions"])
+
+            logger.info(f"Generated {len(result['questions'])} questions (after validation)")
             return result
 
         except json.JSONDecodeError as e:
@@ -151,7 +174,10 @@ class AIController:
         prompt = SUMMARIZATION_PROMPT.format(content=content)
 
         try:
-            summary = self.generation_client.generate_text(prompt=prompt)
+            summary = self.generation_client.generate_text(
+                prompt=prompt,
+                max_tokens=1500,
+            )
             if not summary:
                 return "لم يتمكن الـ AI من إنشاء ملخص لهذا المحتوى."
             return summary
@@ -181,7 +207,10 @@ class AIController:
         )
 
         try:
-            raw_response = self.generation_client.generate_text(prompt=prompt)
+            raw_response = self.generation_client.generate_text(
+                prompt=prompt,
+                max_tokens=800,
+            )
 
             if not raw_response:
                 return {
@@ -219,10 +248,55 @@ class AIController:
     # ──────────────────────────────────────────────────────
     # HELPERS
     # ──────────────────────────────────────────────────────
+    def _validate_questions(self, questions: list) -> list:
+        """
+        Post-generation validation:
+        1. Remove questions where correct_answer letter is not present in options.
+        2. Warn if all correct answers are the same letter (A-bias).
+        """
+        valid = []
+        answer_letters = []
+
+        for q in questions:
+            answer = q.get("correct_answer", "").strip().upper()
+            options = q.get("options") or []
+            question_text = q.get("question_text", "")
+
+            if not answer or not question_text:
+                logger.warning("Skipping question with missing answer or text")
+                continue
+
+            # Check correct_answer letter appears in one of the options
+            answer_in_options = any(
+                opt.strip().upper().startswith(answer) for opt in options
+            )
+
+            if options and not answer_in_options:
+                logger.warning(
+                    f"Dropping question — correct_answer '{answer}' not found in options: {options}"
+                )
+                continue
+
+            answer_letters.append(answer)
+            valid.append(q)
+
+        # Detect A-bias: warn if all answers are the same letter
+        if answer_letters and len(set(answer_letters)) == 1:
+            logger.warning(
+                f"Answer bias detected: all {len(answer_letters)} questions have correct_answer='{answer_letters[0]}'"
+            )
+
+        logger.info(
+            f"Validation: {len(valid)}/{len(questions)} questions passed. "
+            f"Answer distribution: {dict((l, answer_letters.count(l)) for l in set(answer_letters))}"
+        )
+        return valid
+
     def _extract_json(self, text: str) -> str:
-        """Extract JSON from LLM response (handle markdown code blocks)."""
+        """Extract JSON from LLM response (handle markdown code blocks and truncation)."""
         text = text.strip()
-        # Try markdown code fences first
+
+        # 1. Try markdown code fences first
         patterns = [
             r"```json\s*([\s\S]*?)\s*```",
             r"```\s*([\s\S]*?)\s*```",
@@ -230,16 +304,62 @@ class AIController:
         for pattern in patterns:
             match = re.search(pattern, text)
             if match:
-                return match.group(1).strip()
+                candidate = match.group(1).strip()
+                try:
+                    json.loads(candidate)
+                    return candidate
+                except json.JSONDecodeError:
+                    candidate = self._repair_truncated_json(candidate)
+                    if candidate:
+                        return candidate
 
-        # Try to find JSON object/array directly
+        # 2. Find the JSON object boundaries
         start = text.find("{")
         end = text.rfind("}")
         if start != -1 and end != -1 and end > start:
-            return text[start:end + 1]
+            candidate = text[start:end + 1]
+            try:
+                json.loads(candidate)
+                return candidate
+            except json.JSONDecodeError:
+                # JSON is truncated — try to repair it
+                repaired = self._repair_truncated_json(text[start:])
+                if repaired:
+                    return repaired
 
-        # Fallback: LLM returned markdown text (not JSON)
-        # Build a JSON from the raw markdown as a single text question
+        # 3. Fallback: LLM returned non-JSON text
         logger.warning("LLM returned non-JSON response, using raw text fallback")
         safe = text.replace('"', "'").replace('\n', ' ')
         return f'{{"questions": [], "raw_text": "{safe[:1000]}", "error": "LLM returned text not JSON"}}'
+
+    def _repair_truncated_json(self, text: str) -> Optional[str]:
+        """
+        Try to salvage complete question objects from a truncated JSON array.
+        Extracts all fully-formed question objects even if the outer structure is cut off.
+        """
+        try:
+            # Find all complete question objects using regex
+            # A question object starts with { and ends with } on a balanced basis
+            question_pattern = re.compile(
+                r'\{\s*"question_text"[^{}]*(?:\{[^{}]*\}[^{}]*)*\}',
+                re.DOTALL
+            )
+            matches = question_pattern.findall(text)
+            valid_questions = []
+            for m in matches:
+                try:
+                    obj = json.loads(m)
+                    # Must have at minimum question_text and correct_answer
+                    if "question_text" in obj and "correct_answer" in obj:
+                        valid_questions.append(obj)
+                except json.JSONDecodeError:
+                    continue
+
+            if valid_questions:
+                logger.warning(
+                    f"Repaired truncated JSON: recovered {len(valid_questions)} complete questions"
+                )
+                return json.dumps({"questions": valid_questions})
+        except Exception as e:
+            logger.warning(f"JSON repair failed: {e}")
+        return None

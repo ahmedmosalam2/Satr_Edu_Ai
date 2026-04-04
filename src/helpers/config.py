@@ -46,6 +46,19 @@ class Settings(BaseSettings):
     VECTOR_DB_PATH: str = "qdrant_db"
     VECTOR_DB_DISTANCE_METHOD: str = "cosine"
 
+    # Reranker
+    RERANKER_ENABLED: bool = True
+    RERANKER_MODEL: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    RERANKER_TOP_K: int = 3
+
+    # Multi-Retrieval (Qdrant vector + MongoDB keyword)
+    MULTI_RETRIEVAL_ENABLED: bool = True
+    VECTOR_SEARCH_LIMIT: int = 10     # كام نتيجة من Qdrant
+    KEYWORD_SEARCH_LIMIT: int = 10    # كام نتيجة من MongoDB text search
+
+    # Redis / Celery
+    REDIS_URL: str = "redis://localhost:6379/0"
+
     # Auth / JWT
     JWT_SECRET_KEY: str = "satr-edu-super-secret-key-change-in-production"
     JWT_ALGORITHM: str = "HS256"

@@ -2,7 +2,7 @@ from .BaseDataModel import BaseDataModel
 from src.models.enums.DataBaseEnumProject import DataBaseEnumProject
 from src.models.scheme_db import DataChunk
 from bson import ObjectId
-from pymongo import InsertOne
+from pymongo import InsertOne, TEXT
 
 
 class ChunkModel(BaseDataModel):
@@ -30,6 +30,16 @@ class ChunkModel(BaseDataModel):
                     unique=index["unique"],
                     name=index["name"]
                     )
+
+        # Text index for keyword search (idempotent)
+        try:
+            await self.collection.create_index(
+                [("chunk_text", TEXT)],
+                name="chunk_text_search",
+                default_language="none",  # يدعم العربي والإنجليزي
+            )
+        except Exception:
+            pass  # Index already exists
 
     async def create_chunk(self,chunk:DataChunk):
         result= await self.collection.insert_one(chunk.dict())
@@ -69,3 +79,58 @@ class ChunkModel(BaseDataModel):
     async def get_project_chunks(self,project_id:str ,page:int=1,page_size:int=10,):
         result= await self.collection.find({"chunk_project_id":project_id}).skip((page-1)*page_size).limit(page_size).to_list(length=page_size)
         return [DataChunk(**chunk) for chunk in result]
+
+    async def search_by_keyword(
+        self,
+        project_id: str,
+        query: str,
+        limit: int = 10,
+    ) -> list:
+        """
+        بحث بالكلمات بـ MongoDB $text index.
+        يرجع list من dicts، كل dict عنده payload + score
+        عشان يكون compatible مع نتائج Qdrant.
+        """
+        if self.collection is None:
+            return []
+        try:
+            cursor = self.collection.find(
+                {
+                    "$text": {"$search": query},
+                    "chunk_project_id": project_id,
+                },
+                {
+                    "score": {"$meta": "textScore"},
+                    "chunk_id": 1,
+                    "chunk_text": 1,
+                    "chunk_metadata": 1,
+                    "chunk_order": 1,
+                }
+            ).sort([("score", {"$meta": "textScore"})]).limit(limit)
+
+            results = []
+            async for doc in cursor:
+                doc.pop("_id", None)
+                score = doc.pop("score", 0.0)
+                # نبني object بنفس شكل Qdrant ScoredPoint عشان الـ Reranker يشتغل عليه
+                results.append(_KeywordResult(
+                    payload={
+                        "text": doc.get("chunk_text", ""),
+                        "chunk_id": doc.get("chunk_id", ""),
+                        "chunk_order": doc.get("chunk_order", 0),
+                        **(doc.get("chunk_metadata") or {}),
+                    },
+                    score=score,
+                ))
+            return results
+        except Exception as e:
+            import logging
+            logging.getLogger("uvicorn.error").warning(f"Keyword search failed: {e}")
+            return []
+
+
+class _KeywordResult:
+    """Wrapper عشان نتائج MongoDB تبقى compatible مع Qdrant ScoredPoint."""
+    def __init__(self, payload: dict, score: float):
+        self.payload = payload
+        self.score = score

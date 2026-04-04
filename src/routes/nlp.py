@@ -184,11 +184,14 @@ async def answer_rag(request: Request, project_id: str, search_request: SearchRe
         project_id=project_id
     )
 
+    chunk_model = ChunkModel(client=request.app.client, project_id=project_id)
+
     nlp_controller = NLPController(
         vectordb_client=get_or_init_vectordb(),
         generation_client=get_or_init_generation(),
         embedding_client=get_or_init_embedding(),
         template_parser=template_parser,
+        chunk_model=chunk_model,  # للـ Multi-Retrieval (keyword search)
     )
 
     answer, full_prompt, chat_history, sources = await nlp_controller.answer_rag_question(

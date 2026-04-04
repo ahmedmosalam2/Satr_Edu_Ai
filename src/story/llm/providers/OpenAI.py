@@ -54,9 +54,10 @@ class OpenAIProvider(LLMInference):
         max_output_tokens = max_tokens if max_tokens else self.default_generation_max_output_tokens
         temperature = temperature if temperature else self.default_generation_temperature
 
-        chat_history.append(
-            self.construct_prompt(prompt=prompt, role=LLMEnums.OpenAiEnums.USER.value)
-        )
+        chat_history.append({
+            "role": LLMEnums.OpenAiEnums.USER.value,
+            "content": prompt,
+        })
 
         response = self.client.chat.completions.create(
             model = self.generation_model_id,

@@ -1,20 +1,75 @@
 services:
+  # ── MongoDB ──────────────────────────────────────────────────────────────
   mongodb:
     image: mongo:7
     container_name: mongodb
-    ports:
-      - "27017:27017"
     volumes:
       - ./data/mongodb:/data/db
-
     networks:
       - backend
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-    
+    restart: always
+
+  # ── Redis: طابور المهام للـ Celery ──────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    networks:
+      - backend
+    restart: always
+
+  # ── FastAPI Application ──────────────────────────────────────────────────
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: satr_edu_app
+    env_file:
+      - ../.env
+    volumes:
+      - ../src/assets:/app/src/assets   # ملفات المستخدمين
+      - ../qdrant_db:/app/qdrant_db     # Qdrant local storage
+    networks:
+      - backend
+    depends_on:
+      - mongodb
+      - redis
+    restart: always
+
+  # ── NGINX Load Balancer ──────────────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: satr_edu_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - backend
+    depends_on:
+      - app
+    restart: always
+
+  # ── Celery Worker ────────────────────────────────────────────────────────
+  celery_worker:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: satr_edu_celery
+    command: celery -A src.tasks.process_tasks.celery_app worker --loglevel=info
+    env_file:
+      - ../.env
+    volumes:
+      - ../src/assets:/app/src/assets
+      - ../qdrant_db:/app/qdrant_db
+    networks:
+      - backend
+    depends_on:
+      - mongodb
+      - redis
     restart: always
 
 networks:
   backend:
-   
