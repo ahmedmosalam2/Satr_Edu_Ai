@@ -1,0 +1,1137 @@
+{
+  "info": {
+    "name": "Satr Edu AI — Full API",
+    "description": "Complete Postman collection for Satr Edu AI platform.\nBase URL: http://localhost\n\nFlow:\n1. Register Operations user\n2. Login → token saved automatically\n3. Register Teacher → approve\n4. Create Project\n5. Upload + Process file\n6. NLP Index\n7. Chat / Exam",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "var token = pm.collectionVariables.get('token');",
+          "if (!token || token.length < 10) {",
+          "    console.log('⚠️ No token — run Login first');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": " System",
+      "item": [
+        {
+          "name": "Welcome",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/"
+          }
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/health"
+          }
+        },
+        {
+          "name": "Swagger Docs",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/docs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "1. Register Operations (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_name\": \"Admin User\",\n  \"user_email\": \"admin@satr.com\",\n  \"user_password\": \"Admin1234!\",\n  \"user_role\": \"operations\"\n}"
+            }
+          }
+        },
+        {
+          "name": "2. Register Teacher",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_name\": \"Ahmed Teacher\",\n  \"user_email\": \"teacher@satr.com\",\n  \"user_password\": \"Teacher1234!\",\n  \"user_role\": \"teacher\"\n}"
+            }
+          }
+        },
+        {
+          "name": "3. Register Student",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_name\": \"Mohamed Student\",\n  \"user_email\": \"student@satr.com\",\n  \"user_password\": \"Student1234!\",\n  \"user_role\": \"student\"\n}"
+            }
+          }
+        },
+        {
+          "name": "4. Login → saves token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.access_token) {",
+                  "    pm.collectionVariables.set('token', json.access_token);",
+                  "    console.log('✅ Token saved');",
+                  "} else {",
+                  "    console.log('❌ Login failed:', JSON.stringify(json));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_email\": \"admin@satr.com\",\n  \"user_password\": \"Admin1234!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "5. Who Am I",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/me"
+          }
+        },
+        {
+          "name": "6. Approve Teacher",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/teacher/approve/{{teacher_id}}"
+          }
+        },
+        {
+          "name": "7. Pending Teachers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/teacher/pending"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📁 Projects (KB Management)",
+      "item": [
+        {
+          "name": "1. Create Project",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.project && json.project.project_id) {",
+                  "    pm.collectionVariables.set('project_id', json.project.project_id);",
+                  "    console.log('✅ project_id saved:', json.project.project_id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/projects",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"project_name\": \"ميكانيكا الكم\",\n  \"project_description\": \"مادة ميكانيكا الكم للفرقة الثالثة\"\n}"
+            }
+          }
+        },
+        {
+          "name": "2. List All Projects",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/projects?page=1&page_size=10",
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Get Project Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/projects/{{project_id}}"
+          }
+        },
+        {
+          "name": "4. Project Stats (files + chunks + vectors)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/projects/{{project_id}}/stats"
+          }
+        },
+        {
+          "name": "5. Update Project Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/projects/{{project_id}}/settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chunk_size\": 800,\n  \"chunk_overlap\": 80,\n  \"use_deepdoc\": true,\n  \"language\": \"ar\"\n}"
+            }
+          }
+        },
+        {
+          "name": "6. Delete Project",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/projects/{{project_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📤 Data (Upload & Process)",
+      "item": [
+        {
+          "name": "1. Upload File",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.file_id) {",
+                  "    pm.collectionVariables.set('file_id', json.file_id);",
+                  "    console.log('✅ file_id saved:', json.file_id);",
+                  "} else if (json.data && json.data.file_id) {",
+                  "    pm.collectionVariables.set('file_id', json.data.file_id);",
+                  "    console.log('✅ file_id saved:', json.data.file_id);",
+                  "} else {",
+                  "    console.log('Response:', JSON.stringify(json));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/upload/{{project_id}}",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Process File (DeepDoc Smart Chunking)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/process/{{project_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file_id\": \"{{file_id}}\",\n  \"chunk_size\": 800,\n  \"chunk_overlap\": 80,\n  \"do_reset\": false,\n  \"use_deepdoc\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "3. Process File (Simple — Non-PDF)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/process/{{project_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file_id\": \"{{file_id}}\",\n  \"chunk_size\": 1000,\n  \"chunk_overlap\": 100,\n  \"do_reset\": false,\n  \"use_deepdoc\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "4. List Files",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/files/{{project_id}}"
+          }
+        },
+        {
+          "name": "5. List Chunks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/chunks/{{project_id}}?page=1&page_size=5",
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔍 NLP (RAG Pipeline)",
+      "item": [
+        {
+          "name": "1. Index to Vector DB (Push)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/nlp/index/push/{{project_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"do_reset\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "2. Vector DB Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/nlp/index/info/{{project_id}}"
+          }
+        },
+        {
+          "name": "3. Search (Hybrid — Vector + Keyword)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/nlp/search/{{project_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"ما هو مبدأ عدم اليقين؟\",\n  \"limit\": 5\n}"
+            }
+          }
+        },
+        {
+          "name": "4. RAG Answer (Single Question)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/nlp/answer/{{project_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"اشرح مفهوم التشابك الكمي\",\n  \"limit\": 5\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💬 Chat (Multi-turn RAG)",
+      "item": [
+        {
+          "name": "1. Start New Conversation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.conversation_id) {",
+                  "    pm.collectionVariables.set('conversation_id', json.conversation_id);",
+                  "    console.log('✅ conversation_id saved:', json.conversation_id);",
+                  "    console.log('Answer:', json.answer.substring(0, 100) + '...');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/chat/{{project_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"ما هي أهم المفاهيم في هذا الموضوع؟\",\n  \"limit\": 5\n}"
+            }
+          }
+        },
+        {
+          "name": "2. Continue Conversation (Follow-up)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/chat/{{project_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"وضّح لي أكثر عن النقطة الأولى\",\n  \"conversation_id\": \"{{conversation_id}}\",\n  \"limit\": 5\n}"
+            }
+          }
+        },
+        {
+          "name": "3. Another Follow-up",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/chat/{{project_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"أعطني مثالاً تطبيقياً\",\n  \"conversation_id\": \"{{conversation_id}}\",\n  \"limit\": 5\n}"
+            }
+          }
+        },
+        {
+          "name": "4. List My Conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/chat/conversations?project_id={{project_id}}",
+              "query": [
+                {
+                  "key": "project_id",
+                  "value": "{{project_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "5. Get Conversation Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/chat/conversations/{{conversation_id}}"
+          }
+        },
+        {
+          "name": "6. Clear Conversation History",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/chat/conversations/{{conversation_id}}/clear"
+          }
+        },
+        {
+          "name": "7. Delete Conversation",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/chat/conversations/{{conversation_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🤖 AI Features",
+      "item": [
+        {
+          "name": "Summarize Content",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/ai/summarize",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"project_id\": \"{{project_id}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Generate Exam Questions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/ai/generate-questions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"project_id\": \"{{project_id}}\",\n  \"num_questions\": 5,\n  \"difficulty\": \"medium\",\n  \"question_types\": [\"MCQ\", \"True/False\"]\n}"
+            }
+          }
+        },
+        {
+          "name": "OCR Extract (Image)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/ocr/extract",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔍 OCR (Gemini Vision)",
+      "item": [
+        {
+          "name": "1. OCR Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/ocr/status"
+          }
+        },
+        {
+          "name": "2. Test Gemini Connection",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/ocr/test/gemini"
+          }
+        },
+        {
+          "name": "3. Extract from Image (Gemini Vision)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/ocr/extract",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "",
+                  "description": "PNG/JPEG scanned image"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "4. Extract from Scanned PDF",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/ocr/extract/pdf",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "",
+                  "description": "Scanned PDF"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📝 Exams",
+      "item": [
+        {
+          "name": "1. Create Exam",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.exam_id) {",
+                  "    pm.collectionVariables.set('exam_id', json.exam_id);",
+                  "    console.log('✅ exam_id saved:', json.exam_id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/exam/create",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"project_id\": \"{{project_id}}\",\n  \"exam_title\": \"امتحان منتصف الترم\",\n  \"num_questions\": 5,\n  \"difficulty\": \"medium\",\n  \"question_types\": [\"MCQ\", \"True/False\"]\n}"
+            }
+          }
+        },
+        {
+          "name": "2. Get Exam Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/exam/{{exam_id}}"
+          }
+        },
+        {
+          "name": "3. Approve Exam (Teacher)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/exam/{{exam_id}}/approve"
+          }
+        },
+        {
+          "name": "4. Student — Available Exams",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/exam/student/project/{{project_id}}"
+          }
+        },
+        {
+          "name": "5. Submit Answers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/exam/{{exam_id}}/submit",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"answers\": [\n    {\"question_id\": \"PASTE_Q_ID_1\", \"student_answer\": \"A\"},\n    {\"question_id\": \"PASTE_Q_ID_2\", \"student_answer\": \"True\"}\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "6. My Results",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/exam/student/results"
+          }
+        },
+        {
+          "name": "7. Teacher — All Results",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/exam/{{exam_id}}/results"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 Analytics",
+      "item": [
+        {
+          "name": "Student Performance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/analytics/student"
+          }
+        },
+        {
+          "name": "Class Analytics (Teacher)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/analytics/class/{{project_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔧 Model Settings",
+      "item": [
+        {
+          "name": "1. Current Model",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/models/current"
+          }
+        },
+        {
+          "name": "2. Available Models (Ollama)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/models/available"
+          }
+        },
+        {
+          "name": "3. Switch Generation Model",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/models/set",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"generation_model\": \"llama3.2:latest\"\n}"
+            }
+          }
+        },
+        {
+          "name": "4. Test Model (Quick Check)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/models/test",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"مرحباً، هل أنت شغال؟ قل نعم فقط.\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚙️ Admin",
+      "item": [
+        {
+          "name": "System Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/admin/stats"
+          }
+        },
+        {
+          "name": "All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/admin/users"
+          }
+        },
+        {
+          "name": "All Projects",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/admin/projects"
+          }
+        },
+        {
+          "name": "Storage Status (MinIO or Filesystem)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/admin/storage/status"
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/admin/users/{{teacher_id}}"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "project_id",
+      "value": ""
+    },
+    {
+      "key": "file_id",
+      "value": ""
+    },
+    {
+      "key": "exam_id",
+      "value": ""
+    },
+    {
+      "key": "conversation_id",
+      "value": ""
+    },
+    {
+      "key": "teacher_id",
+      "value": ""
+    }
+  ]
+}
