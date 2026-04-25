@@ -8,6 +8,7 @@ __pycache__/
 *.egg-info/
 *.egg
 
+
 # =====================
 # Build / packaging
 # =====================
@@ -65,3 +66,5 @@ ehthumbs.db
 # PyInstaller
 # =====================
 *.spec
+*.png 
+*.svg
