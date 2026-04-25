@@ -1,61 +1,67 @@
-# Byte-code files
+# =====================
+# Python cache
+# =====================
 __pycache__/
 *.pyc
-*.pyd
 *.pyo
+*.pyd
 *.egg-info/
 *.egg
 
-# Distributions and packaging
+# =====================
+# Build / packaging
+# =====================
 dist/
 build/
 wheels/
 
-# Installer logs
-pip-log.txt
-pip-delete-this-line.txt
-
-# Unit test / coverage reports
-.coverage
-.tox/
-htmlcov/
-.nox/
-
-# Editors and IDEs
-.idea/          # For PyCharm
-.vscode/        # For VS Code (can be merged with global gitignore)
-*.swp
-*~
-.sess/
-
-# OS-generated files
-.DS_Store       # macOS
-Thumbs.db       # Windows
-ehthumbs.db     # Windows
-
+# =====================
 # Virtual environments
+# =====================
 venv/
 env/
-/bin/
-/include/
-/lib/
-/lib64/
-__venv/
+__venv__/
 
+# =====================
 # Environment variables
-.env            # file for storing API keys/passwords
+# =====================
+.env
 .flaskenv
 
-# PyInstaller
-# See https://pyinstaller.org
-*.layout
-*.spec
+# =====================
+# Logs
+# =====================
+logs/
+*.log
 
-# Jupyter Notebook
-.ipynb_checkpoints
-
-__pycache__/
-*.pyc
-docker/data/
+# =====================
+# Data (VERY IMPORTANT for your project)
+# =====================
+data/
 qdrant_db/
-.env
+docker/data/
+
+# =====================
+# Jupyter
+# =====================
+.ipynb_checkpoints/
+
+# =====================
+# IDEs
+# =====================
+.idea/
+.vscode/
+*.swp
+*~
+
+# =====================
+# OS files
+# =====================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# =====================
+# PyInstaller
+# =====================
+*.spec
