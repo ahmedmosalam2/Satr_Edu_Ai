@@ -29,8 +29,6 @@ router = APIRouter(
 )
 
 
-# ─── Upload ────────────────────────────────────────────────────────────────────
-
 @router.post("/upload/{project_id}")
 async def upload(
     request: Request,
@@ -38,7 +36,6 @@ async def upload(
     file: UploadFile,
     app_settings: Settings = Depends(get_settings)
 ):
-    """رفع ملف جديد لمشروع. يدعم PDF, TXT, DOCX, images."""
     data_controller = DataController()
     is_valid = data_controller.valied_upload(project_id, file=file)
 
@@ -99,11 +96,8 @@ async def upload(
     }
 
 
-# ─── List Files in a Project ───────────────────────────────────────────────────
-
 @router.get("/files/{project_id}")
 async def list_files(request: Request, project_id: str):
-    """قائمة بكل الملفات المرفوعة لمشروع معين."""
     asset_model = AssetModel(client=request.app.client, project_id=project_id)
     try:
         assets = await asset_model.get_all_assets(
@@ -129,18 +123,14 @@ async def list_files(request: Request, project_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ─── Delete a File ─────────────────────────────────────────────────────────────
-
 @router.delete("/files/{project_id}/{file_id}")
 async def delete_file(request: Request, project_id: str, file_id: str):
-    """حذف ملف مع حذف الـ chunks الخاصة به من MongoDB."""
     asset_model = AssetModel(client=request.app.client, project_id=project_id)
 
     asset = await asset_model.get_asset(file_id)
     if not asset:
         raise HTTPException(status_code=404, detail="File not found")
 
-    # Delete from filesystem
     data_controller = DataController()
     project_controller = ProjectController()
     project_path = project_controller.get_project_path(project_id=project_id)
@@ -148,10 +138,8 @@ async def delete_file(request: Request, project_id: str, file_id: str):
     if os.path.exists(file_path):
         os.remove(file_path)
 
-    # Delete from MongoDB (assets)
     await asset_model.delete_asset(file_id)
 
-    # Delete related chunks from MongoDB
     chunk_model = ChunkModel(client=request.app.client, project_id=project_id)
     try:
         await chunk_model.collection.delete_many({"chunk_project_id": project_id})
@@ -166,8 +154,6 @@ async def delete_file(request: Request, project_id: str, file_id: str):
     }
 
 
-# ─── Process File ──────────────────────────────────────────────────────────────
-
 @router.post("/process/{project_id}")
 async def process(
     request: Request,
@@ -176,15 +162,10 @@ async def process(
     background_tasks: BackgroundTasks,
     app_settings: Settings = Depends(get_settings),
 ):
-    """
-    معالجة الملف وتقسيمه لـ chunks وحفظها في MongoDB.
-    يعمل بشكل سريع ويحفظ الـ chunks في الـ background.
-    """
     chunk_model = await ChunkModel.create_index(db_client=request.app.client)
     process_controller = ProcessController(project_id=project_id)
 
     try:
-        # ── DeepDoc path: PDF + use_deepdoc=True ─────────────────────────────
         file_ext = os.path.splitext(body.file_id)[-1].lower()
         use_deepdoc = body.use_deepdoc and file_ext == ".pdf"
 
@@ -201,8 +182,13 @@ async def process(
             )
             chunking_method = "deepdoc"
             logger.info(f"[DeepDoc] {len(file_chunks)} smart chunks for {body.file_id}")
+
+        elif file_ext == ".pdf":
+            chunking_method = "smart_ocr_background"
+            file_chunks = []
+            logger.info(f"Accepted {body.file_id} for background OCR processing")
+
         else:
-            # ── Legacy path (non-PDF or DeepDoc disabled) ─────────────────────
             file_content = process_controller.get_file_content(file_id=body.file_id)
             file_chunks = process_controller.process_file_content(
                 file_content=file_content,
@@ -217,7 +203,6 @@ async def process(
 
     logger.info(f"Generated {len(file_chunks)} chunks for file {body.file_id}")
 
-    # Delete old chunks for this file prefix if do_reset
     if body.do_reset:
         try:
             await chunk_model.collection.delete_many({"chunk_project_id": project_id})
@@ -227,8 +212,37 @@ async def process(
 
     async def _save_chunks_to_db():
         try:
+            nonlocal file_chunks, chunking_method
+            if chunking_method == "smart_ocr_background":
+                from src.controllers.ProjectController import ProjectController as PC
+                from src.pipeline.pipeline_manager import DocumentPipeline
+                import os
+
+                logger.info(f"[Background] Starting Smart OCR for {body.file_id}...")
+                proj_path = PC().get_project_path(project_id=project_id)
+                file_path = os.path.join(proj_path, body.file_id)
+
+                pipeline = DocumentPipeline()
+                result = pipeline.process(
+                    file_path=file_path,
+                    chunk_strategy="naive",
+                    chunk_size=body.chunk_size,
+                    chunk_overlap=body.chunk_overlap
+                )
+
+                if not result.success:
+                    logger.error(f"[Background] Smart OCR failed: {result.error}")
+                    return
+
+                class DummyChunk:
+                    def __init__(self, c):
+                        self.page_content = c.chunk_text
+                        self.metadata = c.chunk_metadata
+
+                file_chunks = [DummyChunk(c) for c in result.chunks]
+                logger.info(f"[Background] Smart OCR finished. Extracted {len(file_chunks)} chunks.")
+
             now = datetime.now().isoformat()
-            # Get current max order to avoid ID collisions on append
             existing_count = await chunk_model.collection.count_documents({"chunk_project_id": project_id})
             chunks_to_save = [
                 DataChunk(
@@ -242,13 +256,17 @@ async def process(
                 )
                 for i, chunk in enumerate(file_chunks)
             ]
-            await chunk_model.insert_many_chunks(
-                project_id=project_id,
-                chunks=chunks_to_save
-            )
-            logger.info(f"✅ Saved {len(chunks_to_save)} chunks to MongoDB for project {project_id}")
+
+            if chunks_to_save:
+                await chunk_model.insert_many_chunks(
+                    project_id=project_id,
+                    chunks=chunks_to_save
+                )
+                logger.info(f"Saved {len(chunks_to_save)} chunks to MongoDB for project {project_id}")
+            else:
+                logger.info(f"No chunks generated for project {project_id}")
         except Exception as e:
-            logger.error(f"❌ Failed to save chunks to MongoDB: {e}")
+            logger.error(f"Failed to process or save chunks to MongoDB: {e}")
 
     background_tasks.add_task(_save_chunks_to_db)
 
@@ -274,8 +292,6 @@ async def process(
     }
 
 
-# ─── List Chunks ───────────────────────────────────────────────────────────────
-
 @router.get("/chunks/{project_id}")
 async def get_chunks(
     request: Request,
@@ -283,7 +299,6 @@ async def get_chunks(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
 ):
-    """استرجاع كل الـ chunks الخاصة بمشروع مع pagination."""
     chunk_model = ChunkModel(client=request.app.client, project_id=project_id)
     chunks = await chunk_model.get_project_chunks(
         project_id=project_id,
@@ -312,11 +327,8 @@ async def get_chunks(
     }
 
 
-# ─── Reset/Delete All Chunks ───────────────────────────────────────────────────
-
 @router.delete("/chunks/{project_id}")
 async def delete_chunks(request: Request, project_id: str):
-    """حذف كل الـ chunks الخاصة بمشروع (قبل إعادة المعالجة)."""
     chunk_model = ChunkModel(client=request.app.client, project_id=project_id)
     try:
         result = await chunk_model.collection.delete_many({"chunk_project_id": project_id})
@@ -329,11 +341,8 @@ async def delete_chunks(request: Request, project_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ─── Legacy task status (deprecated) ──────────────────────────────────────────
-
 @router.get("/process/status/{task_id}")
 async def get_process_status(task_id: str):
-    """Legacy — Celery tasks no longer used."""
     return {
         "status": "deprecated",
         "message": "Processing is now synchronous. No task tracking needed.",

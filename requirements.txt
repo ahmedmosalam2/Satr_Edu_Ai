@@ -3,10 +3,12 @@ uvicorn
 python-multipart==0.0.12
 python-dotenv
 pillow
+google-generativeai
 
 pydantic_settings
 PyPDF2
 pypdf
+pdfplumber
 langchain_community
 langchain_text_splitters
 unstructured
@@ -36,4 +38,6 @@ celery[redis]
 # ML (reranker needs torch + sentence-transformers)
 torch
 transformers
+timm
+einops
 sentence-transformers

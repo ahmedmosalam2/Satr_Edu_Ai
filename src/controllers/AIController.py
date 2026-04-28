@@ -258,17 +258,26 @@ class AIController:
         answer_letters = []
 
         for q in questions:
-            answer = q.get("correct_answer", "").strip().upper()
+            raw_answer = q.get("correct_answer")
+            answer = str(raw_answer).strip() if raw_answer is not None else ""
+            
             options = q.get("options") or []
             question_text = q.get("question_text", "")
+            q_type = q.get("question_type", "").upper()
 
             if not answer or not question_text:
                 logger.warning("Skipping question with missing answer or text")
                 continue
 
+            # Skip option validation for ESSAY questions since they don't have options
+            if q_type == "ESSAY":
+                valid.append(q)
+                continue
+
             # Check correct_answer letter appears in one of the options
+            answer_upper = answer.upper()
             answer_in_options = any(
-                opt.strip().upper().startswith(answer) for opt in options
+                opt.strip().upper().startswith(answer_upper) for opt in options
             )
 
             if options and not answer_in_options:
@@ -277,7 +286,7 @@ class AIController:
                 )
                 continue
 
-            answer_letters.append(answer)
+            answer_letters.append(answer_upper)
             valid.append(q)
 
         # Detect A-bias: warn if all answers are the same letter

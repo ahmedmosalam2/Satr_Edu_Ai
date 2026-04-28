@@ -6,7 +6,6 @@ from src.models.ChunkModel import ChunkModel
 from src.controllers.NLPController import NLPController
 from src.models.enums.Response import ResponseSignal as Response
 from src.helpers.nlp_clients import get_vectordb_client, get_embedding_client, get_generation_client, template_parser
-
 import logging
 
 logger = logging.getLogger('uvicorn.error')
@@ -51,7 +50,6 @@ def _serialize_search_result(result):
 async def index_project(request: Request, project_id: str, push_request: PushRequest, background_tasks: BackgroundTasks):
     project_id = project_id.strip()
 
-    # Minimal check using try/except to avoid PyMongo truth-value testing issues
     try:
         db_client = request.app.client
         if db_client is None:
@@ -149,9 +147,6 @@ async def get_project_index_info(request: Request, project_id: str):
 
 @nlp_router.post("/search/{project_id}")
 async def nlp_search(request: Request, project_id: str, search_request: SearchRequest):
-    """
-    Search into vector database for a specific project.
-    """
     logger.info(f"NLP Search hit for project: {project_id}")
     try:
         db_client = request.app.client
@@ -179,11 +174,11 @@ async def nlp_search(request: Request, project_id: str, search_request: SearchRe
         )
 
         if not results:
-             return {
-                 "status": Response.SUCCESS.value,
-                 "message": "No results found",
-                 "data": []
-             }
+            return {
+                "status": Response.SUCCESS.value,
+                "message": "No results found",
+                "data": []
+            }
 
         return {
             "status": Response.SUCCESS.value,
@@ -200,9 +195,6 @@ async def nlp_search(request: Request, project_id: str, search_request: SearchRe
 
 @nlp_router.post("/answer/{project_id}")
 async def nlp_answer(request: Request, project_id: str, search_request: SearchRequest):
-    """
-    Generate a RAG answer for a specific project.
-    """
     logger.info(f"NLP Answer hit for project: {project_id}")
     try:
         db_client = request.app.client

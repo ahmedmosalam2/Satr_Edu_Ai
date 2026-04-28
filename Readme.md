@@ -1,273 +1,156 @@
 <div align="center">
-
-<img src="./satr-banner.svg" alt="Satr EDU AI" width="250"/>
-
-<p><em>Transform your documents into intelligent, searchable knowledge using cutting-edge AI</em></p>
-
-<p>
-  <a href="https://github.com/ahmedmosalam2/Satr_Edu_Ai"><img src="https://img.shields.io/badge/-%F0%9F%8F%A0%20GITHUB-1a1a2e?style=for-the-badge&logoColor=white" alt="GitHub"/></a>
-  <a href="#-api-reference"><img src="https://img.shields.io/badge/-📄%20API%20DOCS-7c3aed?style=for-the-badge&logoColor=white" alt="API Docs"/></a>
-  <a href="#-getting-started"><img src="https://img.shields.io/badge/-🚀%20GET%20STARTED-0f9d58?style=for-the-badge&logoColor=white" alt="Get Started"/></a>
-  <a href="#-architecture"><img src="https://img.shields.io/badge/-🏗️%20ARCHITECTURE-e91e63?style=for-the-badge&logoColor=white" alt="Architecture"/></a>
-</p>
-
-<p>
-  <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI"/></a>
-  <a href="https://python.org/"><img src="https://img.shields.io/badge/Python_3.10+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"/></a>
-  <a href="https://mongodb.com/"><img src="https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white" alt="MongoDB"/></a>
-  <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=flat-square&logo=pytorch&logoColor=white" alt="PyTorch"/></a>
-  <a href="https://qdrant.tech/"><img src="https://img.shields.io/badge/Qdrant-DC143C?style=flat-square&logo=qdrant&logoColor=white" alt="Qdrant"/></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License"/></a>
-</p>
-
-<p>
-  <a href="#english">English</a> | <a href="#arabic">العربية</a>
-</p>
-
----
-
+  <img src="./assets/satr_edu_clean.png" width="54" style="vertical-align: middle;"/>
+  <span style="font-size: 2.8em; font-weight: bold; vertical-align: middle; margin-left: 12px;">Satr Edu</span>
 </div>
 
-## 📋 What is Satr Edu AI?
+<p align="center">
+  <a href="https://github.com/ahmedmosalam2/Satr_Edu_Ai">Document</a> | 
+  <a href="#">Roadmap</a> | 
+  <a href="#">Twitter</a> | 
+  <a href="#">Discord</a> | 
+  <a href="#">Demo</a>
+</p>
 
-**Satr Edu AI** is an enterprise-grade platform that converts unstructured educational content into structured, AI-ready data. Whether you're building a RAG system, a document search engine, or an intelligent tutoring system — this platform handles the heavy lifting.
+# README in English | [العربية](#)
 
-> **Built for educators and developers** who want to unlock the power of AI over their existing documents — without rebuilding everything from scratch.
+## Table of Contents
+- [What is Satr Edu?](#what-is-satr-edu-ai)
+- [Demo](#demo)
+- [Latest Updates](#latest-updates)
+- [Key Features](#key-features)
+- [System Architecture](#system-architecture)
+- [Get Started](#get-started)
+- [Configurations](#configurations)
+- [Build a Docker image](#build-a-docker-image)
+- [Documentation](#documentation)
+- [Roadmap](#roadmap)
+- [Community](#community)
+- [Contributing](#contributing)
 
-<br/>
+## What is Satr Edu?
+Satr Edu is a leading open-source Retrieval-Augmented Generation (RAG) engine that fuses cutting-edge RAG with Agent capabilities to create a superior context layer for educational LLMs. It offers a streamlined RAG workflow adaptable to educational institutions of any scale. Powered by a converged context engine and pre-built educational agent templates, Satr Edu enables developers to transform complex learning materials into high-fidelity, production-ready AI tutors with exceptional efficiency and precision.
 
-## 🎯 Features
+## Demo
+Try our demo at http://localhost:8000/docs.
 
-<table>
-<tr>
-<td width="50%">
+## Latest Updates
+* 2026-04-28 Supports Gemini 1.5 Flash for advanced Arabic generation.
+* 2026-04-27 Integrates Surya OCR for GPU-accelerated document and image parsing.
+* 2026-04-25 Supports 'Memory' and ReAct logic for AI agent.
+* 2026-04-23 Supports multi-modal file processing (PDF, DOCX, PPTX, Images).
+* 2026-04-20 Supports orchestrable ingestion pipeline for educational content.
 
-### 📄 Document Processing
-- PDF, Word, PowerPoint, Excel
-- HTML, Markdown, JSON, CSV
-- Plain text files
-- Automatic format detection
+## Key Features
+* **"Quality in, quality out"**
+  Deep document understanding-based knowledge extraction from unstructured educational data.
+  Finds "needle in a data haystack" of literally unlimited tokens.
 
-</td>
-<td width="50%">
+* **Template-based chunking**
+  Intelligent and explainable.
+  Plenty of template options to choose from (Recursive, Semantic, Structure).
 
-### 🤖 AI-Powered OCR
-- Transformer-based vision models
-- GPU acceleration support
-- Handwritten text recognition
-- Multi-language support
+* **Grounded citations with reduced hallucinations**
+  Visualization of text chunking to allow human intervention.
+  Quick view of the key references and traceable citations to support grounded answers for students.
 
-</td>
-</tr>
-<tr>
-<td width="50%">
+* **Compatibility with heterogeneous data sources**
+  Supports Word, slides, excel, txt, images, scanned copies, structured data, web pages, and more.
 
-### ✂️ Smart Chunking
-- Recursive text splitting
-- Configurable chunk size & overlap
-- Metadata preservation
-- RAG-optimized output
+* **Automated and effortless RAG workflow**
+  Streamlined RAG orchestration catered to students and educational businesses.
+  Configurable LLMs (Ollama, Gemini) as well as embedding models.
+  Multiple recall paired with fused re-ranking via Qdrant.
+  Intuitive APIs for seamless integration with business.
 
-</td>
-<td width="50%">
+## System Architecture
 
-### 🗄️ Vector Search
-- Qdrant vector database
-- Semantic similarity search
-- BM25 keyword hybrid retrieval
-- Cross-encoder re-ranking
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-### 🎓 Exam Generation
-- AI-powered question creation
-- Multiple choice & true/false
-- Student performance analytics
-- Celery async task queue
-
-</td>
-<td width="50%">
-
-### 🔐 Auth & Management
-- JWT authentication
-- Role-based access control
-- Project-based organization
-- Admin dashboard routes
-
-</td>
-</tr>
-</table>
-
-<br/>
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-```
-Python 3.10+
-MongoDB 4.4+
-Redis (for Celery async tasks)
-CUDA GPU (optional, for OCR acceleration)
-```
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/ahmedmosalam2/Satr_Edu_Ai.git
-cd Satr_Edu_Ai
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Setup environment
-cp .env.example .env
-```
-
-### Configuration
-
-```env
-MONGODB_URL=mongodb://localhost:27017
-MONGODB_DATABASE=satr_edu_ai
-OCR_MODEL=microsoft/trocr-base-handwritten
-APP_FILES_PATH=./src/assets/files
-SECRET_KEY=your-secret-key-here
-QDRANT_URL=http://localhost:6333
-REDIS_URL=redis://localhost:6379
-```
-
-### Run
-
-```bash
-# Development
-uvicorn main:app --reload --reload-exclude "docker/data/*" --port 8000
-
-# Production (with Docker)
-docker-compose up -d
-```
-
-<br/>
-
-## 📡 API Reference
-
-### Authentication
-
-```http
-POST /api/v1/auth/register
-POST /api/v1/auth/login
-```
-
-### Document Management
-
-```http
-POST   /api/v1/upload/{project_id}      # Upload document
-POST   /api/v1/process/{project_id}     # Process & chunk
-GET    /api/v1/assets/{project_id}      # List documents
-DELETE /api/v1/assets/{asset_id}        # Delete document
-```
-
-### AI & Search
-
-```http
-POST /api/v1/ai/search                  # Semantic search
-POST /api/v1/ai/exam/generate           # Generate exam
-POST /api/v1/ai/exam/submit             # Submit answers
-GET  /api/v1/analytics/performance      # Student analytics
-```
-
-<br/>
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                    FastAPI Server                        │
-├─────────────────────────────────────────────────────────┤
-│   Routes          Controllers         Helpers           │
-│   ├─ auth         ├─ Data            ├─ Config         │
-│   ├─ data         ├─ Process         ├─ OCR            │
-│   ├─ ai           ├─ AI              ├─ Reranker       │
-│   └─ analytics    ├─ Analytics       └─ Embeddings     │
-│                   └─ Project                            │
-├─────────────────────────────────────────────────────────┤
-│   Models                                                │
-│   ├─ ProjectModel  ├─ AssetModel   ├─ ChunkModel      │
-│   ├─ ExamResult    ├─ UserModel    └─ enums/           │
-│   └─ scheme_db/                                         │
-├─────────────────────────────────────────────────────────┤
-│   Infrastructure                                        │
-│   ├─ MongoDB (Motor)    ├─ Qdrant (Vector DB)          │
-│   └─ Redis + Celery (Async Tasks)                      │
-└─────────────────────────────────────────────────────────┘
-```
-
-<br/>
-
-## 📁 Project Structure
-
-```
-Satr_Edu_Ai/
-├── main.py                 # Entry point
-├── requirements.txt        # Dependencies
-├── Dockerfile              # Docker config
-├── docker/                 # Docker compose files
-└── src/
-    ├── controllers/        # Business logic
-    │   ├── AIController.py
-    │   ├── OCRController.py
-    │   ├── AnalyticsController.py
-    │   └── ...
-    ├── routes/             # API endpoints
-    │   ├── data.py
-    │   ├── ai.py
-    │   └── schemes/        # Pydantic schemas
-    ├── models/             # Data models
-    │   ├── scheme_db/      # MongoDB documents
-    │   └── enums/          # Enum types
-    ├── helpers/            # Utilities
-    │   ├── reranker.py
-    │   └── ...
-    └── assets/             # File storage
-```
-
-<br/>
-
-## 🛠️ Tech Stack
-
-| Category | Technologies |
-|----------|-------------|
-| **Backend** | FastAPI, Uvicorn, Pydantic |
-| **AI / ML** | PyTorch, Transformers, LangChain, TrOCR |
-| **Search** | Qdrant, BM25, Cross-Encoder Re-ranking |
-| **Database** | MongoDB, Motor (async) |
-| **Task Queue** | Celery, Redis |
-| **Documents** | PyPDF2, python-docx, Unstructured |
-| **DevOps** | Docker, Docker Compose |
-
-<br/>
-
-## 📜 License
-
-MIT License © 2024 — Satr Edu AI
-
----
+Satr Edu follows a modular architecture designed for high-fidelity document processing and intelligent retrieval. The system is divided into several specialized layers to ensure scalability and precision.
 
 <div align="center">
-
-**Built with ❤️ for the future of education**
-
-<br/>
-
-<a href="https://github.com/ahmedmosalam2/Satr_Edu_Ai/stargazers"><img src="https://img.shields.io/github/stars/ahmedmosalam2/Satr_Edu_Ai?style=social" alt="Stars"/></a>
-&nbsp;
-<a href="https://github.com/ahmedmosalam2/Satr_Edu_Ai/network/members"><img src="https://img.shields.io/github/forks/ahmedmosalam2/Satr_Edu_Ai?style=social" alt="Forks"/></a>
-
+  <img src="./satr_edu_architecture_simple.png" alt="Satr Edu System Architecture" width="700"/>
 </div>
+
+### Technical Infrastructure
+
+- **Ingestion Layer**: Orchestrates multi-format file processing using a factory pattern. It utilizes specialized parsers for PDF, DOCX, and HTML, with a dedicated GPU-accelerated OCR pipeline for scanned content.
+- **Processing Layer**: Implements advanced chunking strategies including recursive character splitting and structural awareness to maintain document hierarchy and context.
+- **Storage Layer**: A hybrid database approach using Qdrant for high-dimensional vector search and MongoDB for relational metadata and project management.
+- **Agentic Reasoning**: A multi-agent system built on the ReAct (Reasoning + Acting) pattern, capable of tool-use and autonomous context retrieval to provide grounded educational answers.
+- **Task Management**: Utilizes Celery and Redis for asynchronous background processing, ensuring that heavy computational tasks like OCR do not block the main application flow.
+
+## Get Started
+
+**Prerequisites**
+* CPU >= 4 cores
+* RAM >= 16 GB
+* Disk >= 50 GB
+* Docker >= 24.0.0 & Docker Compose >= v2.26.1
+
+**Start up the server**
+
+Clone the repo:
+```bash
+$ git clone https://github.com/ahmedmosalam2/Satr_Edu_Ai.git
+```
+
+Start up the server using the pre-built Docker Compose:
+```bash
+$ cd Satr_Edu_Ai
+$ docker compose -f docker/docker-compose.yml up -d
+```
+
+Check the server status after having the server up and running:
+```bash
+$ docker logs -f satr_edu_app
+```
+
+The following output confirms a successful launch of the system:
+```text
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+```
+
+In your web browser, enter the IP address of your server and log in to Satr Edu.
+With the default settings, you only need to enter `http://localhost:8000/docs` to see the API interface.
+
+## Configurations
+When it comes to system configurations, you will need to manage the following files:
+
+* `.env`: Keeps the fundamental setups for the system, such as API keys, Database passwords, and LLM configurations.
+* `docker/docker-compose.yml`: The system relies on docker-compose.yml to start up. The environment variables in this file will be automatically populated when the Docker container starts.
+
+To update the default HTTP serving port (8000), go to docker-compose.yml and change `8000:8000` to `<YOUR_SERVING_PORT>:8000`.
+
+Updates to the above configurations require a reboot of all containers to take effect:
+```bash
+$ docker compose -f docker/docker-compose.yml restart app
+```
+
+## Build a Docker image
+This image is approximately 2 GB in size and relies on external LLM and embedding services.
+
+```bash
+$ git clone https://github.com/ahmedmosalam2/Satr_Edu_Ai.git
+$ cd Satr_Edu_Ai/
+$ docker build --platform linux/amd64 -f Dockerfile -t satr_edu_ai:latest .
+```
+
+## Documentation
+* Quickstart
+* Configuration
+* Release notes
+* User guides
+* Developer guides
+
+## Roadmap
+See the Satr Edu Roadmap 2026
+
+## Community
+* Discord
+* Twitter
+* GitHub Discussions
+
+## Contributing
+Satr Edu flourishes via open-source collaboration. In this spirit, we embrace diverse contributions from the community. If you would like to be a part, review our Contribution Guidelines first.

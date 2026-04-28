@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, Request, HTTPException, Depends
+from fastapi import APIRouter, Request, HTTPException, Depends, Query
 from fastapi.responses import JSONResponse
 from src.models.ExamResultModel import ExamResultModel
 from src.models.ExamModel import ExamModel
@@ -23,20 +23,12 @@ def get_analytics_controller() -> AnalyticsController:
     return _analytics_controller
 
 
-# ─── 1. Student Performance Summary ──────────────────────────────────────────
-
 @analytics_router.get("/student/{student_id}")
 async def get_student_analytics(
     student_id: str,
     request: Request,
     current_user: dict = Depends(get_current_user),
 ):
-    """
-    AI-powered analysis of a student's performance across ALL their exam results.
-
-    - Students can only view their own analytics
-    - Teachers and Operations can view any student
-    """
     student_id = student_id.strip()
     role = current_user.get("user_role")
     uid  = current_user.get("user_id")
@@ -44,17 +36,11 @@ async def get_student_analytics(
     if role == UserRole.STUDENT.value and uid != student_id:
         raise HTTPException(status_code=403, detail="يمكنك عرض تحليل أدائك الشخصي فقط")
 
-    result_model = ExamResultModel(client=request.app.client)
-
-    # Gather all exam results for this student across all exams
-    # We search by student_id — collect from all exam collections
-    from src.models.BaseDataModel import BaseDataModel
     db = request.app.client["Satr-Edu"]
     cursor = db["exam_results"].find({"student_id": student_id})
     raw_results = []
     async for doc in cursor:
         doc.pop("_id", None)
-        # Convert datetime to string for JSON
         if "submitted_at" in doc and hasattr(doc["submitted_at"], "isoformat"):
             doc["submitted_at"] = doc["submitted_at"].isoformat()
         raw_results.append(doc)
@@ -67,7 +53,6 @@ async def get_student_analytics(
             "total_exams": 0,
         })
 
-    # Run AI analysis
     analytics = get_analytics_controller()
     analysis = analytics.analyze_student_performance(raw_results)
 
@@ -79,15 +64,12 @@ async def get_student_analytics(
     })
 
 
-# ─── 2. Exam-Level Analytics (Teacher) ───────────────────────────────────────
-
 @analytics_router.get("/exam/{exam_id}")
 async def get_exam_analytics(
     exam_id: str,
     request: Request,
     current_user: dict = Depends(require_roles(UserRole.TEACHER.value)),
 ):
-
     exam_model  = ExamModel(client=request.app.client)
     result_model = ExamResultModel(client=request.app.client)
 
@@ -109,7 +91,6 @@ async def get_exam_analytics(
             "total_submissions": 0,
         })
 
-    # Serialize results for the analytics controller
     raw_results = [
         {
             "student_id": r.student_id,
@@ -131,5 +112,110 @@ async def get_exam_analytics(
         "exam_title": exam.exam_title,
         "total_submissions": len(all_results),
         "analysis": analysis,
-    }
-)
+    })
+
+
+@analytics_router.get("/leaderboard/{project_id}")
+async def get_project_leaderboard(
+    project_id: str,
+    request: Request,
+    top_n: int = Query(10, ge=1, le=50),
+    current_user: dict = Depends(get_current_user),
+):
+    db = request.app.client["Satr-Edu"]
+
+    exam_model = ExamModel(client=request.app.client)
+    exams = await exam_model.list_approved_exams_by_project(project_id)
+    if not exams:
+        return JSONResponse(content={
+            "status": "no_data",
+            "project_id": project_id,
+            "message": "لا توجد امتحانات معتمدة لهذا المشروع بعد",
+            "leaderboard": []
+        })
+
+    exam_ids = [e.exam_id for e in exams]
+
+    pipeline = [
+        {"$match": {"exam_id": {"$in": exam_ids}}},
+        {"$group": {
+            "_id": "$student_id",
+            "avg_percentage": {"$avg": "$percentage"},
+            "total_exams": {"$sum": 1},
+            "best_score": {"$max": "$percentage"},
+            "total_score": {"$sum": "$total_score"},
+            "total_max": {"$sum": "$max_score"},
+        }},
+        {"$sort": {"avg_percentage": -1}},
+        {"$limit": top_n}
+    ]
+
+    leaderboard = []
+    async for doc in db["exam_results"].aggregate(pipeline):
+        leaderboard.append({
+            "rank": len(leaderboard) + 1,
+            "student_id": doc["_id"],
+            "avg_percentage": round(doc["avg_percentage"], 2),
+            "total_exams_taken": doc["total_exams"],
+            "best_score": round(doc["best_score"], 2),
+        })
+
+    return JSONResponse(content={
+        "status": "success",
+        "project_id": project_id,
+        "total_exams_in_project": len(exams),
+        "leaderboard": leaderboard
+    })
+
+
+@analytics_router.get("/teacher/{teacher_id}/overview")
+async def get_teacher_overview(
+    teacher_id: str,
+    request: Request,
+    current_user: dict = Depends(require_roles(UserRole.TEACHER.value, UserRole.OPERATIONS.value)),
+):
+    role = current_user.get("user_role")
+    uid = current_user.get("user_id")
+
+    if role == UserRole.TEACHER.value and uid != teacher_id:
+        raise HTTPException(status_code=403, detail="يمكنك عرض إحصائياتك الشخصية فقط")
+
+    db = request.app.client["Satr-Edu"]
+
+    exams_cursor = db["exams"].find({"teacher_id": teacher_id}, {"_id": 0})
+    exams = []
+    async for doc in exams_cursor:
+        exams.append(doc)
+
+    total_exams = len(exams)
+    approved_count = sum(1 for e in exams if e.get("status") == "approved")
+    draft_count = total_exams - approved_count
+
+    exam_ids = [e["exam_id"] for e in exams]
+    total_submissions = 0
+    avg_score_all = 0.0
+
+    if exam_ids:
+        pipeline = [
+            {"$match": {"exam_id": {"$in": exam_ids}}},
+            {"$group": {
+                "_id": None,
+                "total": {"$sum": 1},
+                "avg_pct": {"$avg": "$percentage"}
+            }}
+        ]
+        async for doc in db["exam_results"].aggregate(pipeline):
+            total_submissions = doc.get("total", 0)
+            avg_score_all = round(doc.get("avg_pct", 0), 2)
+
+    return JSONResponse(content={
+        "status": "success",
+        "teacher_id": teacher_id,
+        "overview": {
+            "total_exams_created": total_exams,
+            "approved_exams": approved_count,
+            "draft_exams": draft_count,
+            "total_student_submissions": total_submissions,
+            "average_student_score": avg_score_all,
+        }
+    })

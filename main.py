@@ -11,6 +11,11 @@ from src.routes import admin
 from src.routes import chat
 from src.routes import projects
 from src.routes import model_settings
+from src.routes import pipeline
+from src.routes import documents
+from src.routes import agent
+from src.routes import evaluation
+from src.routes import adaptive
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient 
 from src.helpers.config import get_settings
@@ -100,8 +105,10 @@ async def startup():
             logger.warning("⚠️ Ollama NOT reachable. Check if Ollama is running on Windows with OLLAMA_HOST=0.0.0.0")
 
         llm_provider = LLMProviderFactory(settings)
-        app.llm_provider = llm_provider.create_provider(LLMEnums.ProviderType.OLLAMA)
-        app.llm_provider.set_generate_model(settings.GENERATION_MODEL_ID)
+        # ── Switching to Gemini for better Arabic generation ──
+        app.llm_provider = llm_provider.create_provider(LLMEnums.ProviderType.GEMINI)
+        # ──────────────────────────────────────────────────────
+        app.llm_provider.set_generate_model("gemini-1.5-flash") # Use standard gemini model name
         app.llm_provider.set_embedding_model(settings.EMBEDDING_MODEL_ID, settings.EMBEDDING_MODEL_SIZE)
         logger.info(f"✅ LLM provider initialized (Embed Model: {settings.EMBEDDING_MODEL_ID})")
     except Exception as e:
@@ -141,3 +148,8 @@ app.include_router(admin.admin_router)
 app.include_router(chat.chat_router)
 app.include_router(projects.projects_router)
 app.include_router(model_settings.model_router)
+app.include_router(pipeline.pipeline_router)
+app.include_router(documents.documents_router)
+app.include_router(agent.agent_router)
+app.include_router(evaluation.eval_router)
+app.include_router(adaptive.adaptive_router)

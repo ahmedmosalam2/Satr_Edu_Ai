@@ -1,4 +1,3 @@
-import logging
 from fastapi import APIRouter, Request, HTTPException, UploadFile, File, status
 from fastapi.responses import JSONResponse
 
@@ -10,6 +9,7 @@ from src.routes.schemes.ai import (
     SummarizeRequest,
     GradeEssayRequest,
 )
+import logging
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -17,7 +17,6 @@ ai_router = APIRouter(
     prefix="/api/v1/ai",
     tags=["AI"],
 )
-
 
 _ai_controller = None
 _ocr_controller = None
@@ -37,7 +36,6 @@ def get_ocr_controller() -> OCRController:
 
 @ai_router.post("/exam/generate")
 async def generate_exam_from_text(request: Request, body: ExamGenerateRequest):
-
     ai = get_ai_controller()
     content = body.content
 
@@ -74,14 +72,12 @@ async def generate_exam_from_file(
     difficulty: str = "mixed",
     file: UploadFile = File(...),
 ):
-
     ocr = get_ocr_controller()
     ai = get_ai_controller()
 
     file_bytes = await file.read()
     content_type = file.content_type or ""
 
-    # Extract text based on file type
     if content_type == "application/pdf" or file.filename.endswith(".pdf"):
         content = ocr.extract_from_pdf_bytes(file_bytes)
     elif content_type.startswith("image/"):
@@ -110,13 +106,8 @@ async def generate_exam_from_file(
     })
 
 
-
-
-
-
 @ai_router.post("/summarize")
 async def summarize_content(request: Request, body: SummarizeRequest):
-
     ai = get_ai_controller()
     content = body.content
 
@@ -143,7 +134,6 @@ async def summarize_file(
     request: Request,
     file: UploadFile = File(...),
 ):
-
     ocr = get_ocr_controller()
     ai = get_ai_controller()
 
@@ -172,10 +162,6 @@ async def summarize_file(
 
 @ai_router.post("/grade/essay")
 async def grade_essay(body: GradeEssayRequest):
-    """
-    Grade a student essay answer using LLM comparison with the model answer.
-    Returns score, feedback, missing_points, correct_points.
-    """
     ai = get_ai_controller()
 
     result = await ai.grade_essay(
@@ -192,14 +178,8 @@ async def grade_essay(body: GradeEssayRequest):
     })
 
 
-
-
 @ai_router.post("/ocr/extract")
 async def ocr_extract(file: UploadFile = File(...)):
-    """
-    Extract text from an uploaded PDF or image file.
-    Returns the raw extracted text.
-    """
     ocr = get_ocr_controller()
     file_bytes = await file.read()
     content_type = file.content_type or ""
@@ -219,9 +199,7 @@ async def ocr_extract(file: UploadFile = File(...)):
     })
 
 
-
 async def _fetch_project_content(request: Request, project_id: str) -> str:
-    """Fetch all chunks from MongoDB for a project and concatenate them."""
     try:
         from src.models.ChunkModel import ChunkModel
         chunk_model = ChunkModel(client=request.app.client, project_id=project_id)
@@ -241,4 +219,3 @@ async def _fetch_project_content(request: Request, project_id: str) -> str:
     except Exception as e:
         logger.error(f"Error fetching project chunks: {e}")
         return ""
-

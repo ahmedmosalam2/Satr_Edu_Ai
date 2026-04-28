@@ -2,6 +2,8 @@ import uuid
 from fastapi import APIRouter, Request, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 from datetime import datetime
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 from src.models.UserModel import UserModel
 from src.models.scheme_db.user import User
@@ -21,14 +23,20 @@ auth_router = APIRouter(
 )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# POST /api/v1/auth/register
-# ─────────────────────────────────────────────────────────────────────────────
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
+class UpdateProfileRequest(BaseModel):
+    user_name: Optional[str] = None
+    user_email: Optional[EmailStr] = None
+
+
 @auth_router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(request: Request, body: RegisterRequest):
     user_model = UserModel(client=request.app.client)
 
-    # منع التسجيل بإيميل موجود
     if await user_model.email_exists(body.user_email):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -36,7 +44,6 @@ async def register(request: Request, body: RegisterRequest):
         )
 
     user_id = str(uuid.uuid4())
-    # Teachers تحتاج موافقة من Ops — باقي الأدوار موافقة تلقائية
     is_approved = body.user_role != UserRole.TEACHER
 
     new_user = User(
@@ -63,9 +70,6 @@ async def register(request: Request, body: RegisterRequest):
     )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# POST /api/v1/auth/login
-# ─────────────────────────────────────────────────────────────────────────────
 @auth_router.post("/login", response_model=TokenResponse)
 async def login(request: Request, body: LoginRequest):
     user_model = UserModel(client=request.app.client)
@@ -83,7 +87,6 @@ async def login(request: Request, body: LoginRequest):
             detail="Account is deactivated"
         )
 
-    # المعلم لازم يكون متموافق عليه من Ops
     if user.user_role == UserRole.TEACHER.value and not user.is_approved:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -112,9 +115,6 @@ async def login(request: Request, body: LoginRequest):
     )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# GET /api/v1/auth/me
-# ─────────────────────────────────────────────────────────────────────────────
 @auth_router.get("/me", response_model=UserResponse)
 async def get_me(request: Request, current_user: dict = Depends(get_current_user)):
     user_model = UserModel(client=request.app.client)
@@ -132,9 +132,74 @@ async def get_me(request: Request, current_user: dict = Depends(get_current_user
     )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PUT /api/v1/auth/approve/{user_id}  — Operations only
-# ─────────────────────────────────────────────────────────────────────────────
+@auth_router.put("/me/profile")
+async def update_profile(
+    request: Request,
+    body: UpdateProfileRequest,
+    current_user: dict = Depends(get_current_user),
+):
+    user_id = current_user["user_id"]
+    user_model = UserModel(client=request.app.client)
+    user = await user_model.get_user_by_id(user_id)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    update_fields = {}
+    if body.user_name and body.user_name.strip():
+        update_fields["user_name"] = body.user_name.strip()
+
+    if body.user_email and body.user_email != user.user_email:
+        if await user_model.email_exists(body.user_email):
+            raise HTTPException(status_code=409, detail="Email already in use by another account")
+        update_fields["user_email"] = body.user_email
+
+    if not update_fields:
+        raise HTTPException(status_code=400, detail="No fields to update")
+
+    db = request.app.client["Satr-Edu"]
+    await db["user"].update_one({"user_id": user_id}, {"$set": update_fields})
+
+    logger.info(f"[Auth] Profile updated for user {user_id}")
+
+    return JSONResponse(content={
+        "status": "success",
+        "message": "Profile updated successfully",
+        "updated_fields": list(update_fields.keys())
+    })
+
+
+@auth_router.put("/me/change-password")
+async def change_password(
+    request: Request,
+    body: ChangePasswordRequest,
+    current_user: dict = Depends(get_current_user),
+):
+    user_id = current_user["user_id"]
+    user_model = UserModel(client=request.app.client)
+    user = await user_model.get_user_by_id(user_id)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not verify_password(body.current_password, user.user_password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+
+    if len(body.new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters")
+
+    new_hashed = hash_password(body.new_password)
+    db = request.app.client["Satr-Edu"]
+    await db["user"].update_one({"user_id": user_id}, {"$set": {"user_password": new_hashed}})
+
+    logger.info(f"[Auth] Password changed for user {user_id}")
+
+    return JSONResponse(content={
+        "status": "success",
+        "message": "Password changed successfully"
+    })
+
+
 @auth_router.put("/approve/{user_id}")
 async def approve_teacher(
     user_id: str,

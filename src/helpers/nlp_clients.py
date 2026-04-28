@@ -8,13 +8,24 @@ from src.story.llm.LLMEnums import LLMEnums
 class DummyTemplateParser:
     def get(self, domain, name, kwargs=None):
         if name == "system_prompt":
-            return "You are a helpful educational assistant."
+            return (
+                "You are a smart and direct educational assistant. You must always follow these rules:\n"
+                "1. Answer briefly and clearly – do not write more than the question requires.\n"
+                "2. Speak in the user's language (Arabic if asked in Arabic, English if asked in English).\n"
+                "3. Use only the information from the documents. If you don't find an answer, say so clearly.\n"
+                "4. Do not repeat the question or give long introductions – start directly with the answer.\n"
+                "5. If the question is simple, answer in one or two sentences only."
+            )
         elif name == "document_prompt":
             kwargs = kwargs or {}
-            return f"Document {kwargs.get('doc_num', '')}:\n{kwargs.get('chunk_text', '')}"
+            return f"[Reference {kwargs.get('doc_num', '')}]: {kwargs.get('chunk_text', '')}"
         elif name == "footer_prompt":
             kwargs = kwargs or {}
-            return f"Answer the query: {kwargs.get('query', '')}"
+            return (
+                f"Based only on the above references, answer this question briefly:\n"
+                f"Question: {kwargs.get('query', '')}\n\n"
+                f"Direct answer:"
+            )
         return ""
 
 
@@ -125,6 +136,8 @@ def get_generation_client():
         provider = factory.create_provider(LLMEnums.ProviderType.OLLAMA)
     elif backend == "COHERE":
         provider = factory.create_provider(LLMEnums.ProviderType.COHERE)
+    elif backend == "GEMINI":
+        provider = factory.create_provider(LLMEnums.ProviderType.GEMINI)
     else:  # default: OPENAI
         provider = factory.create_provider(LLMEnums.ProviderType.OPENAI)
 

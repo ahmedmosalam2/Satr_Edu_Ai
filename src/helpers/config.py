@@ -14,11 +14,14 @@ class Settings(BaseSettings):
     OCR_MODEL: str = "microsoft/Florence-2-base"
 
     # OCR Backend: "gemini" (cloud, recommended) | "local" (Florence-2, needs GPU) | "tesseract" (CPU fallback)
-    OCR_BACKEND: str = "gemini"
+    OCR_BACKEND: str = "surya"
+    SURYA_SERVICE_URL: str = "http://host.docker.internal:8765"
 
     # Gemini API (Google AI Studio — مجاني)
     # احصل عليه من: https://aistudio.google.com
     GEMINI_API_KEY: str = ""
+    GEMINI_API_KEY_2: str = ""
+    GEMINI_API_KEY_3: str = ""
     GEMINI_VISION_MODEL: str = "gemini-2.0-flash"
 
     # MongoDB

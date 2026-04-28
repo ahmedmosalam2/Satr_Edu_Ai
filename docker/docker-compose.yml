@@ -59,9 +59,10 @@ services:
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadmin123
       - MINIO_SECURE=false
-      - OCR_BACKEND=gemini
+      - OCR_BACKEND=surya
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - GEMINI_VISION_MODEL=${GEMINI_VISION_MODEL:-gemini-2.0-flash}
+      - SURYA_SERVICE_URL=http://host.docker.internal:8765
     restart: always
 
   # ── NGINX Load Balancer ───────────────────────────────────────────────────

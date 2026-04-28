@@ -1,21 +1,7 @@
-"""
-src/routes/chat.py
-──────────────────
-Multi-turn RAG Chat — محادثة تراكمية مع قاعدة المعرفة.
-
-Endpoints:
-  POST   /api/v1/chat/{project_id}              → سؤال جديد أو متابعة محادثة
-  GET    /api/v1/chat/conversations              → قائمة محادثات المستخدم
-  GET    /api/v1/chat/conversations/{conv_id}   → تفاصيل محادثة كاملة
-  DELETE /api/v1/chat/conversations/{conv_id}   → حذف محادثة
-  POST   /api/v1/chat/conversations/{conv_id}/clear → مسح رسائل المحادثة
-"""
-
-import logging
-from typing import Optional
-
 from fastapi import APIRouter, Request, HTTPException, Depends, Query
 from fastapi.responses import JSONResponse
+from typing import Optional
+import logging
 
 from src.helpers.auth import get_current_user
 from src.models.ConversationModel import ConversationModel
@@ -35,7 +21,6 @@ chat_router = APIRouter(
     tags=["Chat"],
 )
 
-# ── Lazy singletons (نفس نمط باقي الـ routes) ────────────────────────────────
 _vectordb = None
 _embedding = None
 _generation = None
@@ -59,8 +44,6 @@ def _get_generation():
     return _generation
 
 
-# ─── POST /api/v1/chat/{project_id} ──────────────────────────────────────────
-
 @chat_router.post("/{project_id}", response_model=ChatResponse)
 async def chat(
     project_id: str,
@@ -68,20 +51,12 @@ async def chat(
     request: Request,
     current_user: dict = Depends(get_current_user),
 ):
-    """
-    سؤال RAG مع Chat History كامل.
-
-    - لو `conversation_id` فاضي → ينشئ محادثة جديدة
-    - لو `conversation_id` موجود → يكمل على نفس المحادثة
-    - الـ context التراكمي بيتبعت للـ LLM عشان يفهم السياق
-    """
     user_id = current_user["user_id"]
     db_client = request.app.client
 
     if db_client is None:
         raise HTTPException(status_code=503, detail="Database not available")
 
-    # 1. الـ project لازم يكون موجود
     project_model = await ProjectModel.create_index(db_client=db_client)
     project = await project_model.get_project(project_id=project_id)
     if not project:
@@ -90,12 +65,10 @@ async def chat(
     conv_model = ConversationModel(client=db_client)
     is_new = False
 
-    # 2. جيب أو أنشئ المحادثة
     if body.conversation_id:
         conversation = await conv_model.get_conversation(body.conversation_id)
         if not conversation:
             raise HTTPException(status_code=404, detail="Conversation not found")
-        # أمان: تأكد إن المحادثة بتاعت نفس المستخدم
         if conversation.user_id != user_id:
             raise HTTPException(status_code=403, detail="Access denied")
     else:
@@ -106,9 +79,7 @@ async def chat(
         )
         is_new = True
 
-    # 3. بنيّ الـ chat_history للـ LLM (آخر 6 رسائل = 3 أدوار)
     recent_messages = conversation.messages[-6:] if conversation.messages else []
-    chat_history_for_llm = []
     nlp = NLPController(
         vectordb_client=_get_vectordb(),
         generation_client=_get_generation(),
@@ -117,28 +88,17 @@ async def chat(
         chunk_model=ChunkModel(client=db_client, project_id=project_id),
     )
 
-    # أضف الـ history القديمة كـ context في الـ prompt system
-    history_context = ""
-    if recent_messages:
-        lines = []
-        for msg in recent_messages:
-            prefix = "الطالب" if msg.role == "user" else "المساعد"
-            lines.append(f"{prefix}: {msg.content}")
-        history_context = "\n".join(lines)
-
-    # 4. نفذ الـ RAG مع تعديل الـ query ليشمل الـ context
-    enriched_query = body.text
-    if history_context:
-        enriched_query = (
-            f"سياق المحادثة السابقة:\n{history_context}\n\n"
-            f"السؤال الحالي: {body.text}"
-        )
+    previous_messages = [
+        {"role": msg.role, "content": msg.content}
+        for msg in recent_messages
+    ]
 
     try:
         answer, _, _, sources = await nlp.answer_rag_question(
             project=project,
-            query=enriched_query,
+            query=body.text,
             limit=body.limit,
+            previous_messages=previous_messages,
         )
     except Exception as e:
         logger.error(f"[Chat] RAG error: {e}")
@@ -147,7 +107,6 @@ async def chat(
     if not answer:
         answer = "لم أجد إجابة كافية في قاعدة المعرفة. يرجى التأكد من رفع ومعالجة ملفات المشروع أولاً."
 
-    # 5. احفظ السؤال والإجابة في المحادثة
     await conv_model.append_turn(
         conversation_id=conversation.conversation_id,
         user_text=body.text,
@@ -155,7 +114,6 @@ async def chat(
         sources=sources,
     )
 
-    # 6. جيب المحادثة المحدّثة لإرجاعها كاملة
     updated_conv = await conv_model.get_conversation(conversation.conversation_id)
     history_response = []
     if updated_conv:
@@ -180,17 +138,14 @@ async def chat(
     )
 
 
-# ─── GET /api/v1/chat/conversations ──────────────────────────────────────────
-
 @chat_router.get("/conversations")
 async def list_my_conversations(
     request: Request,
-    project_id: Optional[str] = Query(None, description="فلترة بالمشروع (اختياري)"),
+    project_id: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=50),
     current_user: dict = Depends(get_current_user),
 ):
-    """عرض كل محادثات المستخدم الحالي (مع فلترة اختيارية بالمشروع)."""
     user_id = current_user["user_id"]
     conv_model = ConversationModel(client=request.app.client)
 
@@ -218,15 +173,12 @@ async def list_my_conversations(
     })
 
 
-# ─── GET /api/v1/chat/conversations/{conv_id} ────────────────────────────────
-
 @chat_router.get("/conversations/{conversation_id}")
 async def get_conversation(
     conversation_id: str,
     request: Request,
     current_user: dict = Depends(get_current_user),
 ):
-    """جيب تفاصيل محادثة كاملة مع كل الرسائل."""
     conv_model = ConversationModel(client=request.app.client)
     conv = await conv_model.get_conversation(conversation_id)
 
@@ -248,15 +200,12 @@ async def get_conversation(
     })
 
 
-# ─── DELETE /api/v1/chat/conversations/{conv_id} ─────────────────────────────
-
 @chat_router.delete("/conversations/{conversation_id}")
 async def delete_conversation(
     conversation_id: str,
     request: Request,
     current_user: dict = Depends(get_current_user),
 ):
-    """حذف محادثة بالكامل."""
     conv_model = ConversationModel(client=request.app.client)
     conv = await conv_model.get_conversation(conversation_id)
 
@@ -269,15 +218,12 @@ async def delete_conversation(
     return JSONResponse(content={"status": "success", "message": "Conversation deleted"})
 
 
-# ─── POST /api/v1/chat/conversations/{conv_id}/clear ─────────────────────────
-
 @chat_router.post("/conversations/{conversation_id}/clear")
 async def clear_conversation(
     conversation_id: str,
     request: Request,
     current_user: dict = Depends(get_current_user),
 ):
-    """مسح كل رسائل المحادثة مع الإبقاء على الـ ID."""
     conv_model = ConversationModel(client=request.app.client)
     conv = await conv_model.get_conversation(conversation_id)
 

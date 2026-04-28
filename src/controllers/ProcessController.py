@@ -18,7 +18,7 @@ class ProcessController(BaseController):
         return os.path.splitext(file_id)[-1]
     def get_file_loader(self,file_id:str):
         file_path=os.path.join(self.project_path,file_id)
-        file_extention=self.get_file_extention(file_path)
+        file_extention=self.get_file_extention(file_path).lower()
         if file_extention==Processing.TXT.value:
             from langchain_community.document_loaders import TextLoader
             return TextLoader(file_path)
@@ -37,14 +37,25 @@ class ProcessController(BaseController):
         elif file_extention==Processing.POWERPOINT.value:
             from langchain_community.document_loaders import UnstructuredPowerPointLoader
             return UnstructuredPowerPointLoader(file_path)
-        elif file_extention==Processing.CSV.value:
+        elif file_extention in [".csv"]:
             from langchain_community.document_loaders import UnstructuredCSVLoader
             return UnstructuredCSVLoader(file_path)
-        elif file_extention==Processing.JSON.value:
+        elif file_extention in [".json"]:
             from langchain_community.document_loaders import UnstructuredJSONLoader
             return UnstructuredJSONLoader(file_path)
+        elif file_extention in [".png", ".jpg", ".jpeg"]:
+            class ImageLoader:
+                def __init__(self, path):
+                    self.path = path
+                def load(self):
+                    from src.controllers.OCRController import OCRController
+                    with open(self.path, 'rb') as f:
+                        text = OCRController().extract_from_image_bytes(f.read())
+                    from langchain_core.documents import Document
+                    return [Document(page_content=text, metadata={"source": self.path})]
+            return ImageLoader(file_path)
         else:
-            raise ValueError(Response.FILE_TYPE_NOT_SUPPORTED.value)
+            raise ValueError(f"{Response.FILE_TYPE_NOT_SUPPORTED.value} ({file_extention})")
     
     def get_file_content(self,file_id:str):
         print(f" Loading file content for: {file_id}")

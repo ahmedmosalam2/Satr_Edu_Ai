@@ -16,11 +16,87 @@ Document Intelligence Pipeline — "DeepDoc" inspired by RAGFlow.
 أي كود موجود مش هيتأثر — فقط تستدعيه بشكل صريح.
 """
 
+import io
 import logging
 import re
 from typing import List, Dict, Any, Optional
 
 logger = logging.getLogger("uvicorn.error")
+
+
+def _ocr_page_to_blocks(page, page_num: int) -> List[Dict]:
+    """
+    Render a fitz page to image → OCR → return blocks.
+    Used when PyMuPDF finds no text (scanned page).
+    
+    Pipeline: Gemini (fast cloud) → Surya (local ML) → Tesseract (last resort)
+    """
+    import fitz
+
+    # Render page at 300 DPI
+    mat = fitz.Matrix(300 / 72, 300 / 72)
+    pix = page.get_pixmap(matrix=mat)
+    img_bytes = pix.tobytes("png")
+
+    ocr_text = ""
+
+    # 1. Try Gemini Vision (fast — seconds)
+    try:
+        from src.helpers.gemini_ocr import get_gemini_ocr
+        gemini = get_gemini_ocr()
+        if gemini:
+            result = gemini.extract_text_sync(img_bytes, "image/png")
+            if result and len(result.strip()) > 5:
+                ocr_text = result
+                logger.info(f"[DeepDoc] ✅ Gemini OCR: {len(ocr_text)} chars from page {page_num+1}")
+    except Exception as e:
+        logger.warning(f"[DeepDoc] Gemini OCR failed for page {page_num+1}: {e}")
+
+    # 2. Fallback: Surya OCR (local ML — slower on CPU)
+    if not ocr_text:
+        try:
+            from src.helpers.surya_ocr_helper import get_surya_ocr
+            surya = get_surya_ocr()
+            if surya and surya.is_available():
+                result = surya.extract_text(img_bytes)
+                if result and len(result.strip()) > 5:
+                    ocr_text = result
+                    logger.info(f"[DeepDoc] ✅ Surya OCR: {len(ocr_text)} chars from page {page_num+1}")
+        except Exception as e:
+            logger.warning(f"[DeepDoc] Surya OCR failed for page {page_num+1}: {e}")
+
+    # 3. Last resort: Tesseract
+    if not ocr_text:
+        try:
+            import pytesseract
+            from PIL import Image
+            img = Image.open(io.BytesIO(img_bytes))
+            result = pytesseract.image_to_string(img, lang="ara+eng", config="--psm 6")
+            if result and len(result.strip()) > 5:
+                ocr_text = result.strip()
+                logger.info(f"[DeepDoc] ✅ Tesseract: {len(ocr_text)} chars from page {page_num+1}")
+        except Exception as e:
+            logger.warning(f"[DeepDoc] Tesseract failed for page {page_num+1}: {e}")
+
+    if not ocr_text:
+        logger.warning(f"[DeepDoc] All OCR methods failed for page {page_num+1}")
+        return []
+
+    # Split OCR text into paragraph blocks
+    paragraphs = re.split(r"\n{2,}", ocr_text.strip())
+    blocks = []
+    for para in paragraphs:
+        para = para.strip()
+        if para:
+            blocks.append({
+                "text": para,
+                "type": "paragraph",
+                "page": page_num,
+                "font_size": 12,
+                "is_bold": False,
+                "extraction_method": "ocr",
+            })
+    return blocks
 
 
 class SimpleDocument:
@@ -122,13 +198,18 @@ class DeepDocController:
         """
         استخراج blocks مصنفة من PDF باستخدام PyMuPDF.
         كل block عنده: text, type (header/table/list/paragraph), page, bbox
+        لو الصفحة scanned (مفيش text) → OCR fallback.
         """
         import fitz  # PyMuPDF
 
         all_blocks = []
         doc = fitz.open(file_path)
+        total_pages = len(doc)
+        ocr_pages = 0
 
         for page_num, page in enumerate(doc):
+            page_blocks = []
+
             # استخراج blocks مع metadata
             raw_blocks = page.get_text("dict", flags=fitz.TEXT_PRESERVE_WHITESPACE)["blocks"]
 
@@ -166,7 +247,7 @@ class DeepDocController:
                     num_lines=len(lines),
                 )
 
-                all_blocks.append({
+                page_blocks.append({
                     "text": block_text,
                     "type": block_type,
                     "page": page_num,
@@ -174,7 +255,23 @@ class DeepDocController:
                     "is_bold": is_bold,
                 })
 
+            # ── Smart Detection: هل الصفحة scanned؟ ──
+            page_text = " ".join(b["text"] for b in page_blocks)
+            if len(page_text.strip()) < 50:
+                # الصفحة فاضية أو فيها نص قليل جداً → غالباً scanned
+                logger.info(f"[DeepDoc] Page {page_num+1}/{total_pages}: only {len(page_text.strip())} chars → trying OCR...")
+                ocr_blocks = _ocr_page_to_blocks(page, page_num)
+                if ocr_blocks:
+                    page_blocks = ocr_blocks
+                    ocr_pages += 1
+
+            all_blocks.extend(page_blocks)
+
         doc.close()
+
+        if ocr_pages > 0:
+            logger.info(f"[DeepDoc] Used OCR on {ocr_pages}/{total_pages} scanned pages")
+
         return all_blocks
 
     # ── Block classification ──────────────────────────────────────────────────
@@ -330,7 +427,12 @@ class DeepDocController:
                     if idx > start + chunk_size // 2:
                         end = idx + len(sep)
                         break
+            
             parts.append(text[start:end].strip())
+            
+            if end >= len(text):
+                break
+                
             start = max(start + 1, end - overlap)
         return [p for p in parts if p]
 

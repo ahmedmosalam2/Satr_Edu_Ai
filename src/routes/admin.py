@@ -1,21 +1,8 @@
-"""
-src/routes/admin.py
-────────────────────
-Admin routes — متاحة لـ OPERATIONS role فقط.
-
-Endpoints:
-  GET    /api/v1/admin/users               → كل المستخدمين (مع filter)
-  GET    /api/v1/admin/users/{user_id}     → مستخدم بالتفصيل
-  PUT    /api/v1/admin/users/{user_id}/activate   → تفعيل/إيقاف حساب
-  DELETE /api/v1/admin/users/{user_id}     → حذف مستخدم
-  GET    /api/v1/admin/stats               → إحصائيات النظام
-  GET    /api/v1/admin/projects            → كل المشاريع
-"""
-
 import logging
 from fastapi import APIRouter, Request, HTTPException, status, Depends, Query
 from fastapi.responses import JSONResponse
 from typing import Optional
+from pydantic import BaseModel
 
 from src.models.UserModel import UserModel
 from src.models.ProjectModel import ProjectModel
@@ -32,9 +19,10 @@ admin_router = APIRouter(
 )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# GET /api/v1/admin/users
-# ─────────────────────────────────────────────────────────────────────────────
+class ChangeRoleRequest(BaseModel):
+    new_role: str
+
+
 @admin_router.get("/users")
 async def list_users(
     request: Request,
@@ -42,7 +30,6 @@ async def list_users(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
 ):
-    """عرض كل المستخدمين مع إمكانية الفلترة بالـ role والـ pagination."""
     user_model = UserModel(client=request.app.client)
 
     users = await user_model.get_all_users(role_filter=role, page=page, page_size=page_size)
@@ -67,12 +54,26 @@ async def list_users(
     })
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# GET /api/v1/admin/users/{user_id}
-# ─────────────────────────────────────────────────────────────────────────────
+@admin_router.get("/users/pending")
+async def list_pending_teachers(request: Request):
+    db = request.app.client["Satr-Edu"]
+    cursor = db["user"].find(
+        {"user_role": UserRole.TEACHER.value, "is_approved": False},
+        {"_id": 0, "user_password": 0}
+    )
+    pending = []
+    async for doc in cursor:
+        pending.append(doc)
+
+    return JSONResponse(content={
+        "status": "success",
+        "total_pending": len(pending),
+        "pending_teachers": pending
+    })
+
+
 @admin_router.get("/users/{user_id}")
 async def get_user(user_id: str, request: Request):
-    """عرض مستخدم بالتفصيل."""
     user_model = UserModel(client=request.app.client)
     user = await user_model.get_user_by_id(user_id)
 
@@ -92,16 +93,12 @@ async def get_user(user_id: str, request: Request):
     })
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PUT /api/v1/admin/users/{user_id}/activate
-# ─────────────────────────────────────────────────────────────────────────────
 @admin_router.put("/users/{user_id}/activate")
 async def toggle_user_activation(
     user_id: str,
     request: Request,
     active: bool = Query(..., description="True لتفعيل / False لإيقاف"),
 ):
-    """تفعيل أو إيقاف حساب مستخدم."""
     user_model = UserModel(client=request.app.client)
 
     if active:
@@ -118,12 +115,38 @@ async def toggle_user_activation(
     return JSONResponse(content={"status": "success", "message": f"User {user_id} {action}"})
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# DELETE /api/v1/admin/users/{user_id}
-# ─────────────────────────────────────────────────────────────────────────────
+@admin_router.put("/users/{user_id}/role")
+async def change_user_role(
+    user_id: str,
+    body: ChangeRoleRequest,
+    request: Request,
+):
+    valid_roles = [r.value for r in UserRole]
+    if body.new_role not in valid_roles:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid role '{body.new_role}'. Valid roles: {valid_roles}"
+        )
+
+    db = request.app.client["Satr-Edu"]
+    result = await db["user"].update_one(
+        {"user_id": user_id},
+        {"$set": {"user_role": body.new_role, "is_approved": True}}
+    )
+
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    logger.info(f"[Admin] User {user_id} role changed to {body.new_role}")
+
+    return JSONResponse(content={
+        "status": "success",
+        "message": f"User {user_id} role changed to {body.new_role}"
+    })
+
+
 @admin_router.delete("/users/{user_id}")
 async def delete_user(user_id: str, request: Request):
-    """حذف مستخدم نهائياً من النظام."""
     user_model = UserModel(client=request.app.client)
     success = await user_model.delete_user(user_id)
 
@@ -134,34 +157,31 @@ async def delete_user(user_id: str, request: Request):
     return JSONResponse(content={"status": "success", "message": f"User {user_id} deleted"})
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# GET /api/v1/admin/stats
-# ─────────────────────────────────────────────────────────────────────────────
 @admin_router.get("/stats")
 async def get_system_stats(request: Request):
-    """إحصائيات عامة عن النظام: عدد المستخدمين، المشاريع، الـ chunks."""
     user_model = UserModel(client=request.app.client)
     project_model = ProjectModel(client=request.app.client)
 
-    # User counts by role
     total_users     = await user_model.count_users()
     total_teachers  = await user_model.count_users(role_filter=UserRole.TEACHER.value)
     total_students  = await user_model.count_users(role_filter=UserRole.STUDENT.value)
     total_ops       = await user_model.count_users(role_filter=UserRole.OPERATIONS.value)
 
-    # Projects
     projects_data = await project_model.get_all_projects(page=1, page_size=1)
     total_projects = projects_data.get("total_document", 0)
 
-    # Chunks — count from the single 'chunk' collection
     total_chunks = 0
+    total_exams = 0
+    total_conversations = 0
+
     try:
         db = request.app.client["Satr-Edu"]
         if db is not None:
             total_chunks = await db["chunk"].count_documents({})
+            total_exams = await db["exams"].count_documents({})
+            total_conversations = await db["conversations"].count_documents({})
     except Exception as e:
-        logger.warning(f"[Admin] Error counting chunks: {e}")
-
+        logger.warning(f"[Admin] Error counting documents: {e}")
 
     return JSONResponse(content={
         "status": "success",
@@ -172,26 +192,20 @@ async def get_system_stats(request: Request):
                 "students": total_students,
                 "operations": total_ops,
             },
-            "projects": {
-                "total": total_projects,
-            },
-            "chunks": {
-                "total": total_chunks,
-            },
+            "projects": {"total": total_projects},
+            "chunks": {"total": total_chunks},
+            "exams": {"total": total_exams},
+            "conversations": {"total": total_conversations},
         },
     })
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# GET /api/v1/admin/projects
-# ─────────────────────────────────────────────────────────────────────────────
 @admin_router.get("/projects")
 async def list_all_projects(
     request: Request,
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=50),
 ):
-    """عرض كل المشاريع في النظام."""
     project_model = ProjectModel(client=request.app.client)
     data = await project_model.get_all_projects(page=page, page_size=page_size)
 
@@ -204,9 +218,8 @@ async def list_all_projects(
     })
 
 
-@admin_router.get('/storage/status')
+@admin_router.get("/storage/status")
 async def get_storage_status():
-    """عرض حالة الـ Storage Backend — MinIO أو Filesystem."""
     from src.controllers.StorageController import get_storage
     storage = get_storage()
-    return JSONResponse(content={'status': 'success', 'storage': storage.status()})
+    return JSONResponse(content={"status": "success", "storage": storage.status()})

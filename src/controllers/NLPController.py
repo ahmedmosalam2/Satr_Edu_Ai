@@ -107,7 +107,8 @@ class NLPController(BaseController):
 
         return results if results else []
 
-    async def answer_rag_question(self, project: Project, query: str, limit: int = 10):
+    async def answer_rag_question(self, project: Project, query: str, limit: int = 10,
+                                   previous_messages: list = None):
         """Generate a RAG answer with source citations."""
         answer, full_prompt, chat_history, sources = None, None, None, []
         settings = get_settings()
@@ -203,12 +204,33 @@ class NLPController(BaseController):
 
         footer_prompt = self.template_parser.get("rag", "footer_prompt", {"query": query})
 
+        # Start with system prompt
         chat_history = [
             self.generation_client.construct_prompt(
                 prompt=system_prompt,
                 role=self.generation_client.enums.SYSTEM.value,
             )
         ]
+
+        # Inject previous conversation turns as real messages (so LLM remembers context)
+        if previous_messages:
+            for msg in previous_messages:
+                role = msg.get("role", "user")
+                content = msg.get("content", "")
+                if role == "user":
+                    chat_history.append(
+                        self.generation_client.construct_prompt(
+                            prompt=content,
+                            role=self.generation_client.enums.USER.value,
+                        )
+                    )
+                elif role == "assistant":
+                    chat_history.append(
+                        self.generation_client.construct_prompt(
+                            prompt=content,
+                            role=self.generation_client.enums.ASSISTANT.value,
+                        )
+                    )
 
         full_prompt = "\n\n".join([documents_prompts, footer_prompt])
 

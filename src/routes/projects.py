@@ -1,25 +1,7 @@
-"""
-src/routes/projects.py
-──────────────────────
-Knowledge Base Management — إدارة متقدمة للمشاريع/قواعد المعرفة.
-
-Endpoints:
-  POST   /api/v1/projects                     → إنشاء مشروع جديد
-  GET    /api/v1/projects                     → كل مشاريع المستخدم
-  GET    /api/v1/projects/{project_id}        → تفاصيل مشروع
-  PUT    /api/v1/projects/{project_id}/settings → تعديل إعدادات المشروع
-  GET    /api/v1/projects/{project_id}/stats  → إحصائيات المشروع
-  DELETE /api/v1/projects/{project_id}        → حذف مشروع
-"""
-
-import uuid
-import logging
-from datetime import datetime
-from typing import Optional
-
 from fastapi import APIRouter, Request, HTTPException, Depends, Query
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
+from typing import Optional
+import logging
 
 from src.helpers.auth import get_current_user, require_roles
 from src.models.ProjectModel import ProjectModel
@@ -28,6 +10,10 @@ from src.models.AssetModel import AssetModel
 from src.models.enums.AssetType import AssetType
 from src.models.enums.UserRole import UserRole
 from src.models.scheme_db.project import Project
+from pydantic import BaseModel, Field
+from typing import Optional
+import uuid
+from datetime import datetime
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -37,24 +23,19 @@ projects_router = APIRouter(
 )
 
 
-# ── Request/Response Schemas ──────────────────────────────────────────────────
-
 class ProjectCreateRequest(BaseModel):
     project_name: str = Field(..., min_length=1, max_length=100)
     project_description: str = Field("", max_length=500)
 
 
 class ProjectSettingsRequest(BaseModel):
-    """إعدادات معالجة المشروع — كل مشروع ممكن يكون ليه إعدادات مختلفة."""
     chunk_size: Optional[int] = Field(None, ge=100, le=4000)
     chunk_overlap: Optional[int] = Field(None, ge=0, le=500)
-    use_deepdoc: Optional[bool] = None       # Smart vs Simple chunking
-    generation_model: Optional[str] = None   # Override model for this project
-    embedding_model: Optional[str] = None    # Override embedding for this project
-    language: Optional[str] = None           # "ar" أو "en" أو "auto"
+    use_deepdoc: Optional[bool] = None
+    generation_model: Optional[str] = None
+    embedding_model: Optional[str] = None
+    language: Optional[str] = None
 
-
-# ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @projects_router.post("", status_code=201)
 async def create_project(
@@ -62,7 +43,6 @@ async def create_project(
     request: Request,
     current_user: dict = Depends(require_roles(UserRole.TEACHER.value, UserRole.OPERATIONS.value)),
 ):
-    """إنشاء مشروع/Knowledge Base جديد."""
     project_id = str(uuid.uuid4())
     now = datetime.now().isoformat()
 
@@ -99,7 +79,6 @@ async def list_projects(
     page_size: int = Query(10, ge=1, le=50),
     current_user: dict = Depends(get_current_user),
 ):
-    """قائمة المشاريع مع pagination."""
     project_model = await ProjectModel.create_index(db_client=request.app.client)
     data = await project_model.get_all_projects(page=page, page_size=page_size)
 
@@ -129,7 +108,6 @@ async def get_project(
     request: Request,
     current_user: dict = Depends(get_current_user),
 ):
-    """تفاصيل مشروع معين."""
     project_model = await ProjectModel.create_index(db_client=request.app.client)
     project = await project_model.get_project(project_id=project_id)
 
@@ -156,13 +134,8 @@ async def update_project_settings(
     request: Request,
     current_user: dict = Depends(require_roles(UserRole.TEACHER.value, UserRole.OPERATIONS.value)),
 ):
-    """
-    تحديث إعدادات المعالجة الخاصة بمشروع معين.
-    الإعدادات بتتحفظ في MongoDB وبتستخدم تلقائياً عند المعالجة.
-    """
     db = request.app.client["Satr-Edu"]
 
-    # بناء الـ update dict من الحقول اللي اتبعتت فقط
     update_fields = {}
     settings_map = {
         "chunk_size": body.chunk_size,
@@ -204,19 +177,10 @@ async def get_project_stats(
     request: Request,
     current_user: dict = Depends(get_current_user),
 ):
-    """
-    إحصائيات تفصيلية عن المشروع:
-    - عدد الملفات وحجمها
-    - عدد الـ chunks
-    - عدد الـ vectors في Qdrant
-    - آخر تحديث
-    """
     db = request.app.client["Satr-Edu"]
 
-    # Chunks
     total_chunks = await db["chunk"].count_documents({"chunk_project_id": project_id})
 
-    # Files
     asset_model = AssetModel(client=request.app.client, project_id=project_id)
     try:
         assets = await asset_model.get_all_assets(
@@ -229,13 +193,10 @@ async def get_project_stats(
         total_files = 0
         total_size_bytes = 0
 
-    # Vector count from Qdrant
     vector_count = 0
     try:
         from src.helpers.nlp_clients import get_vectordb_client
         vdb = get_vectordb_client()
-        project_model = await ProjectModel.create_index(db_client=request.app.client)
-        project = await project_model.get_project(project_id=project_id)
         collection_name = f"collection_{vdb.default_vector_size}_{project_id}"
         info = await vdb.get_collection_info(collection_name)
         if info and hasattr(info, "vectors_count"):
@@ -245,7 +206,6 @@ async def get_project_stats(
     except Exception as e:
         logger.warning(f"[Stats] Could not get vector count: {e}")
 
-    # Project settings
     proj_doc = await db["project"].find_one({"project_id": project_id}, {"_id": 0})
     settings = proj_doc.get("settings", {}) if proj_doc else {}
 
@@ -258,9 +218,7 @@ async def get_project_stats(
                 "total_size_bytes": total_size_bytes,
                 "total_size_mb": round(total_size_bytes / (1024 * 1024), 2),
             },
-            "chunks": {
-                "total": total_chunks,
-            },
+            "chunks": {"total": total_chunks},
             "vectors": {
                 "total": vector_count,
                 "indexed": vector_count > 0,
@@ -276,24 +234,13 @@ async def delete_project(
     request: Request,
     current_user: dict = Depends(require_roles(UserRole.TEACHER.value, UserRole.OPERATIONS.value)),
 ):
-    """
-    حذف مشروع بالكامل:
-    - حذف الـ chunks من MongoDB
-    - حذف الـ assets من MongoDB
-    - حذف الـ project record
-    (الـ vectors في Qdrant تتمسح بشكل منفصل)
-    """
     db = request.app.client["Satr-Edu"]
 
-    # التأكد إن المشروع موجود
     if not await db["project"].find_one({"project_id": project_id}):
         raise HTTPException(status_code=404, detail="Project not found")
 
-    # حذف الـ chunks
     chunks_result = await db["chunk"].delete_many({"chunk_project_id": project_id})
-    # حذف الـ assets
     assets_result = await db["asset"].delete_many({"asset_project_id": project_id})
-    # حذف الـ project
     await db["project"].delete_one({"project_id": project_id})
 
     logger.info(
