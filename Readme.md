@@ -67,7 +67,7 @@ Try our demo at http://localhost:8000/docs.
 Satr Edu follows a modular architecture designed for high-fidelity document processing and intelligent retrieval. The system is divided into several specialized layers to ensure scalability and precision.
 
 <div align="center">
-  <img src="image.png" alt="Satr Edu System Architecture" width="900"/>
+  <img src="assets/arcthct.png" alt="Satr Edu System Architecture" width="900"/>
 </div>
 
 ### Technical Infrastructure
