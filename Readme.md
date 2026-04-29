@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="./assets/satr_edu_clean.png" width="54" style="vertical-align: middle;"/>
-  <span style="font-size: 2.8em; font-weight: bold; vertical-align: middle; margin-left: 12px;">Satr Edu</span>
+  <img src="assets/satr_edu_clean.png" width="100"/>
+  <h1>Satr Edu</h1>
 </div>
 
 <p align="center">
@@ -67,7 +67,7 @@ Try our demo at http://localhost:8000/docs.
 Satr Edu follows a modular architecture designed for high-fidelity document processing and intelligent retrieval. The system is divided into several specialized layers to ensure scalability and precision.
 
 <div align="center">
-  <img src="./satr_edu_architecture_simple.png" alt="Satr Edu System Architecture" width="700"/>
+  <img src="image.png" alt="Satr Edu System Architecture" width="900"/>
 </div>
 
 ### Technical Infrastructure

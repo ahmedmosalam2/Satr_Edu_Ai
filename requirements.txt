@@ -25,8 +25,7 @@ openai
 arabic-reshaper
 python-bidi
 
-# AI / OCR extras
-pymupdf
+# AI / OCR extraspymupdf
 pytesseract
 httpx
 python-jose[cryptography]
@@ -35,7 +34,6 @@ email-validator
 aiofiles
 celery[redis]
 
-# ML (reranker needs torch + sentence-transformers)
 torch
 transformers
 timm
