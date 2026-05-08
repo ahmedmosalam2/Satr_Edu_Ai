@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, Request, BackgroundTasks
 from fastapi.responses import JSONResponse
-from src.routes.schemes.nlp import PushRequest, SearchRequest
+from src.routes.schemes.nlp import PushRequest, SearchRequest, MultiSearchRequest
 from src.models.ProjectModel import ProjectModel
 from src.models.ChunkModel import ChunkModel
 from src.controllers.NLPController import NLPController
@@ -242,3 +242,158 @@ async def nlp_answer(request: Request, project_id: str, search_request: SearchRe
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"signal": Response.RAG_ANSWER_ERROR.value, "message": str(e)}
         )
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Multi-Project RAG
+# ──────────────────────────────────────────────────────────────────────────────
+
+@nlp_router.post("/search-multi")
+async def nlp_search_multi(request: Request, body: MultiSearchRequest):
+    """
+    Search across multiple projects at once.
+    Merges results from all projects sorted by relevance score.
+    """
+    logger.info(f"Multi-project search: {len(body.project_ids)} projects, query='{body.text[:50]}'")
+    try:
+        db_client = request.app.client
+        if db_client is None:
+            return JSONResponse(
+                status_code=503,
+                content={"signal": Response.RAG_ANSWER_ERROR.value, "message": "DB not ready"}
+            )
+
+        project_model = await ProjectModel.create_index(db_client=db_client)
+
+        # Load all requested projects
+        projects = []
+        not_found = []
+        for pid in body.project_ids:
+            project = await project_model.get_project(project_id=pid.strip())
+            if project:
+                projects.append(project)
+            else:
+                not_found.append(pid)
+
+        if not projects:
+            return JSONResponse(
+                status_code=404,
+                content={"signal": Response.PROJECT_NOT_FOUND.value,
+                         "message": "None of the requested projects were found"}
+            )
+
+        nlp_controller = NLPController(
+            vectordb_client=get_or_init_vectordb(),
+            generation_client=get_or_init_generation(),
+            embedding_client=get_or_init_embedding(),
+            template_parser=template_parser,
+        )
+
+        results = await nlp_controller.search_multiple_projects(
+            projects=projects,
+            text=body.text,
+            limit_per_project=body.limit_per_project,
+        )
+
+        return {
+            "status": Response.SUCCESS.value,
+            "message": f"Found {len(results)} results across {len(projects)} projects",
+            "projects_searched": [p.project_id for p in projects],
+            "projects_not_found": not_found,
+            "data": [_serialize_multi_result(r) for r in results]
+        }
+
+    except Exception as e:
+        logger.error(f"Error in multi-project search: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"signal": Response.RAG_ANSWER_ERROR.value, "message": str(e)}
+        )
+
+
+@nlp_router.post("/answer-multi")
+async def nlp_answer_multi(request: Request, body: MultiSearchRequest):
+    """
+    Generate a RAG answer using context from multiple projects.
+    The AI pulls relevant info from all projects and combines them.
+    """
+    logger.info(f"Multi-project answer: {len(body.project_ids)} projects, query='{body.text[:50]}'")
+    try:
+        db_client = request.app.client
+        if db_client is None:
+            return JSONResponse(
+                status_code=503,
+                content={"signal": Response.RAG_ANSWER_ERROR.value, "message": "DB not ready"}
+            )
+
+        project_model = await ProjectModel.create_index(db_client=db_client)
+
+        projects = []
+        not_found = []
+        for pid in body.project_ids:
+            project = await project_model.get_project(project_id=pid.strip())
+            if project:
+                projects.append(project)
+            else:
+                not_found.append(pid)
+
+        if not projects:
+            return JSONResponse(
+                status_code=404,
+                content={"signal": Response.PROJECT_NOT_FOUND.value,
+                         "message": "None of the requested projects were found"}
+            )
+
+        nlp_controller = NLPController(
+            vectordb_client=get_or_init_vectordb(),
+            generation_client=get_or_init_generation(),
+            embedding_client=get_or_init_embedding(),
+            template_parser=template_parser,
+        )
+
+        answer, sources = await nlp_controller.answer_rag_multi_project(
+            projects=projects,
+            query=body.text,
+            limit_per_project=body.limit_per_project,
+        )
+
+        if not answer:
+            return JSONResponse(
+                status_code=400,
+                content={"signal": Response.RAG_ANSWER_ERROR.value,
+                         "message": "Could not generate answer. No relevant content found in the given projects."}
+            )
+
+        return {
+            "status": Response.SUCCESS.value,
+            "message": "Multi-project answer generated successfully",
+            "projects_searched": [p.project_id for p in projects],
+            "projects_not_found": not_found,
+            "data": {
+                "answer": answer,
+                "sources": sources
+            }
+        }
+
+    except Exception as e:
+        logger.error(f"Error in multi-project answer: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"signal": Response.RAG_ANSWER_ERROR.value, "message": str(e)}
+        )
+
+
+def _serialize_multi_result(result):
+    """Serialize a search result with project info."""
+    payload = getattr(result, "payload", {}) or {}
+    return {
+        "id": str(getattr(result, "id", "")),
+        "score": getattr(result, "score", None),
+        "project_id": payload.get("_project_id", ""),
+        "project_name": payload.get("_project_name", ""),
+        "payload": {
+            k: v for k, v in payload.items()
+            if not k.startswith("_")  # exclude internal fields
+        },
+    }
+

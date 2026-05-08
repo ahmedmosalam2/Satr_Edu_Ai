@@ -7,3 +7,9 @@ class PushRequest(BaseModel):
 class SearchRequest(BaseModel):
     text: str
     limit: Optional[int] = 10
+
+class MultiSearchRequest(BaseModel):
+    text: str
+    project_ids: List[str]
+    limit_per_project: Optional[int] = 5
+

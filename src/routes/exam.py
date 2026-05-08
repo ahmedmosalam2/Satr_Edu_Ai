@@ -16,6 +16,7 @@ from src.models.enums.ExamStatus import ExamStatus
 from src.models.enums.QuestionType import QuestionType
 from src.controllers.AIController import AIController
 from src.helpers.auth import get_current_user, require_roles
+from src.helpers.project_content import fetch_project_content
 from src.models.enums.UserRole import UserRole
 from src.routes.schemes.exam import (
     ExamCreateRequest,
@@ -46,26 +47,8 @@ def get_ai_controller() -> AIController:
 
 
 # ─── Helper ───────────────────────────────────────────────────────────────────
+# _fetch_project_content is now in src.helpers.project_content
 
-async def _fetch_project_content(request: Request, project_id: str) -> str:
-    """Fetch all chunks from MongoDB for a project and concatenate."""
-    try:
-        from src.models.ChunkModel import ChunkModel
-        chunk_model = ChunkModel(client=request.app.client, project_id=project_id)
-        all_text = []
-        page = 1
-        while True:
-            chunks = await chunk_model.get_project_chunks(
-                project_id=project_id, page=page, page_size=100
-            )
-            if not chunks:
-                break
-            all_text.extend([c.chunk_text for c in chunks if c.chunk_text])
-            page += 1
-        return "\n\n".join(all_text)
-    except Exception as e:
-        logger.error(f"Error fetching project chunks: {e}")
-        return ""
 
 
 def _parse_ai_questions(ai_result: dict, exam_id: str) -> List[Question]:
@@ -99,7 +82,7 @@ async def create_exam(
     Exam is saved as DRAFT — not visible to students yet.
     """
     # 1. Fetch content from MongoDB chunks
-    content = await _fetch_project_content(request, body.project_id)
+    content = await fetch_project_content(request.app.client, body.project_id)
     if not content or len(content.strip()) < 50:
         raise HTTPException(
             status_code=400,

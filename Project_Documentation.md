@@ -1,6 +1,6 @@
 # FastAPI - API Documentation (v0.1.0)
 
-Comprehensive API Documentation for all 83 routes in the system.
+Comprehensive API Documentation for all routes in the system.
 
 
 ---
@@ -80,8 +80,60 @@ Comprehensive API Documentation for all 83 routes in the system.
 
 ---
 
-### `POST` /api/v1/ai/ocr/extract
-**Summary:** Ocr Extract
+## Agent — Multi-Agent System Routes
+
+### `POST` /api/v1/agent/ask
+**Summary:** Single RAG Agent — search + answer with multi-step reasoning
+
+**Request Body:**
+```json
+{
+  "project_id": "...",
+  "query": "your question",
+  "language": "ar"
+}
+```
+
+**Responses:**
+- **200**: Successful Response with answer + reasoning steps
+- **422**: Validation Error
+
+---
+
+### `POST` /api/v1/agent/smart-ask
+**Summary:** Multi-Agent Smart Ask — automatically routes to the right agent
+
+**Request Body:**
+```json
+{
+  "project_id": "...",
+  "query": "فهمني قانون نيوتن",
+  "language": "ar",
+  "student_id": "optional_student_id"
+}
+```
+
+**Intent Detection:**
+- "فهمني" / "اشرح" / "explain" → **Tutor Agent** (شرح مبسط حسب مستوى الطالب)
+- "اختبرني" / "quiz me" → **Quiz Agent** (أسئلة سريعة)
+- أي سؤال تاني → **Research Agent** (بحث + إجابة)
+
+**Responses:**
+- **200**: Returns answer + agent_used + intent_detected + conversation_log
+- **422**: Validation Error
+
+---
+
+### `GET` /api/v1/agent/tools
+**Summary:** List available agent tools
+
+**Responses:**
+- **200**: Successful Response
+
+---
+
+### `POST` /api/v1/agent/batch
+**Summary:** Batch Agent Queries — ask multiple questions at once (max 10)
 
 **Responses:**
 - **200**: Successful Response
@@ -839,24 +891,6 @@ Teacher: Get all student results for an exam.
 
 ---
 
-### `POST` /api/v1/ocr/test/pdf
-**Summary:** Test Extract Pdf No Auth
-
-**Responses:**
-- **200**: Successful Response
-- **422**: Validation Error
-
----
-
-### `POST` /api/v1/ocr/test/image
-**Summary:** Test Extract Image No Auth
-
-**Responses:**
-- **200**: Successful Response
-- **422**: Validation Error
-
----
-
 ## Pipeline — document processing Routes
 
 ### `GET` /api/v1/pipeline/info
@@ -998,113 +1032,6 @@ Teacher: Get all student results for an exam.
 
 ---
 
-### `POST` /api/v1/upload/{project_id}
-**Summary:** Upload
-
-**Parameters:**
-| Name | In | Required | Type |
-| --- | --- | --- | --- |
-| project_id | path | Yes | string |
-
-
-**Responses:**
-- **200**: Successful Response
-- **422**: Validation Error
-
----
-
-### `GET` /api/v1/files/{project_id}
-**Summary:** List Files
-
-**Parameters:**
-| Name | In | Required | Type |
-| --- | --- | --- | --- |
-| project_id | path | Yes | string |
-
-
-**Responses:**
-- **200**: Successful Response
-- **422**: Validation Error
-
----
-
-### `DELETE` /api/v1/files/{project_id}/{file_id}
-**Summary:** Delete File
-
-**Parameters:**
-| Name | In | Required | Type |
-| --- | --- | --- | --- |
-| project_id | path | Yes | string |
-| file_id | path | Yes | string |
-
-
-**Responses:**
-- **200**: Successful Response
-- **422**: Validation Error
-
----
-
-### `POST` /api/v1/process/{project_id}
-**Summary:** Process
-
-**Parameters:**
-| Name | In | Required | Type |
-| --- | --- | --- | --- |
-| project_id | path | Yes | string |
-
-
-**Responses:**
-- **200**: Successful Response
-- **422**: Validation Error
-
----
-
-### `GET` /api/v1/chunks/{project_id}
-**Summary:** Get Chunks
-
-**Parameters:**
-| Name | In | Required | Type |
-| --- | --- | --- | --- |
-| project_id | path | Yes | string |
-| page | query | No | integer |
-| page_size | query | No | integer |
-
-
-**Responses:**
-- **200**: Successful Response
-- **422**: Validation Error
-
----
-
-### `DELETE` /api/v1/chunks/{project_id}
-**Summary:** Delete Chunks
-
-**Parameters:**
-| Name | In | Required | Type |
-| --- | --- | --- | --- |
-| project_id | path | Yes | string |
-
-
-**Responses:**
-- **200**: Successful Response
-- **422**: Validation Error
-
----
-
-### `GET` /api/v1/process/status/{task_id}
-**Summary:** Get Process Status
-
-**Parameters:**
-| Name | In | Required | Type |
-| --- | --- | --- | --- |
-| task_id | path | Yes | string |
-
-
-**Responses:**
-- **200**: Successful Response
-- **422**: Validation Error
-
----
 
 ### `POST` /api/v1/nlp/index/push/{project_id}
 **Summary:** Index Project
@@ -1288,3 +1215,43 @@ Teacher: Get all student results for an exam.
 - **422**: Validation Error
 
 ---
+
+### `POST` /api/v1/nlp/search-multi
+**Summary:** Multi-Project Search — Search across multiple projects at once
+
+**Request Body:**
+```json
+{
+  "text": "your search query",
+  "project_ids": ["project_1", "project_2", "project_3"],
+  "limit_per_project": 5
+}
+```
+
+**Responses:**
+- **200**: Returns merged results from all projects sorted by relevance
+- **404**: None of the requested projects were found
+- **422**: Validation Error
+
+---
+
+### `POST` /api/v1/nlp/answer-multi
+**Summary:** Multi-Project RAG Answer — Generate answer using context from multiple projects
+
+**Request Body:**
+```json
+{
+  "text": "your question",
+  "project_ids": ["project_1", "project_2", "project_3"],
+  "limit_per_project": 5
+}
+```
+
+**Responses:**
+- **200**: Returns AI answer with sources from multiple projects
+- **400**: No relevant content found
+- **404**: None of the requested projects were found
+- **422**: Validation Error
+
+---
+

@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 
 from src.controllers.AIController import AIController
 from src.controllers.OCRController import OCRController
+from src.helpers.project_content import fetch_project_content
 from src.routes.schemes.ai import (
     ExamGenerateRequest,
     ExamGenerateFromChunksRequest,
@@ -40,7 +41,7 @@ async def generate_exam_from_text(request: Request, body: ExamGenerateRequest):
     content = body.content
 
     if not content and body.project_id:
-        content = await _fetch_project_content(request, body.project_id)
+        content = await fetch_project_content(request.app.client, body.project_id)
 
     if not content or len(content.strip()) < 50:
         raise HTTPException(
@@ -112,7 +113,7 @@ async def summarize_content(request: Request, body: SummarizeRequest):
     content = body.content
 
     if not content and body.project_id:
-        content = await _fetch_project_content(request, body.project_id)
+        content = await fetch_project_content(request.app.client, body.project_id)
 
     if not content or len(content.strip()) < 50:
         raise HTTPException(
@@ -178,44 +179,3 @@ async def grade_essay(body: GradeEssayRequest):
     })
 
 
-@ai_router.post("/ocr/extract")
-async def ocr_extract(file: UploadFile = File(...)):
-    ocr = get_ocr_controller()
-    file_bytes = await file.read()
-    content_type = file.content_type or ""
-
-    if content_type == "application/pdf" or file.filename.endswith(".pdf"):
-        text = ocr.extract_from_pdf_bytes(file_bytes)
-    elif content_type.startswith("image/"):
-        text = ocr.extract_from_image_bytes(file_bytes)
-    else:
-        raise HTTPException(status_code=400, detail="Unsupported file type. Send a PDF or image.")
-
-    return JSONResponse(content={
-        "status": "success",
-        "filename": file.filename,
-        "text_length": len(text),
-        "text": text,
-    })
-
-
-async def _fetch_project_content(request: Request, project_id: str) -> str:
-    try:
-        from src.models.ChunkModel import ChunkModel
-        chunk_model = ChunkModel(client=request.app.client, project_id=project_id)
-
-        all_text = []
-        page = 1
-        while True:
-            chunks = await chunk_model.get_project_chunks(
-                project_id=project_id, page=page, page_size=100
-            )
-            if not chunks:
-                break
-            all_text.extend([c.chunk_text for c in chunks if c.chunk_text])
-            page += 1
-
-        return "\n\n".join(all_text)
-    except Exception as e:
-        logger.error(f"Error fetching project chunks: {e}")
-        return ""

@@ -1,5 +1,3 @@
-"""
-src/agent/agents/__init__.py
-────────────────────────────
-Specialist Agents — كل agent متخصص في مجال.
-"""
+from .orchestrator import Orchestrator
+from .tutor_agent import TutorAgent
+from .quiz_agent import QuizAgent

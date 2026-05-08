@@ -240,3 +240,112 @@ class NLPController(BaseController):
         )
 
         return answer, full_prompt, chat_history, sources
+
+    # ──────────────────────────────────────────────────────
+    # MULTI-PROJECT RAG
+    # ──────────────────────────────────────────────────────
+
+    async def search_multiple_projects(self, projects: list, text: str, limit_per_project: int = 5):
+        """
+        Search across multiple project collections and merge results by score.
+        Returns combined list sorted by relevance.
+        """
+        # Embed the query once
+        vectors = await self.embedding_client.embed_text(
+            text=text,
+            document_type=LLMEnums.DocumentTypeEnum.QUERY.value
+        )
+        if not vectors:
+            return []
+
+        query_vector = vectors[0]
+        if not query_vector:
+            return []
+
+        all_results = []
+        for project in projects:
+            collection_name = self.create_collection_name(project_id=project.project_id)
+            try:
+                results = await self.vectordb_client.search_by_vector(
+                    collection_name=collection_name,
+                    vector=query_vector,
+                    limit=limit_per_project,
+                )
+                if results:
+                    # Tag each result with its source project
+                    for r in results:
+                        payload = r.payload if hasattr(r, "payload") else {}
+                        payload["_project_id"] = project.project_id
+                        payload["_project_name"] = project.project_name
+                    all_results.extend(results)
+            except Exception as e:
+                logger.warning(f"[MultiRAG] Skipping project {project.project_id}: {e}")
+                continue
+
+        # Sort all results by score (highest first)
+        all_results.sort(key=lambda r: getattr(r, "score", 0), reverse=True)
+
+        # Return top results across all projects
+        return all_results[:limit_per_project * 2]
+
+    async def answer_rag_multi_project(self, projects: list, query: str,
+                                        limit_per_project: int = 5):
+        """
+        Generate a RAG answer using context from multiple projects.
+        """
+        answer, sources = None, []
+
+        # Search across all projects
+        retrieved_documents = await self.search_multiple_projects(
+            projects=projects,
+            text=query,
+            limit_per_project=limit_per_project,
+        )
+
+        if not retrieved_documents:
+            return answer, sources
+
+        # Build sources with project info
+        for idx, doc in enumerate(retrieved_documents):
+            payload = doc.payload if hasattr(doc, "payload") else {}
+            sources.append({
+                "doc_num": idx + 1,
+                "project_id": payload.get("_project_id", ""),
+                "project_name": payload.get("_project_name", ""),
+                "chunk_id": payload.get("chunk_id", ""),
+                "source_file": payload.get("source", payload.get("source_file", "")),
+                "score": round(doc.score, 4) if hasattr(doc, "score") else None,
+                "snippet": (payload.get("text", ""))[:200],
+            })
+
+        # Build prompt
+        system_prompt = self.template_parser.get("rag", "system_prompt")
+
+        documents_prompts = "\n".join([
+            self.template_parser.get("rag", "document_prompt", {
+                "doc_num": idx + 1,
+                "chunk_text": self.generation_client.process_text(
+                    doc.payload.get("text", "")
+                ),
+            })
+            for idx, doc in enumerate(retrieved_documents)
+        ])
+
+        footer_prompt = self.template_parser.get("rag", "footer_prompt", {"query": query})
+
+        chat_history = [
+            self.generation_client.construct_prompt(
+                prompt=system_prompt,
+                role=self.generation_client.enums.SYSTEM.value,
+            )
+        ]
+
+        full_prompt = "\n\n".join([documents_prompts, footer_prompt])
+
+        answer = await self.generation_client.generate_text(
+            prompt=full_prompt,
+            chat_history=chat_history
+        )
+
+        return answer, sources
+
