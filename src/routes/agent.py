@@ -173,6 +173,8 @@ class SmartAgentQuery(BaseModel):
     query: str
     language: str = "ar"
     student_id: Optional[str] = None
+    conversation_id: Optional[str] = None   # لو عايز يكمل محادثة قديمة
+    auto_quiz: bool = False                 # لو True: بعد الشرح يولد أسئلة تلقائياً
 
 
 @agent_router.post("/smart-ask")
