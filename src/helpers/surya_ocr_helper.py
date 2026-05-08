@@ -31,8 +31,8 @@ class SuryaOCRHelper:
         self._load_error = None
 
     def _check_service(self) -> bool:
-        if self._service_available is not None:
-            return self._service_available
+        if self._service_available:
+            return True
         try:
             with httpx.Client(timeout=5.0) as client:
                 resp = client.get(f"{self._service_url}/health")

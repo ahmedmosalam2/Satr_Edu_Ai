@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, UploadFile, Depends, status, Request, BackgroundTasks, HTTPException, Query
+from fastapi import FastAPI, APIRouter, UploadFile, File, Depends, status, Request, BackgroundTasks, HTTPException, Query
 from src.helpers.config import get_settings, Settings
 from src.helpers.ocr_helper import get_ocr_helper
 import os
@@ -33,7 +33,7 @@ router = APIRouter(
 async def upload(
     request: Request,
     project_id: str,
-    file: UploadFile,
+    file: UploadFile = File(...),
     app_settings: Settings = Depends(get_settings)
 ):
     data_controller = DataController()
@@ -168,6 +168,7 @@ async def process(
     try:
         file_ext = os.path.splitext(body.file_id)[-1].lower()
         use_deepdoc = body.use_deepdoc and file_ext == ".pdf"
+        file_chunks = []
 
         if use_deepdoc:
             from src.controllers.DeepDocController import get_deepdoc
@@ -183,19 +184,64 @@ async def process(
             chunking_method = "deepdoc"
             logger.info(f"[DeepDoc] {len(file_chunks)} smart chunks for {body.file_id}")
 
-        elif file_ext == ".pdf":
-            chunking_method = "smart_ocr_background"
-            file_chunks = []
-            logger.info(f"Accepted {body.file_id} for background OCR processing")
-
         else:
-            file_content = process_controller.get_file_content(file_id=body.file_id)
-            file_chunks = process_controller.process_file_content(
-                file_content=file_content,
-                chunk_size=body.chunk_size,
-                chunk_overlap=body.chunk_overlap,
-            )
-            chunking_method = "recursive"
+            chunking_method = "smart_pipeline"
+            from src.controllers.ProjectController import ProjectController as PC
+            
+            logger.info(f"[Process] Starting Smart Pipeline for {body.file_id}...")
+            proj_path = PC().get_project_path(project_id=project_id)
+            file_path = os.path.join(proj_path, body.file_id)
+            
+            # ────────────────────────────────────────────────────────────────
+            # DEBUG PRINTS
+            print(f"\n>>> DEBUG: project_id = '{project_id}'")
+            print(f">>> DEBUG: file_id = '{body.file_id}'")
+            print(f">>> DEBUG: file_path = '{file_path}'")
+            print(f">>> DEBUG: exists = {os.path.exists(file_path)}\n")
+            # ────────────────────────────────────────────────────────────────
+
+            _IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".tiff", ".bmp"}
+            is_image = file_ext in _IMAGE_EXTENSIONS
+            
+            class DummyChunk:
+                def __init__(self, text, meta):
+                    self.page_content = text
+                    self.metadata = meta
+
+            if is_image:
+                from src.controllers.OCRController import OCRController
+                from src.chunking.chunker_factory import get_chunker
+                from src.parsers.base_parser import ParsedPage
+                
+                ocr = OCRController()
+                with open(file_path, "rb") as f:
+                    img_bytes = f.read()
+                
+                ocr_text = await ocr.extract_from_image_bytes_async(img_bytes)
+                if not ocr_text or len(ocr_text.strip()) < 5:
+                    raise ValueError(f"OCR failed or extracted no text for {body.file_id}")
+                    
+                chunker = get_chunker("structure")
+                page = ParsedPage(page_content=ocr_text, metadata={"source": file_path, "parser": "ocr"})
+                raw_chunks = chunker.chunk([page], chunk_size=body.chunk_size, chunk_overlap=body.chunk_overlap)
+                file_chunks = [DummyChunk(c.chunk_text, c.chunk_metadata) for c in raw_chunks]
+                logger.info(f"[Process] Image OCR finished. Extracted {len(file_chunks)} chunks.")
+                
+            else:
+                from src.pipeline.pipeline_manager import DocumentPipeline
+                pipeline = DocumentPipeline()
+                result = pipeline.process(
+                    file_path=file_path,
+                    chunk_strategy="structure",
+                    chunk_size=body.chunk_size,
+                    chunk_overlap=body.chunk_overlap
+                )
+
+                if not result.success:
+                    raise ValueError(f"Smart Pipeline failed: {result.error}")
+
+                file_chunks = [DummyChunk(c.chunk_text, c.chunk_metadata) for c in result.chunks]
+                logger.info(f"[Process] Smart Pipeline finished. Extracted {len(file_chunks)} chunks.")
 
     except Exception as e:
         logger.error(f"File processing failed: {e}")
@@ -210,65 +256,32 @@ async def process(
         except Exception as e:
             logger.warning(f"Could not reset chunks: {e}")
 
-    async def _save_chunks_to_db():
-        try:
-            nonlocal file_chunks, chunking_method
-            if chunking_method == "smart_ocr_background":
-                from src.controllers.ProjectController import ProjectController as PC
-                from src.pipeline.pipeline_manager import DocumentPipeline
-                import os
+    try:
+        now = datetime.now().isoformat()
+        existing_count = await chunk_model.collection.count_documents({"chunk_project_id": project_id})
+        chunks_to_save = [
+            DataChunk(
+                chunk_id=f"{project_id}_{body.file_id}_{existing_count + i}",
+                chunk_text=chunk.page_content,
+                chunk_metadata=chunk.metadata,
+                chunk_order=existing_count + i,
+                chunk_created_at=now,
+                chunk_updated_at=now,
+                chunk_project_id=project_id,
+            )
+            for i, chunk in enumerate(file_chunks)
+        ]
 
-                logger.info(f"[Background] Starting Smart OCR for {body.file_id}...")
-                proj_path = PC().get_project_path(project_id=project_id)
-                file_path = os.path.join(proj_path, body.file_id)
-
-                pipeline = DocumentPipeline()
-                result = pipeline.process(
-                    file_path=file_path,
-                    chunk_strategy="naive",
-                    chunk_size=body.chunk_size,
-                    chunk_overlap=body.chunk_overlap
-                )
-
-                if not result.success:
-                    logger.error(f"[Background] Smart OCR failed: {result.error}")
-                    return
-
-                class DummyChunk:
-                    def __init__(self, c):
-                        self.page_content = c.chunk_text
-                        self.metadata = c.chunk_metadata
-
-                file_chunks = [DummyChunk(c) for c in result.chunks]
-                logger.info(f"[Background] Smart OCR finished. Extracted {len(file_chunks)} chunks.")
-
-            now = datetime.now().isoformat()
-            existing_count = await chunk_model.collection.count_documents({"chunk_project_id": project_id})
-            chunks_to_save = [
-                DataChunk(
-                    chunk_id=f"{project_id}_{body.file_id}_{existing_count + i}",
-                    chunk_text=chunk.page_content,
-                    chunk_metadata=chunk.metadata,
-                    chunk_order=existing_count + i,
-                    chunk_created_at=now,
-                    chunk_updated_at=now,
-                    chunk_project_id=project_id,
-                )
-                for i, chunk in enumerate(file_chunks)
-            ]
-
-            if chunks_to_save:
-                await chunk_model.insert_many_chunks(
-                    project_id=project_id,
-                    chunks=chunks_to_save
-                )
-                logger.info(f"Saved {len(chunks_to_save)} chunks to MongoDB for project {project_id}")
-            else:
-                logger.info(f"No chunks generated for project {project_id}")
-        except Exception as e:
-            logger.error(f"Failed to process or save chunks to MongoDB: {e}")
-
-    background_tasks.add_task(_save_chunks_to_db)
+        if chunks_to_save:
+            await chunk_model.insert_many_chunks(
+                project_id=project_id,
+                chunks=chunks_to_save
+            )
+            logger.info(f"Saved {len(chunks_to_save)} chunks to MongoDB for project {project_id}")
+        else:
+            logger.info(f"No chunks generated for project {project_id}")
+    except Exception as e:
+        logger.error(f"Failed to save chunks to MongoDB: {e}")
 
     return {
         "status": Response.SUCCESS.value,

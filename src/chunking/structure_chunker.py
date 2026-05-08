@@ -165,6 +165,11 @@ class StructureChunker(BaseChunker):
                     if idx > start + chunk_size // 2:
                         end = idx + len(sep)
                         break
+            
             parts.append(text[start:end].strip())
+            
+            if end == len(text):
+                break
+                
             start = max(start + 1, end - overlap)
         return [p for p in parts if p]

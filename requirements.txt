@@ -25,7 +25,8 @@ openai
 arabic-reshaper
 python-bidi
 
-# AI / OCR extraspymupdf
+# AI / OCR extras
+pymupdf
 pytesseract
 httpx
 python-jose[cryptography]

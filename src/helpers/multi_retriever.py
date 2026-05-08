@@ -1,16 +1,4 @@
-"""
-src/helpers/multi_retriever.py
-────────────────────────────────
-Multi-Retrieval: بيجمع نتائج Qdrant (vector) + MongoDB (keyword)
-ثم يمررها على الـ Reranker الموجود.
 
-الـ Flow:
-  Query
-    ├── Vector Search  (Qdrant)    → top N نتيجة
-    ├── Keyword Search (MongoDB)   → top N نتيجة
-    ├── Deduplicate بـ chunk_id
-    └── Rerank → top K نهائية
-"""
 
 import logging
 from typing import List, Any
@@ -19,10 +7,7 @@ logger = logging.getLogger("uvicorn.error")
 
 
 class MultiRetriever:
-    """
-    يدمج نتائج Qdrant + MongoDB keyword search
-    ويمررها على الـ Reranker للحصول على أدق نتيجة.
-    """
+
 
     def __init__(
         self,
@@ -106,10 +91,7 @@ class MultiRetriever:
 
 
 def _merge_and_deduplicate(vector_results: list, keyword_results: list) -> list:
-    """
-    يدمج النتائج من المصدرين ويشيل التكرار بناءً على الـ chunk_id.
-    نتائج Qdrant ليها أولوية (تيجي أول).
-    """
+
     seen_ids = set()
     merged = []
 

@@ -1,10 +1,3 @@
-"""
-DeepSeek-OCR-2 via HuggingFace Spaces API
-مجاني — بدون RAM محلي — أقوى OCR للمستندات
-
-NOTE: These HF Spaces are community-hosted and may be down.
-      The pipeline automatically falls through to Gemini if unavailable.
-"""
 
 import base64
 import logging

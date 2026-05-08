@@ -50,11 +50,14 @@ class PPTXParser(BaseParser):
                                 slide_texts.append(text)
 
                         # Try to detect title
-                        if hasattr(shape, "placeholder_format") and shape.placeholder_format:
-                            ph_type = shape.placeholder_format.type
-                            # type 1 = CENTER_TITLE, type 15 = TITLE
-                            if ph_type in (1, 15) and shape.text.strip():
-                                slide_title = shape.text.strip()
+                        if getattr(shape, "is_placeholder", False):
+                            try:
+                                ph_type = shape.placeholder_format.type
+                                # type 1 = CENTER_TITLE, type 15 = TITLE
+                                if ph_type in (1, 15) and hasattr(shape, "text") and shape.text.strip():
+                                    slide_title = shape.text.strip()
+                            except Exception as pe:
+                                pass
 
                     # ── Tables ─────────────────────────────────────────
                     if shape.has_table:
