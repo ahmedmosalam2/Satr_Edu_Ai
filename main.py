@@ -15,6 +15,8 @@ from src.routes import documents
 from src.routes import agent
 from src.routes import evaluation
 from src.routes import adaptive
+from src.routes import stream
+# from src.mcp.server import mcp_router
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient 
 from src.helpers.config import get_settings
@@ -105,7 +107,7 @@ async def startup():
         # ── Switching to Gemini for better Arabic generation ──
         app.llm_provider = llm_provider.create_provider(LLMEnums.ProviderType.GEMINI)
         # ──────────────────────────────────────────────────────
-        app.llm_provider.set_generate_model("gemini-1.5-flash") # Use standard gemini model name
+        app.llm_provider.set_generate_model(settings.GENERATION_MODEL_ID)
         app.llm_provider.set_embedding_model(settings.EMBEDDING_MODEL_ID, settings.EMBEDDING_MODEL_SIZE)
         logger.info(f"✅ LLM provider initialized (Embed Model: {settings.EMBEDDING_MODEL_ID})")
     except Exception as e:
@@ -118,12 +120,24 @@ async def startup():
             from src.models.ExamModel import ExamModel
             from src.models.ExamResultModel import ExamResultModel
             from src.models.ConversationModel import ConversationModel
+            from src.models.AttendanceModel import AttendanceModel
             await ExamModel.create_indexes(app.client)
             await ExamResultModel.create_indexes(app.client)
             await ConversationModel.create_indexes(app.client)
+            await AttendanceModel.create_indexes(app.client)
             logger.info("✅ MongoDB indexes created")
         except Exception as e:
             logger.warning(f"⚠️ Index creation failed: {e}")
+
+    # ── MCP Auto-Discovery (Disabled) ──────────────────────────────────
+    # try:
+    #     from src.mcp.registry import mcp_registry
+    #     from src.mcp.tools.knowledge_tool import CalculatorMCPTool
+    #     mcp_registry.register(CalculatorMCPTool())
+    #     count = mcp_registry.auto_discover("src.mcp.tools")
+    #     logger.info(f"✅ MCP Server ready — {len(mcp_registry.list_all())} tools registered")
+    # except Exception as e:
+    #     logger.warning(f"⚠️ MCP auto-discovery failed: {e}")
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -149,3 +163,5 @@ app.include_router(documents.documents_router)
 app.include_router(agent.agent_router)
 app.include_router(evaluation.eval_router)
 app.include_router(adaptive.adaptive_router)
+app.include_router(stream.stream_router)  # [NEW] Streaming SSE
+# app.include_router(mcp_router)            # [Disabled] MCP Server

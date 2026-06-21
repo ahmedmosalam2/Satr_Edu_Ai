@@ -82,6 +82,15 @@ class Settings(BaseSettings):
     MINIO_SECURE: bool = False
     MINIO_BUCKET: str = "satr-edu-files"
 
+    # ── WhatsApp / Ultramsg ────────────────────────────────────────────
+    # احصل عليهم من: https://app.ultramsg.com/
+    ULTRAMSG_INSTANCE_ID: str = ""
+    ULTRAMSG_TOKEN: str = ""
+
+    # ── Absence Automation ────────────────────────────────────────
+    ABSENCE_THRESHOLD: int = 3               # عدد مرات الغياب قبل الإشعار
+    ABSENCE_COOLDOWN_DAYS: int = 7           # كم يوم بين كل إشعار والتالي (anti-spam)
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

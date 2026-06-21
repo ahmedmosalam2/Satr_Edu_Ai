@@ -326,3 +326,118 @@ async def get_student_progress(
         },
         "timeline": progress_timeline
     })
+
+
+# ── [NEW] Adaptive Difficulty Engine endpoints ────────────────────────────────
+
+from pydantic import BaseModel
+from typing import Optional as OptType
+
+
+class AttemptRequest(BaseModel):
+    student_id: str
+    question_id: str
+    topic: str
+    difficulty: str = "medium"    # easy / medium / hard
+    is_correct: bool
+    time_taken_sec: float = 0.0
+
+
+class NextQuestionRequest(BaseModel):
+    student_id: str
+    topic: str
+
+
+@adaptive_router.post("/engine/record-attempt")
+async def record_attempt(body: AttemptRequest):
+    """
+    سجّل إجابة الطالب وحدّث مستوى إتقانه في الموضوع.
+
+    يرجع:
+      - next_difficulty: الصعوبة التالية للطالب في نفس الموضوع
+      - mastery_score: مستوى الإتقان الحالي (0 → 1)
+      - reasoning: تفسير إنساني لقرار الـ engine
+    """
+    from src.engine.adaptive_difficulty import get_adaptive_engine, QuestionAttempt
+
+    engine = get_adaptive_engine()
+
+    attempt = QuestionAttempt(
+        question_id=body.question_id,
+        topic=body.topic,
+        difficulty=body.difficulty,
+        is_correct=body.is_correct,
+        time_taken_sec=body.time_taken_sec,
+    )
+
+    updated_mastery = engine.process_attempt(body.student_id, attempt)
+
+    return {
+        "status": "success",
+        "student_id": body.student_id,
+        "topic": body.topic,
+        "result": "correct" if body.is_correct else "incorrect",
+        "mastery": updated_mastery.to_dict(),
+        "next_difficulty": updated_mastery.current_difficulty,
+        "reasoning": updated_mastery.mastery_level,
+    }
+
+
+@adaptive_router.post("/engine/next-question")
+async def get_next_question_difficulty(body: NextQuestionRequest):
+    """
+    اجيب الصعوبة المناسبة للسؤال التالي للطالب في موضوع معين.
+
+    يُستخدم قبل توليد السؤال لتحديد مستوى الصعوبة.
+    """
+    from src.engine.adaptive_difficulty import get_adaptive_engine
+
+    engine = get_adaptive_engine()
+    params = engine.get_next_question_params(body.student_id, body.topic)
+
+    return {
+        "status": "success",
+        "student_id": body.student_id,
+        "topic": body.topic,
+        **params,
+    }
+
+
+@adaptive_router.get("/engine/dashboard/{student_id}")
+async def get_adaptive_dashboard(
+    student_id: str,
+    request: Request,
+):
+    """
+    لوحة التحكم الكاملة لمستوى الطالب في كل المواضيع.
+
+    يرجع:
+      - overall_mastery: مستوى إتقان إجمالي
+      - weakest_topics: أضعف 3 مواضيع
+      - strongest_topics: أقوى 3 مواضيع
+      - due_for_review: مواضيع حان وقت مراجعتها (Spaced Repetition)
+      - topics: تفاصيل كل موضوع
+    """
+    from src.engine.adaptive_difficulty import get_adaptive_engine
+
+    # تحميل بيانات الطالب من DB أول مرة
+    db = request.app.client["Satr-Edu"]
+    cursor = db["exam_results"].find({"student_id": student_id})
+
+    raw_results = []
+    async for doc in cursor:
+        doc.pop("_id", None)
+        raw_results.append(doc)
+
+    engine = get_adaptive_engine()
+
+    # بناء الـ profile لو مش موجود
+    if raw_results and student_id not in engine._student_profiles:
+        engine.load_from_exam_results(student_id, raw_results)
+
+    dashboard = engine.get_student_dashboard(student_id)
+
+    return {
+        "status": "success",
+        **dashboard,
+    }

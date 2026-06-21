@@ -54,6 +54,7 @@ class RAGAgent(BaseAgent):
         actions = []
         all_context = []
         all_sources = []
+        all_citations = []  # [NEW] نجمع citations من كل search step
 
         # ── Step 1: Decompose query if complex ────────────────────────────
         sub_queries = await self._decompose_query(query)
@@ -80,6 +81,15 @@ class RAGAgent(BaseAgent):
                 result = await search_tool.execute(query=sub_q, limit=3)
                 action.tool_output = result
                 all_context.append(f"--- Search {i+1}: {sub_q} ---\n{result}")
+
+                # [NEW] اجمع الـ citations من الـ tool بعد كل search
+                if hasattr(search_tool, "last_citations"):
+                    for cit in search_tool.last_citations:
+                        # تجنب التكرار بناءً على chunk_id
+                        if not any(s.get("chunk_id") == cit.chunk_id for s in all_sources):
+                            all_citations.append(cit)
+                            all_sources.append(cit.to_dict())
+
             except Exception as e:
                 action.tool_output = f"Error: {e}"
 

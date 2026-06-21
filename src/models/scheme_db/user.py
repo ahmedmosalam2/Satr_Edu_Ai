@@ -14,3 +14,8 @@ class User(BaseModel):
     is_active: bool = True
     created_at: datetime = None
     updated_at: Optional[datetime] = None
+
+    # ── Contact Info (للإشعارات) ──────────────────────────────────────────
+    phone: Optional[str] = None             # رقم الطالب بالـ format الدولي e.g. +201012345678
+    guardian_phone: Optional[str] = None    # رقم ولي الأمر بالـ format الدولي
+    guardian_name: Optional[str] = None     # اسم ولي الأمر

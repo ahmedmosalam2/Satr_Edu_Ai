@@ -38,11 +38,26 @@ def make_celery_app() -> Celery:
         # المهمة تنتهي بعد 10 دقائق كحد أقصى
         task_soft_time_limit=600,
         task_time_limit=660,
+        # ── Celery Beat Schedule ────────────────────────────────────────
+        beat_schedule={
+            "daily-absence-check": {
+                "task": "check_absent_students",
+                "schedule": 86400.0,  # كل 24 ساعة (seconds)
+                # لتحديد وقت معين استخدم crontab:
+                # from celery.schedules import crontab
+                # "schedule": crontab(hour=20, minute=0)  # كل يوم 8 مساءً
+                "options": {"expires": 3600},
+            }
+        },
     )
     return app
 
 
 celery_app = make_celery_app()
+
+# ── Import attendance tasks (بعد ما نعمل celery_app) ────────────────────
+# ده بيضمن إن الـ tasks اتسجلت في نفس الـ app
+import src.tasks.attendance_tasks  # noqa: F401, E402
 
 
 async def run_index_project_job(

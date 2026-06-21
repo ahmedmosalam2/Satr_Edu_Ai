@@ -107,19 +107,28 @@ Comprehensive API Documentation for all routes in the system.
 ```json
 {
   "project_id": "...",
-  "query": "فهمني قانون نيوتن",
+  "query": "your question or command",
   "language": "ar",
-  "student_id": "optional_student_id"
+  "student_id": "optional — loads student level from exam history",
+  "conversation_id": "optional — continue existing conversation",
+  "auto_quiz": false
 }
 ```
 
+**Features:**
+- **Intent Detection:** Automatically routes to the right agent
+- **Conversation Persistence:** Saves to MongoDB, send `conversation_id` to continue
+- **Student Adaptation:** Send `student_id` to adapt explanations to student level
+- **Auto-Handoff:** Set `auto_quiz: true` → after Tutor explains, Quiz generates questions
+
 **Intent Detection:**
-- "فهمني" / "اشرح" / "explain" → **Tutor Agent** (شرح مبسط حسب مستوى الطالب)
-- "اختبرني" / "quiz me" → **Quiz Agent** (أسئلة سريعة)
-- أي سؤال تاني → **Research Agent** (بحث + إجابة)
+- "explain" / "what is" / "how" → **Tutor Agent** (adaptive explanation)
+- "quiz me" / "test me" → **Quiz Agent** (quick questions)
+- Any other question → **Research Agent** (RAG search + answer)
 
 **Responses:**
-- **200**: Returns answer + agent_used + intent_detected + conversation_log
+- **200**: Returns answer + agent_used + intent + conversation_id + auto_quiz (if enabled)
+- **404**: Project or conversation not found
 - **422**: Validation Error
 
 ---

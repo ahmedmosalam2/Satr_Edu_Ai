@@ -219,3 +219,142 @@ async def get_teacher_overview(
             "average_student_score": avg_score_all,
         }
     })
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# 📢 Attendance & Absence Endpoints
+# ───────────────────────────────────────────────────────────────────────────────
+
+
+@analytics_router.post("/attendance/record")
+async def record_attendance(
+    request: Request,
+    project_id: str,
+    session_id: str,
+    session_title: str = "",
+    source: str = "session",
+    student_ids: list = None,
+    present_student_ids: list = None,
+    current_user: dict = Depends(require_roles(UserRole.TEACHER.value)),
+):
+    """
+    تسجيل حضور وغياب سيشن/امتحان.
+
+    student_ids       : كل الطلاب المسجلين
+    present_student_ids: الطلاب الحاضرين فعلاً
+    الباقي = غائبون
+    """
+    from src.models.AttendanceModel import AttendanceModel
+    from src.models.scheme_db.attendance import SessionAttendance
+    from datetime import datetime
+
+    attendance_model = AttendanceModel(request.app.client)
+    student_ids      = student_ids or []
+    present_set      = set(present_student_ids or [])
+
+    recorded = 0
+    for sid in student_ids:
+        status = "present" if sid in present_set else "absent"
+        record = SessionAttendance(
+            project_id=project_id,
+            student_id=sid,
+            session_id=session_id,
+            session_title=session_title,
+            source=source,
+            status=status,
+            attended_at=datetime.now() if status == "present" else None,
+        )
+        if await attendance_model.record_attendance(record):
+            recorded += 1
+
+    return JSONResponse(content={
+        "status": "success",
+        "session_id": session_id,
+        "total_students": len(student_ids),
+        "present": len(present_set),
+        "absent": len(student_ids) - len(present_set),
+        "recorded": recorded,
+    })
+
+
+@analytics_router.get("/absence/report/{project_id}")
+async def get_absence_report(
+    project_id: str,
+    request: Request,
+    min_absences: int = Query(3, ge=1, le=50),
+    current_user: dict = Depends(require_roles(UserRole.TEACHER.value, UserRole.OPERATIONS.value)),
+):
+    """
+    تقرير الغياب للمشروع — كل الطلاب اللي غابوا min_absences مرات أو أكتر.
+    """
+    from src.models.AttendanceModel import AttendanceModel
+
+    attendance_model = AttendanceModel(request.app.client)
+    absent_students  = await attendance_model.get_absent_students_summary(
+        project_id=project_id,
+        min_absences=min_absences,
+    )
+
+    return JSONResponse(content={
+        "status": "success",
+        "project_id": project_id,
+        "absence_threshold": min_absences,
+        "total_at_risk": len(absent_students),
+        "students": absent_students,
+    })
+
+
+@analytics_router.post("/absence/notify/{student_id}")
+async def send_absence_notification(
+    student_id: str,
+    request: Request,
+    project_id: str,
+    force: bool = False,
+    current_user: dict = Depends(require_roles(UserRole.TEACHER.value, UserRole.OPERATIONS.value)),
+):
+    """
+    إرسال إشعار WhatsApp فوري لطالب بعينه.
+    force=True يتجاهل الـ cooldown.
+    """
+    from src.tasks.attendance_tasks import send_absence_notification_task
+    from src.helpers.config import get_settings
+
+    settings = get_settings()
+    task = send_absence_notification_task.delay(
+        student_id=student_id,
+        project_id=project_id,
+        mongodb_url=settings.MONGODB_URL,
+        force=force,
+    )
+
+    return JSONResponse(content={
+        "status": "queued",
+        "task_id": task.id,
+        "student_id": student_id,
+        "message": "تم إضافة مهمة الإشعار للطابور",
+    })
+
+
+@analytics_router.post("/absence/notify-all/{project_id}")
+async def trigger_absence_check(
+    project_id: str,
+    request: Request,
+    current_user: dict = Depends(require_roles(UserRole.OPERATIONS.value)),
+):
+    """
+    تشغيل فحص الغياب يدوياً لكل المشاريع (للمدير فقط).
+    """
+    from src.tasks.attendance_tasks import check_and_notify_absent_students
+    from src.helpers.config import get_settings
+
+    settings = get_settings()
+    task = check_and_notify_absent_students.delay(
+        mongodb_url=settings.MONGODB_URL,
+        mongodb_database=settings.MONGODB_DATABASE,
+    )
+
+    return JSONResponse(content={
+        "status": "queued",
+        "task_id": task.id,
+        "message": "تم تشغيل فحص الغياب الشامل — سيتم إرسال الإشعارات تلقائياً",
+    })
