@@ -21,10 +21,14 @@ def verify_password(plain: str, hashed: str) -> bool:
 # ────────────────────────────────────────────────────────
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None, expires_minutes: Optional[int] = None) -> str:
     settings = get_settings()
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=settings.JWT_EXPIRE_MINUTES))
+    if expires_minutes is not None:
+        delta = timedelta(minutes=expires_minutes)
+    else:
+        delta = expires_delta or timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
+    expire = datetime.utcnow() + delta
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
@@ -39,6 +43,13 @@ def decode_token(token: str) -> dict:
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+def verify_token(token: str) -> Optional[dict]:
+    try:
+        settings = get_settings()
+        return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    except JWTError:
+        return None
 
 
 # ────────────────────────────────────────────────────────

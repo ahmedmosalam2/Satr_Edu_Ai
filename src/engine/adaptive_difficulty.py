@@ -66,6 +66,14 @@ class TopicMastery:
     last_practiced: Optional[datetime] = None
 
     @property
+    def attempts_total(self) -> int:
+        return self.total_attempts
+
+    @property
+    def correct_count(self) -> int:
+        return self.correct_attempts
+
+    @property
     def accuracy(self) -> float:
         if self.total_attempts == 0:
             return 0.0
@@ -188,6 +196,8 @@ class AdaptiveDifficultyEngine:
                 "weakest_topics": [],
                 "strongest_topics": [],
                 "due_for_review": [],
+                "total_topics_practiced": 0,
+                "total_topics": 0,
             }
 
         topics_list = [t.to_dict() for t in student_data.values()]
@@ -218,6 +228,7 @@ class AdaptiveDifficultyEngine:
             "strongest_topics": strongest,
             "due_for_review": due_for_review,
             "total_topics_practiced": len(topics_list),
+            "total_topics": len(topics_list),
         }
 
     def load_from_exam_results(

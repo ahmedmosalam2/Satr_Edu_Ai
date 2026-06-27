@@ -64,7 +64,12 @@ class RAGAgent(BaseAgent):
         search_tool = self.tools.get("knowledge_search")
         if not search_tool:
             # No search tool — just generate directly
-            answer = await self.generation_client.generate_text(prompt=query)
+            import inspect
+            result = self.generation_client.generate_text(prompt=query)
+            if inspect.isawaitable(result):
+                answer = await result
+            else:
+                answer = result
             return AgentResult(answer=answer or "", steps_count=1)
 
         for i, sub_q in enumerate(sub_queries):

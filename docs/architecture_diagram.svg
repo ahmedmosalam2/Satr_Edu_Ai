@@ -1,0 +1,991 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="1600" height="4200" viewBox="0 0 1600 4200"
+     font-family="'Segoe UI', Arial, sans-serif">
+
+  <defs>
+    <!-- Solid arrow marker -->
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#546E7A"/>
+    </marker>
+    <!-- Dashed arrow marker -->
+    <marker id="arr-d" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#90A4AE"/>
+    </marker>
+    <!-- Drop shadow filter -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#00000018"/>
+    </filter>
+    <!-- Lane shadow -->
+    <filter id="lane-shadow" x="-2%" y="-2%" width="104%" height="108%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#00000012"/>
+    </filter>
+  </defs>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!--  BACKGROUND                                     -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <rect width="1600" height="4200" fill="#F5F5F5"/>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!--  TITLE BAR                                      -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <rect x="0" y="0" width="1600" height="90" fill="#263238"/>
+  <text x="800" y="38" text-anchor="middle" fill="#ECEFF1" font-size="26" font-weight="700" letter-spacing="0.5">🎓 Satr Edu AI — System Architecture</text>
+  <text x="800" y="62" text-anchor="middle" fill="#90A4AE" font-size="14">Enterprise Educational Platform · RAG + Multi-Agent + Adaptive Learning · Python 3.13 · FastAPI</text>
+  <rect x="580" y="72" width="440" height="20" rx="4" fill="#37474F"/>
+  <text x="800" y="86" text-anchor="middle" fill="#FFD54F" font-size="11" font-weight="600">Software Architecture Diagram — Lucidchart / Draw.io Informal Style</text>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!--  STATS ROW                                      -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <rect x="20" y="100" width="1560" height="54" rx="10" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1.5"/>
+  <!-- stat items -->
+  <g>
+    <text x="140" y="120" text-anchor="middle" fill="#37474F" font-size="22" font-weight="800">17</text>
+    <text x="140" y="140" text-anchor="middle" fill="#90A4AE" font-size="10" font-weight="600">API ROUTERS</text>
+  </g>
+  <g>
+    <text x="340" y="120" text-anchor="middle" fill="#37474F" font-size="22" font-weight="800">10</text>
+    <text x="340" y="140" text-anchor="middle" fill="#90A4AE" font-size="10" font-weight="600">CONTROLLERS</text>
+  </g>
+  <g>
+    <text x="540" y="120" text-anchor="middle" fill="#37474F" font-size="22" font-weight="800">5</text>
+    <text x="540" y="140" text-anchor="middle" fill="#90A4AE" font-size="10" font-weight="600">AI AGENTS</text>
+  </g>
+  <g>
+    <text x="740" y="120" text-anchor="middle" fill="#37474F" font-size="22" font-weight="800">6</text>
+    <text x="740" y="140" text-anchor="middle" fill="#90A4AE" font-size="10" font-weight="600">PARSERS</text>
+  </g>
+  <g>
+    <text x="940" y="120" text-anchor="middle" fill="#37474F" font-size="22" font-weight="800">4</text>
+    <text x="940" y="140" text-anchor="middle" fill="#90A4AE" font-size="10" font-weight="600">CHUNKERS</text>
+  </g>
+  <g>
+    <text x="1140" y="120" text-anchor="middle" fill="#37474F" font-size="22" font-weight="800">5</text>
+    <text x="1140" y="140" text-anchor="middle" fill="#90A4AE" font-size="10" font-weight="600">LLM PROVIDERS</text>
+  </g>
+  <g>
+    <text x="1380" y="120" text-anchor="middle" fill="#37474F" font-size="22" font-weight="800">7</text>
+    <text x="1380" y="140" text-anchor="middle" fill="#90A4AE" font-size="10" font-weight="600">DOCKER SERVICES</text>
+  </g>
+  <!-- dividers -->
+  <line x1="240" y1="108" x2="240" y2="148" stroke="#E0E0E0" stroke-width="1"/>
+  <line x1="440" y1="108" x2="440" y2="148" stroke="#E0E0E0" stroke-width="1"/>
+  <line x1="640" y1="108" x2="640" y2="148" stroke="#E0E0E0" stroke-width="1"/>
+  <line x1="840" y1="108" x2="840" y2="148" stroke="#E0E0E0" stroke-width="1"/>
+  <line x1="1040" y1="108" x2="1040" y2="148" stroke="#E0E0E0" stroke-width="1"/>
+  <line x1="1270" y1="108" x2="1270" y2="148" stroke="#E0E0E0" stroke-width="1"/>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!--  LAYER 1 — CLIENT / ENTRY POINT  (y=170 h=130)                    -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <rect x="20" y="168" width="1560" height="130" rx="12" fill="#FFF8E1" stroke="#FFD54F" stroke-width="2" filter="url(#lane-shadow)"/>
+  <text x="36" y="192" fill="#F57F17" font-size="13" font-weight="700" letter-spacing="1">🌐  LAYER 1 — CLIENT / ENTRY POINT</text>
+
+  <!-- Client nodes -->
+  <!-- Student -->
+  <rect x="36" y="200" width="190" height="82" rx="9" fill="#BBDEFB" stroke="#90CAF9" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="131" y="221" text-anchor="middle" fill="#1A237E" font-size="13" font-weight="700">👨‍🎓 Student Client</text>
+  <text x="131" y="238" text-anchor="middle" fill="#3949AB" font-size="10">Chat · Exams · Adaptive</text>
+  <text x="131" y="252" text-anchor="middle" fill="#3949AB" font-size="10">Quizzes · Document Upload</text>
+
+  <!-- Teacher -->
+  <rect x="246" y="200" width="210" height="82" rx="9" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="351" y="221" text-anchor="middle" fill="#1B5E20" font-size="13" font-weight="700">👩‍🏫 Teacher Client</text>
+  <text x="351" y="238" text-anchor="middle" fill="#2E7D32" font-size="10">Exam Mgmt · Analytics</text>
+  <text x="351" y="252" text-anchor="middle" fill="#2E7D32" font-size="10">Content Upload · Attendance</text>
+
+  <!-- Admin -->
+  <rect x="476" y="200" width="190" height="82" rx="9" fill="#F8BBD0" stroke="#F48FB1" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="571" y="221" text-anchor="middle" fill="#880E4F" font-size="13" font-weight="700">🔧 Admin Client</text>
+  <text x="571" y="238" text-anchor="middle" fill="#AD1457" font-size="10">User Management</text>
+  <text x="571" y="252" text-anchor="middle" fill="#AD1457" font-size="10">System Config · Models</text>
+
+  <!-- WhatsApp -->
+  <rect x="686" y="200" width="200" height="82" rx="9" fill="#D1C4E9" stroke="#B39DDB" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="786" y="221" text-anchor="middle" fill="#4527A0" font-size="13" font-weight="700">📱 WhatsApp Bot</text>
+  <text x="786" y="238" text-anchor="middle" fill="#512DA8" font-size="10">Ultramsg API</text>
+  <text x="786" y="252" text-anchor="middle" fill="#512DA8" font-size="10">Absence Notifications</text>
+  <text x="786" y="266" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">whatsapp_client.py</text>
+
+  <!-- External APIs box -->
+  <rect x="906" y="200" width="660" height="82" rx="9" fill="#FFCCBC" stroke="#FFAB91" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1236" y="221" text-anchor="middle" fill="#BF360C" font-size="13" font-weight="700">🌍 External AI APIs (Cloud)</text>
+  <text x="1236" y="240" text-anchor="middle" fill="#D84315" font-size="10">Google Gemini API  ·  Cohere Embed API  ·  OpenAI GPT  ·  DeepSeek OCR</text>
+  <text x="1236" y="258" text-anchor="middle" fill="#D84315" font-size="10">Surya OCR Service (localhost:8765)  ·  Ollama Local LLM (localhost:11434)</text>
+
+
+  <!-- ── Arrow Layer1 → Layer2 ── -->
+  <line x1="800" y1="298" x2="800" y2="332" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="706" y="305" width="188" height="18" rx="6" fill="#ECEFF1" stroke="#CFD8DC" stroke-width="1"/>
+  <text x="800" y="318" text-anchor="middle" fill="#546E7A" font-size="10" font-weight="600">HTTP REST / SSE Streaming</text>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!--  LAYER 2 — FASTAPI ROUTES  (y=335 h=370)                          -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <rect x="20" y="335" width="1560" height="380" rx="12" fill="#FFF3E0" stroke="#FFB74D" stroke-width="2" filter="url(#lane-shadow)"/>
+  <text x="36" y="358" fill="#E65100" font-size="13" font-weight="700" letter-spacing="1">🚀  LAYER 2 — FastAPI API GATEWAY  ·  main.py  ·  83 Endpoints</text>
+
+  <!-- Sub-group: Auth & Admin (x=36 y=366) -->
+  <rect x="36" y="366" width="320" height="330" rx="8" fill="rgba(255,255,255,0.55)" stroke="#FFB74D" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="50" y="384" fill="#E65100" font-size="11" font-weight="700">🔐  AUTH &amp; ADMIN</text>
+  <!-- auth -->
+  <rect x="46" y="390" width="300" height="60" rx="7" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="196" y="410" text-anchor="middle" fill="#1B5E20" font-size="12" font-weight="700">auth_router</text>
+  <text x="196" y="427" text-anchor="middle" fill="#2E7D32" font-size="10">JWT Login / Register / Token Refresh</text>
+  <text x="196" y="441" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">routes/auth.py</text>
+  <!-- admin -->
+  <rect x="46" y="460" width="300" height="60" rx="7" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="196" y="480" text-anchor="middle" fill="#1B5E20" font-size="12" font-weight="700">admin_router</text>
+  <text x="196" y="497" text-anchor="middle" fill="#2E7D32" font-size="10">User CRUD · Bulk Ops · System Stats</text>
+  <text x="196" y="511" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">routes/admin.py</text>
+  <!-- model_settings -->
+  <rect x="46" y="530" width="300" height="60" rx="7" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="196" y="550" text-anchor="middle" fill="#1B5E20" font-size="12" font-weight="700">model_router</text>
+  <text x="196" y="567" text-anchor="middle" fill="#2E7D32" font-size="10">LLM / Embedding Model Config</text>
+  <text x="196" y="581" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">routes/model_settings.py</text>
+  <!-- base -->
+  <rect x="46" y="600" width="300" height="50" rx="7" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="196" y="620" text-anchor="middle" fill="#1B5E20" font-size="12" font-weight="700">base_router</text>
+  <text x="196" y="637" text-anchor="middle" fill="#2E7D32" font-size="10">Health Check / Root</text>
+  <text x="196" y="648" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">routes/base.py</text>
+
+  <!-- Sub-group: AI & Learning (x=370 y=366) -->
+  <rect x="370" y="366" width="330" height="330" rx="8" fill="rgba(255,255,255,0.55)" stroke="#FFB74D" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="384" y="384" fill="#E65100" font-size="11" font-weight="700">🤖  AI &amp; LEARNING</text>
+  <!-- ai -->
+  <rect x="380" y="390" width="310" height="52" rx="7" fill="#B2DFDB" stroke="#80CBC4" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="535" y="410" text-anchor="middle" fill="#004D40" font-size="12" font-weight="700">ai_router</text>
+  <text x="535" y="426" text-anchor="middle" fill="#00695C" font-size="10">Summarize · Q&amp;A · Exam Generation</text>
+  <text x="535" y="438" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">routes/ai.py</text>
+  <!-- agent -->
+  <rect x="380" y="452" width="310" height="52" rx="7" fill="#B2DFDB" stroke="#80CBC4" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="535" y="472" text-anchor="middle" fill="#004D40" font-size="12" font-weight="700">agent_router</text>
+  <text x="535" y="488" text-anchor="middle" fill="#00695C" font-size="10">Multi-Agent Orchestrator Chat</text>
+  <text x="535" y="500" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">routes/agent.py</text>
+  <!-- chat -->
+  <rect x="380" y="514" width="310" height="52" rx="7" fill="#B2DFDB" stroke="#80CBC4" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="535" y="534" text-anchor="middle" fill="#004D40" font-size="12" font-weight="700">chat_router</text>
+  <text x="535" y="550" text-anchor="middle" fill="#00695C" font-size="10">Conversation History / Memory</text>
+  <text x="535" y="562" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">routes/chat.py</text>
+  <!-- adaptive -->
+  <rect x="380" y="576" width="150" height="52" rx="7" fill="#B2DFDB" stroke="#80CBC4" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="455" y="596" text-anchor="middle" fill="#004D40" font-size="11" font-weight="700">adaptive_router</text>
+  <text x="455" y="612" text-anchor="middle" fill="#00695C" font-size="9">IRT / Adaptive</text>
+  <text x="455" y="624" text-anchor="middle" fill="#9E9E9E" font-size="8" font-style="italic">routes/adaptive.py</text>
+  <!-- stream -->
+  <rect x="540" y="576" width="150" height="52" rx="7" fill="#B2DFDB" stroke="#80CBC4" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="615" y="596" text-anchor="middle" fill="#004D40" font-size="11" font-weight="700">stream_router</text>
+  <text x="615" y="612" text-anchor="middle" fill="#00695C" font-size="9">SSE Streaming</text>
+  <text x="615" y="624" text-anchor="middle" fill="#9E9E9E" font-size="8" font-style="italic">routes/stream.py</text>
+
+  <!-- Sub-group: Content & Data (x=716 y=366) -->
+  <rect x="714" y="366" width="860" height="330" rx="8" fill="rgba(255,255,255,0.55)" stroke="#FFB74D" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="728" y="384" fill="#E65100" font-size="11" font-weight="700">📚  CONTENT, DATA &amp; DOCUMENT ROUTES</text>
+  <!-- documents -->
+  <rect x="724" y="390" width="240" height="52" rx="7" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="844" y="410" text-anchor="middle" fill="#1B5E20" font-size="12" font-weight="700">documents_router</text>
+  <text x="844" y="426" text-anchor="middle" fill="#2E7D32" font-size="10">Upload · Process · Index Files</text>
+  <text x="844" y="438" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">routes/documents.py</text>
+  <!-- nlp -->
+  <rect x="978" y="390" width="200" height="52" rx="7" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1078" y="410" text-anchor="middle" fill="#1B5E20" font-size="12" font-weight="700">nlp_router</text>
+  <text x="1078" y="426" text-anchor="middle" fill="#2E7D32" font-size="10">Search · Index · VectorDB Push</text>
+  <text x="1078" y="438" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">routes/nlp.py</text>
+  <!-- pipeline -->
+  <rect x="1192" y="390" width="200" height="52" rx="7" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1292" y="410" text-anchor="middle" fill="#1B5E20" font-size="12" font-weight="700">pipeline_router</text>
+  <text x="1292" y="426" text-anchor="middle" fill="#2E7D32" font-size="10">Parse → Chunk → Full Pipeline</text>
+  <text x="1292" y="438" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">routes/pipeline.py</text>
+  <!-- ocr -->
+  <rect x="1406" y="390" width="154" height="52" rx="7" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1483" y="410" text-anchor="middle" fill="#1B5E20" font-size="12" font-weight="700">ocr_router</text>
+  <text x="1483" y="426" text-anchor="middle" fill="#2E7D32" font-size="10">Image → Text OCR</text>
+  <text x="1483" y="438" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">routes/ocr.py</text>
+  <!-- exam -->
+  <rect x="724" y="452" width="240" height="52" rx="7" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="844" y="472" text-anchor="middle" fill="#1B5E20" font-size="12" font-weight="700">exam_router</text>
+  <text x="844" y="488" text-anchor="middle" fill="#2E7D32" font-size="10">Create · Submit · Auto-Grade</text>
+  <text x="844" y="500" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">routes/exam.py</text>
+  <!-- analytics -->
+  <rect x="978" y="452" width="200" height="52" rx="7" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1078" y="472" text-anchor="middle" fill="#1B5E20" font-size="12" font-weight="700">analytics_router</text>
+  <text x="1078" y="488" text-anchor="middle" fill="#2E7D32" font-size="10">Dashboard · Stats · Attendance</text>
+  <text x="1078" y="500" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">routes/analytics.py</text>
+  <!-- evaluation -->
+  <rect x="1192" y="452" width="200" height="52" rx="7" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1292" y="472" text-anchor="middle" fill="#1B5E20" font-size="12" font-weight="700">eval_router</text>
+  <text x="1292" y="488" text-anchor="middle" fill="#2E7D32" font-size="10">RAG Benchmark · Metrics</text>
+  <text x="1292" y="500" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">routes/evaluation.py</text>
+  <!-- projects -->
+  <rect x="1406" y="452" width="154" height="52" rx="7" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1483" y="472" text-anchor="middle" fill="#1B5E20" font-size="12" font-weight="700">projects_router</text>
+  <text x="1483" y="488" text-anchor="middle" fill="#2E7D32" font-size="10">Project CRUD</text>
+  <text x="1483" y="500" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">routes/projects.py</text>
+  <!-- data -->
+  <rect x="724" y="514" width="240" height="52" rx="7" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="844" y="534" text-anchor="middle" fill="#1B5E20" font-size="12" font-weight="700">data_router</text>
+  <text x="844" y="550" text-anchor="middle" fill="#2E7D32" font-size="10">Data Export / Download</text>
+  <text x="844" y="562" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">routes/data.py</text>
+
+
+  <!-- ── Arrow Layer2 → Layer3 ── -->
+  <line x1="600" y1="715" x2="600" y2="749" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="600" y="737" text-anchor="middle" fill="#546E7A" font-size="10" font-weight="600">Delegates to Controllers</text>
+  <line x1="1000" y1="715" x2="1000" y2="749" stroke="#90A4AE" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arr-d)"/>
+  <text x="1000" y="737" text-anchor="middle" fill="#78909C" font-size="10">Async → Celery Tasks</text>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!--  LAYER 3 — CONTROLLERS  (y=752 h=230)                             -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <rect x="20" y="752" width="1560" height="228" rx="12" fill="#FBE9E7" stroke="#EF9A9A" stroke-width="2" filter="url(#lane-shadow)"/>
+  <text x="36" y="775" fill="#B71C1C" font-size="13" font-weight="700" letter-spacing="1">⚙️  LAYER 3 — CONTROLLERS  (Business Logic)</text>
+
+  <!-- AIController -->
+  <rect x="36"  y="784" width="188" height="180" rx="9" fill="#F8BBD0" stroke="#F48FB1" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="130" y="806" text-anchor="middle" fill="#880E4F" font-size="12" font-weight="700">AIController</text>
+  <text x="130" y="824" text-anchor="middle" fill="#AD1457" font-size="10">• Exam Generation</text>
+  <text x="130" y="840" text-anchor="middle" fill="#AD1457" font-size="10">• Essay Auto-Grading</text>
+  <text x="130" y="856" text-anchor="middle" fill="#AD1457" font-size="10">• Lecture Summarization</text>
+  <text x="130" y="872" text-anchor="middle" fill="#AD1457" font-size="10">• JSON Response Repair</text>
+  <text x="130" y="892" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">controllers/AIController.py</text>
+
+  <!-- NLPController -->
+  <rect x="234" y="784" width="188" height="180" rx="9" fill="#F8BBD0" stroke="#F48FB1" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="328" y="806" text-anchor="middle" fill="#880E4F" font-size="12" font-weight="700">NLPController</text>
+  <text x="328" y="824" text-anchor="middle" fill="#AD1457" font-size="10">• Embed + Index</text>
+  <text x="328" y="840" text-anchor="middle" fill="#AD1457" font-size="10">• Semantic Search</text>
+  <text x="328" y="856" text-anchor="middle" fill="#AD1457" font-size="10">• Qdrant Push</text>
+  <text x="328" y="872" text-anchor="middle" fill="#AD1457" font-size="10">• Answer Generation</text>
+  <text x="328" y="892" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">controllers/NLPController.py</text>
+
+  <!-- OCRController -->
+  <rect x="432" y="784" width="188" height="180" rx="9" fill="#F8BBD0" stroke="#F48FB1" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="526" y="806" text-anchor="middle" fill="#880E4F" font-size="12" font-weight="700">OCRController</text>
+  <text x="526" y="824" text-anchor="middle" fill="#AD1457" font-size="10">• Surya OCR (GPU)</text>
+  <text x="526" y="840" text-anchor="middle" fill="#AD1457" font-size="10">• Gemini Vision OCR</text>
+  <text x="526" y="856" text-anchor="middle" fill="#AD1457" font-size="10">• DeepSeek OCR</text>
+  <text x="526" y="872" text-anchor="middle" fill="#AD1457" font-size="10">• Scanned PDF detect</text>
+  <text x="526" y="892" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">controllers/OCRController.py</text>
+
+  <!-- StorageController -->
+  <rect x="630" y="784" width="188" height="180" rx="9" fill="#F8BBD0" stroke="#F48FB1" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="724" y="806" text-anchor="middle" fill="#880E4F" font-size="12" font-weight="700">StorageController</text>
+  <text x="724" y="824" text-anchor="middle" fill="#AD1457" font-size="10">• MinIO Object Store</text>
+  <text x="724" y="840" text-anchor="middle" fill="#AD1457" font-size="10">• Filesystem Fallback</text>
+  <text x="724" y="856" text-anchor="middle" fill="#AD1457" font-size="10">• File Upload/Download</text>
+  <text x="724" y="872" text-anchor="middle" fill="#AD1457" font-size="10">• S3-compatible API</text>
+  <text x="724" y="892" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">controllers/StorageController.py</text>
+
+  <!-- ProcessController -->
+  <rect x="828" y="784" width="188" height="180" rx="9" fill="#F8BBD0" stroke="#F48FB1" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="922" y="806" text-anchor="middle" fill="#880E4F" font-size="12" font-weight="700">ProcessController</text>
+  <text x="922" y="824" text-anchor="middle" fill="#AD1457" font-size="10">• File Load</text>
+  <text x="922" y="840" text-anchor="middle" fill="#AD1457" font-size="10">• Chunk Orchestration</text>
+  <text x="922" y="856" text-anchor="middle" fill="#AD1457" font-size="10">• Celery Task Trigger</text>
+  <text x="922" y="892" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">controllers/ProcessController.py</text>
+
+  <!-- AnalyticsController -->
+  <rect x="1026" y="784" width="188" height="180" rx="9" fill="#F8BBD0" stroke="#F48FB1" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1120" y="806" text-anchor="middle" fill="#880E4F" font-size="12" font-weight="700">AnalyticsController</text>
+  <text x="1120" y="824" text-anchor="middle" fill="#AD1457" font-size="10">• Dashboard Aggregations</text>
+  <text x="1120" y="840" text-anchor="middle" fill="#AD1457" font-size="10">• Student Performance</text>
+  <text x="1120" y="856" text-anchor="middle" fill="#AD1457" font-size="10">• Attendance Reports</text>
+  <text x="1120" y="892" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">controllers/AnalyticsController.py</text>
+
+  <!-- DeepDocController -->
+  <rect x="1224" y="784" width="188" height="180" rx="9" fill="#F8BBD0" stroke="#F48FB1" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1318" y="806" text-anchor="middle" fill="#880E4F" font-size="12" font-weight="700">DeepDocController</text>
+  <text x="1318" y="824" text-anchor="middle" fill="#AD1457" font-size="10">• Advanced Doc Analysis</text>
+  <text x="1318" y="840" text-anchor="middle" fill="#AD1457" font-size="10">• Structure Extraction</text>
+  <text x="1318" y="856" text-anchor="middle" fill="#AD1457" font-size="10">• Layout Understanding</text>
+  <text x="1318" y="892" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">controllers/DeepDocController.py</text>
+
+  <!-- ProjectController -->
+  <rect x="1422" y="784" width="140" height="180" rx="9" fill="#F8BBD0" stroke="#F48FB1" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1492" y="806" text-anchor="middle" fill="#880E4F" font-size="12" font-weight="700">ProjectCtrl</text>
+  <text x="1492" y="824" text-anchor="middle" fill="#AD1457" font-size="10">• Project CRUD</text>
+  <text x="1492" y="840" text-anchor="middle" fill="#AD1457" font-size="10">• Metadata Ops</text>
+  <text x="1492" y="892" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">ProjectController.py</text>
+
+
+  <!-- ── Arrow Layer3 → Layer4 ── -->
+  <line x1="500" y1="980" x2="500" y2="1014" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="500" y="1000" text-anchor="middle" fill="#546E7A" font-size="10" font-weight="600">Uses AI Engine</text>
+  <line x1="900" y1="980" x2="900" y2="1014" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="900" y="1000" text-anchor="middle" fill="#546E7A" font-size="10" font-weight="600">Invokes Pipeline</text>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!--  LAYER 4 — AGENTIC AI ENGINE  (y=1017 h=560)                      -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <rect x="20" y="1017" width="1560" height="560" rx="12" fill="#E8F5E9" stroke="#81C784" stroke-width="2" filter="url(#lane-shadow)"/>
+  <text x="36" y="1040" fill="#1B5E20" font-size="13" font-weight="700" letter-spacing="1">🧠  LAYER 4 — AGENTIC AI ENGINE  (Multi-Agent System)</text>
+
+  <!-- ── Orchestrator box ── -->
+  <rect x="36" y="1050" width="760" height="510" rx="9" fill="rgba(255,255,255,0.5)" stroke="#66BB6A" stroke-width="1.5" stroke-dasharray="7,3"/>
+  <text x="50" y="1069" fill="#2E7D32" font-size="11" font-weight="700">🎯  ORCHESTRATOR &amp; SPECIALIZED AGENTS</text>
+
+  <!-- Orchestrator node -->
+  <rect x="226" y="1078" width="320" height="80" rx="10" fill="#B2DFDB" stroke="#2E7D32" stroke-width="2.5" filter="url(#shadow)"/>
+  <text x="386" y="1104" text-anchor="middle" fill="#004D40" font-size="14" font-weight="700">🎯 Orchestrator</text>
+  <text x="386" y="1122" text-anchor="middle" fill="#00695C" font-size="11">LLM Intent Classification → Route to Agent</text>
+  <text x="386" y="1138" text-anchor="middle" fill="#00695C" font-size="10">confidence ≥ 0.7 → Direct · 0.5-0.7 → Uncertain · &lt;0.5 → Research</text>
+  <text x="386" y="1150" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">agent/agents/orchestrator.py</text>
+
+  <!-- Arrow Orchestrator → Agents -->
+  <line x1="386" y1="1158" x2="386" y2="1186" stroke="#1B5E20" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="386" y="1178" text-anchor="middle" fill="#2E7D32" font-size="9">Routes by intent</text>
+
+  <!-- Agent nodes row -->
+  <!-- RAG Agent -->
+  <rect x="46"  y="1192" width="162" height="100" rx="8" fill="#B2DFDB" stroke="#80CBC4" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="127" y="1212" text-anchor="middle" fill="#004D40" font-size="11" font-weight="700">🔍 RAG Agent</text>
+  <text x="127" y="1228" text-anchor="middle" fill="#00695C" font-size="9">(Researcher)</text>
+  <text x="127" y="1244" text-anchor="middle" fill="#00695C" font-size="9">ReAct loop:</text>
+  <text x="127" y="1258" text-anchor="middle" fill="#00695C" font-size="9">Search→Reason→Answer</text>
+  <text x="127" y="1280" text-anchor="middle" fill="#9E9E9E" font-size="8" font-style="italic">agent/rag_agent.py</text>
+
+  <!-- Tutor Agent -->
+  <rect x="220" y="1192" width="162" height="100" rx="8" fill="#B2DFDB" stroke="#80CBC4" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="301" y="1212" text-anchor="middle" fill="#004D40" font-size="11" font-weight="700">📖 Tutor Agent</text>
+  <text x="301" y="1232" text-anchor="middle" fill="#00695C" font-size="9">Simplified explanations</text>
+  <text x="301" y="1248" text-anchor="middle" fill="#00695C" font-size="9">Adapted to student level</text>
+  <text x="301" y="1280" text-anchor="middle" fill="#9E9E9E" font-size="8" font-style="italic">agent/agents/tutor_agent.py</text>
+
+  <!-- Quiz Agent -->
+  <rect x="394" y="1192" width="162" height="100" rx="8" fill="#B2DFDB" stroke="#80CBC4" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="475" y="1212" text-anchor="middle" fill="#004D40" font-size="11" font-weight="700">🧪 Quiz Agent</text>
+  <text x="475" y="1232" text-anchor="middle" fill="#00695C" font-size="9">Interactive quizzes</text>
+  <text x="475" y="1248" text-anchor="middle" fill="#00695C" font-size="9">From content chunks</text>
+  <text x="475" y="1280" text-anchor="middle" fill="#9E9E9E" font-size="8" font-style="italic">agent/agents/quiz_agent.py</text>
+
+  <!-- Socratic Agent -->
+  <rect x="568" y="1192" width="162" height="100" rx="8" fill="#B2DFDB" stroke="#80CBC4" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="649" y="1212" text-anchor="middle" fill="#004D40" font-size="11" font-weight="700">🏛️ Socratic Agent</text>
+  <text x="649" y="1232" text-anchor="middle" fill="#00695C" font-size="9">Guided questioning</text>
+  <text x="649" y="1248" text-anchor="middle" fill="#00695C" font-size="9">Deep learning dialogue</text>
+  <text x="649" y="1280" text-anchor="middle" fill="#9E9E9E" font-size="8" font-style="italic">agent/agents/socratic_agent.py</text>
+
+  <!-- Agent Core section -->
+  <rect x="46" y="1308" width="742" height="238" rx="8" fill="rgba(255,255,255,0.4)" stroke="#A5D6A7" stroke-width="1.2" stroke-dasharray="5,3"/>
+  <text x="60" y="1326" fill="#2E7D32" font-size="10" font-weight="700">⚡  AGENT CORE INFRASTRUCTURE</text>
+
+  <rect x="56"  y="1334" width="162" height="90" rx="7" fill="#D1C4E9" stroke="#B39DDB" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="137" y="1354" text-anchor="middle" fill="#4527A0" font-size="11" font-weight="700">🧭 IntentClassifier</text>
+  <text x="137" y="1372" text-anchor="middle" fill="#512DA8" font-size="9">LLM-based intent</text>
+  <text x="137" y="1386" text-anchor="middle" fill="#512DA8" font-size="9">detection + confidence</text>
+  <text x="137" y="1414" text-anchor="middle" fill="#9E9E9E" font-size="8" font-style="italic">agent/core/intent_classifier.py</text>
+
+  <rect x="228" y="1334" width="162" height="90" rx="7" fill="#D1C4E9" stroke="#B39DDB" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="309" y="1354" text-anchor="middle" fill="#4527A0" font-size="11" font-weight="700">💾 AgentMemory</text>
+  <text x="309" y="1372" text-anchor="middle" fill="#512DA8" font-size="9">Short-term conv.</text>
+  <text x="309" y="1386" text-anchor="middle" fill="#512DA8" font-size="9">Long-term history</text>
+  <text x="309" y="1414" text-anchor="middle" fill="#9E9E9E" font-size="8" font-style="italic">agent/core/memory.py</text>
+
+  <rect x="400" y="1334" width="162" height="90" rx="7" fill="#D1C4E9" stroke="#B39DDB" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="481" y="1354" text-anchor="middle" fill="#4527A0" font-size="11" font-weight="700">📡 MessageBus</text>
+  <text x="481" y="1372" text-anchor="middle" fill="#512DA8" font-size="9">Inter-agent</text>
+  <text x="481" y="1386" text-anchor="middle" fill="#512DA8" font-size="9">communication</text>
+  <text x="481" y="1414" text-anchor="middle" fill="#9E9E9E" font-size="8" font-style="italic">agent/core/message_bus.py</text>
+
+  <rect x="572" y="1334" width="162" height="90" rx="7" fill="#D1C4E9" stroke="#B39DDB" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="653" y="1354" text-anchor="middle" fill="#4527A0" font-size="11" font-weight="700">📝 ResponseFormatter</text>
+  <text x="653" y="1372" text-anchor="middle" fill="#512DA8" font-size="9">Unified output</text>
+  <text x="653" y="1386" text-anchor="middle" fill="#512DA8" font-size="9">+ thinking trace</text>
+  <text x="653" y="1414" text-anchor="middle" fill="#9E9E9E" font-size="8" font-style="italic">agent/core/response_formatter.py</text>
+
+  <!-- Agent Tools section (core row 2) -->
+  <text x="60" y="1448" fill="#2E7D32" font-size="10" font-weight="700">🔧  AGENT TOOLS</text>
+
+  <rect x="56"  y="1456" width="162" height="74" rx="7" fill="#D1C4E9" stroke="#B39DDB" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="137" y="1476" text-anchor="middle" fill="#4527A0" font-size="11" font-weight="700">🔍 KnowledgeSearch</text>
+  <text x="137" y="1493" text-anchor="middle" fill="#512DA8" font-size="9">Vector+Keyword hybrid</text>
+  <text x="137" y="1520" text-anchor="middle" fill="#9E9E9E" font-size="8" font-style="italic">agent/tools/knowledge_search.py</text>
+
+  <rect x="228" y="1456" width="162" height="74" rx="7" fill="#D1C4E9" stroke="#B39DDB" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="309" y="1476" text-anchor="middle" fill="#4527A0" font-size="11" font-weight="700">🗺️ ConceptMap</text>
+  <text x="309" y="1493" text-anchor="middle" fill="#512DA8" font-size="9">Visual concept maps</text>
+  <text x="309" y="1520" text-anchor="middle" fill="#9E9E9E" font-size="8" font-style="italic">agent/tools/concept_map.py</text>
+
+  <rect x="400" y="1456" width="162" height="74" rx="7" fill="#D1C4E9" stroke="#B39DDB" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="481" y="1476" text-anchor="middle" fill="#4527A0" font-size="11" font-weight="700">🐍 PythonScratchpad</text>
+  <text x="481" y="1493" text-anchor="middle" fill="#512DA8" font-size="9">Safe code sandbox</text>
+  <text x="481" y="1520" text-anchor="middle" fill="#9E9E9E" font-size="8" font-style="italic">agent/tools/python_scratchpad.py</text>
+
+  <rect x="572" y="1456" width="162" height="74" rx="7" fill="#D1C4E9" stroke="#B39DDB" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="653" y="1476" text-anchor="middle" fill="#4527A0" font-size="11" font-weight="700">🧮 Calculator</text>
+  <text x="653" y="1493" text-anchor="middle" fill="#512DA8" font-size="9">Math computation</text>
+  <text x="653" y="1520" text-anchor="middle" fill="#9E9E9E" font-size="8" font-style="italic">agent/tools/calculator.py</text>
+
+
+  <!-- ── Adaptive Engine box ── -->
+  <rect x="818" y="1050" width="752" height="510" rx="9" fill="rgba(255,255,255,0.5)" stroke="#66BB6A" stroke-width="1.5" stroke-dasharray="7,3"/>
+  <text x="832" y="1069" fill="#2E7D32" font-size="11" font-weight="700">📊  ADAPTIVE DIFFICULTY ENGINE  (IRT + Spaced Repetition)</text>
+
+  <!-- AdaptiveDifficultyEngine -->
+  <rect x="828" y="1078" width="730" height="120" rx="9" fill="#E1BEE7" stroke="#CE93D8" stroke-width="2" filter="url(#shadow)"/>
+  <text x="1193" y="1102" text-anchor="middle" fill="#4A148C" font-size="14" font-weight="700">📈 AdaptiveDifficultyEngine</text>
+  <text x="1193" y="1122" text-anchor="middle" fill="#6A1B9A" font-size="11">ELO-inspired Mastery Scoring  ·  Streak-based Difficulty Adjustment</text>
+  <text x="1193" y="1140" text-anchor="middle" fill="#6A1B9A" font-size="11">Spaced Repetition Intervals  ·  IRT (Item Response Theory) Simplified</text>
+  <text x="1193" y="1158" text-anchor="middle" fill="#6A1B9A" font-size="10">easy→0.08 · medium→0.12 · hard→0.18 learning rates</text>
+  <text x="1193" y="1174" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">engine/adaptive_difficulty.py</text>
+
+  <!-- TopicMastery -->
+  <rect x="828" y="1214" width="350" height="160" rx="9" fill="#E1BEE7" stroke="#CE93D8" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1003" y="1238" text-anchor="middle" fill="#4A148C" font-size="12" font-weight="700">📋 TopicMastery</text>
+  <text x="1003" y="1258" text-anchor="middle" fill="#6A1B9A" font-size="10">• mastery_score: 0.0 → 1.0</text>
+  <text x="1003" y="1275" text-anchor="middle" fill="#6A1B9A" font-size="10">• mastery_level: new/struggling/learning/mastered</text>
+  <text x="1003" y="1292" text-anchor="middle" fill="#6A1B9A" font-size="10">• streak: +correct / -wrong consecutive</text>
+  <text x="1003" y="1309" text-anchor="middle" fill="#6A1B9A" font-size="10">• next_review_date: Spaced Repetition</text>
+  <text x="1003" y="1330" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">data class inside adaptive_difficulty.py</text>
+
+  <!-- QuestionAttempt -->
+  <rect x="1196" y="1214" width="362" height="160" rx="9" fill="#E1BEE7" stroke="#CE93D8" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1377" y="1238" text-anchor="middle" fill="#4A148C" font-size="12" font-weight="700">✅ QuestionAttempt</text>
+  <text x="1377" y="1258" text-anchor="middle" fill="#6A1B9A" font-size="10">• question_id, topic, difficulty</text>
+  <text x="1377" y="1275" text-anchor="middle" fill="#6A1B9A" font-size="10">• is_correct: bool</text>
+  <text x="1377" y="1292" text-anchor="middle" fill="#6A1B9A" font-size="10">• time_taken_sec: float</text>
+  <text x="1377" y="1309" text-anchor="middle" fill="#6A1B9A" font-size="10">• timestamp: datetime</text>
+  <text x="1377" y="1330" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">data class inside adaptive_difficulty.py</text>
+
+  <!-- Review Intervals table -->
+  <rect x="828"  y="1392" width="730" height="150" rx="9" fill="rgba(255,255,255,0.6)" stroke="#CE93D8" stroke-width="1" stroke-dasharray="5,3"/>
+  <text x="1193" y="1412" text-anchor="middle" fill="#4A148C" font-size="11" font-weight="700">⏰ Spaced Repetition Review Intervals</text>
+  <text x="870"  y="1435" fill="#6A1B9A" font-size="11">mastered  →  14 days</text>
+  <text x="870"  y="1455" fill="#6A1B9A" font-size="11">learning  →  3 days</text>
+  <text x="870"  y="1475" fill="#6A1B9A" font-size="11">struggling →  24 hours</text>
+  <text x="870"  y="1495" fill="#6A1B9A" font-size="11">new       →  1 hour</text>
+  <text x="1100" y="1435" fill="#4A148C" font-size="11">streak +3 correct → upgrade difficulty</text>
+  <text x="1100" y="1455" fill="#4A148C" font-size="11">streak -2 wrong  → downgrade difficulty</text>
+  <text x="1100" y="1475" fill="#4A148C" font-size="11">Dashboard: weakest / strongest topics</text>
+  <text x="1100" y="1495" fill="#4A148C" font-size="11">Load from MongoDB exam results</text>
+
+
+  <!-- ── Arrow Layer4 → Layer5 ── -->
+  <line x1="600" y1="1577" x2="600" y2="1611" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="600" y="1597" text-anchor="middle" fill="#546E7A" font-size="10" font-weight="600">Uses Pipeline</text>
+  <line x1="1000" y1="1577" x2="1000" y2="1611" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="1000" y="1597" text-anchor="middle" fill="#546E7A" font-size="10" font-weight="600">Searches VectorDB</text>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!--  LAYER 5 — DOCUMENT PIPELINE  (y=1614 h=560)                      -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <rect x="20" y="1614" width="1560" height="560" rx="12" fill="#E3F2FD" stroke="#64B5F6" stroke-width="2" filter="url(#lane-shadow)"/>
+  <text x="36" y="1637" fill="#0D47A1" font-size="13" font-weight="700" letter-spacing="1">📄  LAYER 5 — DOCUMENT PROCESSING PIPELINE</text>
+
+  <!-- Pipeline Flow Banner -->
+  <rect x="36" y="1646" width="1524" height="52" rx="8" fill="rgba(255,255,255,0.7)" stroke="#90CAF9" stroke-width="1.5"/>
+  <!-- Upload -->
+  <rect x="50"  y="1653" width="138" height="38" rx="6" fill="#BBDEFB" stroke="#90CAF9" stroke-width="1.5"/>
+  <text x="119" y="1668" text-anchor="middle" fill="#0D47A1" font-size="11" font-weight="700">📤 Upload</text>
+  <text x="119" y="1683" text-anchor="middle" fill="#1565C0" font-size="9">PDF·DOCX·PPTX·TXT</text>
+  <!-- arrow -->
+  <line x1="188" y1="1672" x2="212" y2="1672" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+  <!-- Parse -->
+  <rect x="213" y="1653" width="138" height="38" rx="6" fill="#FFE0B2" stroke="#FFCC80" stroke-width="1.5"/>
+  <text x="282" y="1668" text-anchor="middle" fill="#E65100" font-size="11" font-weight="700">📋 Parse</text>
+  <text x="282" y="1683" text-anchor="middle" fill="#EF6C00" font-size="9">ParserFactory</text>
+  <!-- arrow -->
+  <line x1="351" y1="1672" x2="375" y2="1672" stroke="#90A4AE" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arr-d)"/>
+  <!-- OCR -->
+  <rect x="376" y="1653" width="138" height="38" rx="6" fill="#F8BBD0" stroke="#F48FB1" stroke-width="1.5"/>
+  <text x="445" y="1668" text-anchor="middle" fill="#880E4F" font-size="11" font-weight="700">👁️ OCR</text>
+  <text x="445" y="1683" text-anchor="middle" fill="#AD1457" font-size="9">Scanned detection</text>
+  <!-- arrow -->
+  <line x1="514" y1="1672" x2="538" y2="1672" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+  <!-- Chunk -->
+  <rect x="539" y="1653" width="138" height="38" rx="6" fill="#DCEDC8" stroke="#C5E1A5" stroke-width="1.5"/>
+  <text x="608" y="1668" text-anchor="middle" fill="#33691E" font-size="11" font-weight="700">✂️ Chunk</text>
+  <text x="608" y="1683" text-anchor="middle" fill="#558B2F" font-size="9">ChunkerFactory</text>
+  <!-- arrow -->
+  <line x1="677" y1="1672" x2="701" y2="1672" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+  <!-- Embed -->
+  <rect x="702" y="1653" width="138" height="38" rx="6" fill="#F0F4C3" stroke="#E6EE9C" stroke-width="1.5"/>
+  <text x="771" y="1668" text-anchor="middle" fill="#827717" font-size="11" font-weight="700">🔢 Embed</text>
+  <text x="771" y="1683" text-anchor="middle" fill="#9E9D24" font-size="9">Cohere / Gemini</text>
+  <!-- arrow -->
+  <line x1="840" y1="1672" x2="864" y2="1672" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+  <!-- Save Qdrant -->
+  <rect x="865" y="1653" width="138" height="38" rx="6" fill="#B3E5FC" stroke="#81D4FA" stroke-width="1.5"/>
+  <text x="934" y="1668" text-anchor="middle" fill="#01579B" font-size="11" font-weight="700">💾 Save Qdrant</text>
+  <text x="934" y="1683" text-anchor="middle" fill="#0277BD" font-size="9">Vector embeddings</text>
+  <!-- arrow -->
+  <line x1="1003" y1="1672" x2="1027" y2="1672" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+  <!-- Save MongoDB -->
+  <rect x="1028" y="1653" width="160" height="38" rx="6" fill="#B3E5FC" stroke="#81D4FA" stroke-width="1.5"/>
+  <text x="1108" y="1668" text-anchor="middle" fill="#01579B" font-size="11" font-weight="700">💾 Save MongoDB</text>
+  <text x="1108" y="1683" text-anchor="middle" fill="#0277BD" font-size="9">Chunks metadata</text>
+  <!-- PipelineManager note -->
+  <rect x="1210" y="1653" width="340" height="38" rx="6" fill="rgba(255,255,255,0.8)" stroke="#90CAF9" stroke-width="1"/>
+  <text x="1380" y="1666" text-anchor="middle" fill="#1565C0" font-size="10" font-weight="700">DocumentPipeline orchestrates all steps</text>
+  <text x="1380" y="1682" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">pipeline/pipeline_manager.py</text>
+
+
+  <!-- Parsers sub-group -->
+  <rect x="36" y="1716" width="742" height="438" rx="9" fill="rgba(255,255,255,0.45)" stroke="#90CAF9" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="50" y="1734" fill="#0D47A1" font-size="11" font-weight="700">📑  PARSERS  (Factory Pattern — BaseParser)</text>
+
+  <rect x="46"  y="1742" width="216" height="80" rx="8" fill="#FFE0B2" stroke="#FFCC80" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="154" y="1764" text-anchor="middle" fill="#E65100" font-size="12" font-weight="700">PDFParser</text>
+  <text x="154" y="1782" text-anchor="middle" fill="#EF6C00" font-size="10">PyMuPDF + OCR fallback</text>
+  <text x="154" y="1798" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">parsers/pdf_parser.py</text>
+  <text x="154" y="1812" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">parsers/base_parser.py</text>
+
+  <rect x="272" y="1742" width="216" height="80" rx="8" fill="#FFE0B2" stroke="#FFCC80" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="380" y="1764" text-anchor="middle" fill="#E65100" font-size="12" font-weight="700">DOCXParser</text>
+  <text x="380" y="1782" text-anchor="middle" fill="#EF6C00" font-size="10">python-docx extraction</text>
+  <text x="380" y="1812" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">parsers/docx_parser.py</text>
+
+  <rect x="498" y="1742" width="216" height="80" rx="8" fill="#FFE0B2" stroke="#FFCC80" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="606" y="1764" text-anchor="middle" fill="#E65100" font-size="12" font-weight="700">PPTXParser</text>
+  <text x="606" y="1782" text-anchor="middle" fill="#EF6C00" font-size="10">Slides + notes</text>
+  <text x="606" y="1812" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">parsers/pptx_parser.py</text>
+
+  <rect x="46"  y="1836" width="216" height="80" rx="8" fill="#FFE0B2" stroke="#FFCC80" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="154" y="1858" text-anchor="middle" fill="#E65100" font-size="12" font-weight="700">HTMLParser</text>
+  <text x="154" y="1876" text-anchor="middle" fill="#EF6C00" font-size="10">BeautifulSoup parsing</text>
+  <text x="154" y="1906" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">parsers/html_parser.py</text>
+
+  <rect x="272" y="1836" width="216" height="80" rx="8" fill="#FFE0B2" stroke="#FFCC80" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="380" y="1858" text-anchor="middle" fill="#E65100" font-size="12" font-weight="700">XLSXParser</text>
+  <text x="380" y="1876" text-anchor="middle" fill="#EF6C00" font-size="10">Spreadsheet cells</text>
+  <text x="380" y="1906" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">parsers/xlsx_parser.py</text>
+
+  <rect x="498" y="1836" width="216" height="80" rx="8" fill="#FFE0B2" stroke="#FFCC80" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="606" y="1858" text-anchor="middle" fill="#E65100" font-size="12" font-weight="700">TextParser</text>
+  <text x="606" y="1876" text-anchor="middle" fill="#EF6C00" font-size="10">Plain text / markdown</text>
+  <text x="606" y="1906" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">parsers/text_parser.py</text>
+
+  <!-- OCR section inside pipeline -->
+  <text x="50" y="1944" fill="#0D47A1" font-size="11" font-weight="700">👁️  OCR BACKENDS</text>
+  <rect x="46"  y="1952" width="220" height="80" rx="8" fill="#F8BBD0" stroke="#F48FB1" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="156" y="1974" text-anchor="middle" fill="#880E4F" font-size="12" font-weight="700">Surya OCR</text>
+  <text x="156" y="1992" text-anchor="middle" fill="#AD1457" font-size="10">GPU-accelerated local</text>
+  <text x="156" y="2024" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">surya_ocr_helper.py</text>
+
+  <rect x="276" y="1952" width="220" height="80" rx="8" fill="#F8BBD0" stroke="#F48FB1" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="386" y="1974" text-anchor="middle" fill="#880E4F" font-size="12" font-weight="700">Gemini Vision OCR</text>
+  <text x="386" y="1992" text-anchor="middle" fill="#AD1457" font-size="10">Google API scanned docs</text>
+  <text x="386" y="2024" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">gemini_ocr.py</text>
+
+  <rect x="506" y="1952" width="220" height="80" rx="8" fill="#F8BBD0" stroke="#F48FB1" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="616" y="1974" text-anchor="middle" fill="#880E4F" font-size="12" font-weight="700">DeepSeek OCR</text>
+  <text x="616" y="1992" text-anchor="middle" fill="#AD1457" font-size="10">Cloud alternative</text>
+  <text x="616" y="2024" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">deepseek_ocr.py</text>
+
+
+  <!-- Chunkers sub-group -->
+  <rect x="796" y="1716" width="784" height="438" rx="9" fill="rgba(255,255,255,0.45)" stroke="#90CAF9" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="810" y="1734" fill="#0D47A1" font-size="11" font-weight="700">✂️  CHUNKING STRATEGIES  (Factory Pattern — BaseChunker)</text>
+
+  <rect x="806" y="1742" width="360" height="130" rx="8" fill="#DCEDC8" stroke="#C5E1A5" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="986" y="1766" text-anchor="middle" fill="#33691E" font-size="12" font-weight="700">NaiveChunker</text>
+  <text x="986" y="1786" text-anchor="middle" fill="#558B2F" font-size="10">Fixed-size character split</text>
+  <text x="986" y="1804" text-anchor="middle" fill="#558B2F" font-size="10">chunk_size + chunk_overlap params</text>
+  <text x="986" y="1864" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">chunking/naive_chunker.py</text>
+
+  <rect x="1180" y="1742" width="390" height="130" rx="8" fill="#DCEDC8" stroke="#C5E1A5" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1375" y="1766" text-anchor="middle" fill="#33691E" font-size="12" font-weight="700">StructureChunker</text>
+  <text x="1375" y="1786" text-anchor="middle" fill="#558B2F" font-size="10">Heading-aware logical split</text>
+  <text x="1375" y="1804" text-anchor="middle" fill="#558B2F" font-size="10">Preserves document sections</text>
+  <text x="1375" y="1864" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">chunking/structure_chunker.py</text>
+
+  <rect x="806" y="1892" width="360" height="130" rx="8" fill="#DCEDC8" stroke="#C5E1A5" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="986" y="1916" text-anchor="middle" fill="#33691E" font-size="12" font-weight="700">SemanticChunker</text>
+  <text x="986" y="1936" text-anchor="middle" fill="#558B2F" font-size="10">Embedding similarity-based</text>
+  <text x="986" y="1954" text-anchor="middle" fill="#558B2F" font-size="10">Requires embedding_client</text>
+  <text x="986" y="2014" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">chunking/semantic_chunker.py</text>
+
+  <rect x="1180" y="1892" width="390" height="130" rx="8" fill="#DCEDC8" stroke="#C5E1A5" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1375" y="1916" text-anchor="middle" fill="#33691E" font-size="12" font-weight="700">QAChunker</text>
+  <text x="1375" y="1936" text-anchor="middle" fill="#558B2F" font-size="10">Q&amp;A pair extraction</text>
+  <text x="1375" y="1954" text-anchor="middle" fill="#558B2F" font-size="10">Optimized for exam content</text>
+  <text x="1375" y="2014" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">chunking/qa_chunker.py</text>
+
+
+  <!-- ── Arrow Layer5 → Layer6 ── -->
+  <line x1="800" y1="2174" x2="800" y2="2208" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="800" y="2194" text-anchor="middle" fill="#546E7A" font-size="10" font-weight="600">Persists to Storage</text>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!--  LAYER 6 — STORAGE LAYER  (y=2211 h=560)                          -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <rect x="20" y="2211" width="1560" height="560" rx="12" fill="#F3E5F5" stroke="#CE93D8" stroke-width="2" filter="url(#lane-shadow)"/>
+  <text x="36" y="2234" fill="#4A148C" font-size="13" font-weight="700" letter-spacing="1">🗄️  LAYER 6 — STORAGE &amp; DATA LAYER</text>
+
+  <!-- Databases column -->
+  <rect x="36" y="2244" width="480" height="510" rx="9" fill="rgba(255,255,255,0.5)" stroke="#CE93D8" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="50" y="2262" fill="#4A148C" font-size="11" font-weight="700">🛢️  DATABASES &amp; OBJECT STORAGE</text>
+
+  <!-- MongoDB cylinder -->
+  <rect x="46" y="2270" width="460" height="108" rx="10" fill="#B3E5FC" stroke="#81D4FA" stroke-width="2" filter="url(#shadow)"/>
+  <ellipse cx="276" cy="2270" rx="230" ry="8" fill="#81D4FA" stroke="#81D4FA" stroke-width="1"/>
+  <text x="276" y="2300" text-anchor="middle" fill="#01579B" font-size="14" font-weight="700">🍃 MongoDB 7</text>
+  <text x="276" y="2320" text-anchor="middle" fill="#0277BD" font-size="10">Users · Projects · Exams · Results</text>
+  <text x="276" y="2337" text-anchor="middle" fill="#0277BD" font-size="10">Conversations · Chunks · Attendance</text>
+  <text x="276" y="2354" text-anchor="middle" fill="#0277BD" font-size="10">Analytics · Assets Metadata</text>
+  <text x="276" y="2370" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">motor + AsyncIOMotorClient · Port 27017</text>
+
+  <!-- Qdrant cylinder -->
+  <rect x="46" y="2396" width="460" height="90" rx="10" fill="#B3E5FC" stroke="#81D4FA" stroke-width="2" filter="url(#shadow)"/>
+  <ellipse cx="276" cy="2396" rx="230" ry="7" fill="#81D4FA" stroke="#81D4FA" stroke-width="1"/>
+  <text x="276" y="2424" text-anchor="middle" fill="#01579B" font-size="14" font-weight="700">🔷 Qdrant Vector DB</text>
+  <text x="276" y="2444" text-anchor="middle" fill="#0277BD" font-size="10">High-dimensional embeddings</text>
+  <text x="276" y="2460" text-anchor="middle" fill="#0277BD" font-size="10">Cosine similarity search</text>
+  <text x="276" y="2476" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">story/vectordb/provider/Qdrant.py · Port 6333</text>
+
+  <!-- Redis cylinder -->
+  <rect x="46" y="2504" width="460" height="80" rx="10" fill="#FFCDD2" stroke="#EF9A9A" stroke-width="2" filter="url(#shadow)"/>
+  <ellipse cx="276" cy="2504" rx="230" ry="7" fill="#EF9A9A" stroke="#EF9A9A" stroke-width="1"/>
+  <text x="276" y="2530" text-anchor="middle" fill="#B71C1C" font-size="14" font-weight="700">🔴 Redis 7</text>
+  <text x="276" y="2550" text-anchor="middle" fill="#C62828" font-size="10">Celery broker + result backend + caching</text>
+  <text x="276" y="2568" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">redis:7-alpine · Port 6379</text>
+
+  <!-- MinIO -->
+  <rect x="46" y="2602" width="460" height="80" rx="10" fill="#FFE0B2" stroke="#FFCC80" stroke-width="2" filter="url(#shadow)"/>
+  <ellipse cx="276" cy="2602" rx="230" ry="7" fill="#FFCC80" stroke="#FFCC80" stroke-width="1"/>
+  <text x="276" y="2628" text-anchor="middle" fill="#E65100" font-size="14" font-weight="700">📦 MinIO Object Storage</text>
+  <text x="276" y="2648" text-anchor="middle" fill="#EF6C00" font-size="10">S3-compatible file storage · Fallback: filesystem</text>
+  <text x="276" y="2666" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">minio:latest · Ports 9000/9001</text>
+
+  <!-- Data Models column -->
+  <rect x="534" y="2244" width="530" height="510" rx="9" fill="rgba(255,255,255,0.5)" stroke="#CE93D8" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="548" y="2262" fill="#4A148C" font-size="11" font-weight="700">📋  DATA MODELS  (MongoDB Collections)</text>
+
+  <rect x="544" y="2270" width="246" height="74" rx="8" fill="#FFCCBC" stroke="#FFAB91" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="667" y="2292" text-anchor="middle" fill="#BF360C" font-size="12" font-weight="700">UserModel</text>
+  <text x="667" y="2310" text-anchor="middle" fill="#D84315" font-size="10">Auth · roles (student/teacher/admin)</text>
+  <text x="667" y="2334" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">models/UserModel.py</text>
+
+  <rect x="800" y="2270" width="246" height="74" rx="8" fill="#FFCCBC" stroke="#FFAB91" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="923" y="2292" text-anchor="middle" fill="#BF360C" font-size="12" font-weight="700">ProjectModel</text>
+  <text x="923" y="2310" text-anchor="middle" fill="#D84315" font-size="10">Course/subject container</text>
+  <text x="923" y="2334" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">models/ProjectModel.py</text>
+
+  <rect x="544" y="2354" width="246" height="74" rx="8" fill="#FFCCBC" stroke="#FFAB91" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="667" y="2376" text-anchor="middle" fill="#BF360C" font-size="12" font-weight="700">DocumentModel</text>
+  <text x="667" y="2394" text-anchor="middle" fill="#D84315" font-size="10">Uploaded file metadata</text>
+  <text x="667" y="2418" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">models/DocumentModel.py</text>
+
+  <rect x="800" y="2354" width="246" height="74" rx="8" fill="#FFCCBC" stroke="#FFAB91" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="923" y="2376" text-anchor="middle" fill="#BF360C" font-size="12" font-weight="700">ChunkModel</text>
+  <text x="923" y="2394" text-anchor="middle" fill="#D84315" font-size="10">Text chunks + keyword search</text>
+  <text x="923" y="2418" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">models/ChunkModel.py</text>
+
+  <rect x="544" y="2438" width="246" height="74" rx="8" fill="#FFCCBC" stroke="#FFAB91" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="667" y="2460" text-anchor="middle" fill="#BF360C" font-size="12" font-weight="700">ExamModel</text>
+  <text x="667" y="2478" text-anchor="middle" fill="#D84315" font-size="10">Exams (DRAFT/PUBLISHED)</text>
+  <text x="667" y="2502" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">models/ExamModel.py</text>
+
+  <rect x="800" y="2438" width="246" height="74" rx="8" fill="#FFCCBC" stroke="#FFAB91" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="923" y="2460" text-anchor="middle" fill="#BF360C" font-size="12" font-weight="700">ExamResultModel</text>
+  <text x="923" y="2478" text-anchor="middle" fill="#D84315" font-size="10">Student answers + scores</text>
+  <text x="923" y="2502" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">models/ExamResultModel.py</text>
+
+  <rect x="544" y="2522" width="246" height="74" rx="8" fill="#FFCCBC" stroke="#FFAB91" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="667" y="2544" text-anchor="middle" fill="#BF360C" font-size="12" font-weight="700">ConversationModel</text>
+  <text x="667" y="2562" text-anchor="middle" fill="#D84315" font-size="10">Chat history persistence</text>
+  <text x="667" y="2586" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">models/ConversationModel.py</text>
+
+  <rect x="800" y="2522" width="246" height="74" rx="8" fill="#FFCCBC" stroke="#FFAB91" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="923" y="2544" text-anchor="middle" fill="#BF360C" font-size="12" font-weight="700">AttendanceModel</text>
+  <text x="923" y="2562" text-anchor="middle" fill="#D84315" font-size="10">Student presence tracking</text>
+  <text x="923" y="2586" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">models/AttendanceModel.py</text>
+
+  <!-- Hybrid Retrieval column -->
+  <rect x="1082" y="2244" width="488" height="510" rx="9" fill="rgba(255,255,255,0.5)" stroke="#CE93D8" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="1096" y="2262" fill="#4A148C" font-size="11" font-weight="700">🔍  HYBRID RETRIEVAL SYSTEM</text>
+
+  <!-- Flow top to bottom -->
+  <rect x="1110" y="2270" width="432" height="70" rx="8" fill="#B3E5FC" stroke="#81D4FA" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1326" y="2292" text-anchor="middle" fill="#01579B" font-size="12" font-weight="700">Qdrant Vector Search</text>
+  <text x="1326" y="2310" text-anchor="middle" fill="#0277BD" font-size="10">Semantic similarity (cosine) · limit=10</text>
+  <text x="1326" y="2330" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">VectorDBinferance.py</text>
+
+  <rect x="1110" y="2360" width="432" height="70" rx="8" fill="#B3E5FC" stroke="#81D4FA" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1326" y="2382" text-anchor="middle" fill="#01579B" font-size="12" font-weight="700">MongoDB Keyword Search</text>
+  <text x="1326" y="2400" text-anchor="middle" fill="#0277BD" font-size="10">Text index full-text · limit=10</text>
+  <text x="1326" y="2420" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">ChunkModel.search_by_keyword()</text>
+
+  <!-- Arrow down to MultiRetriever -->
+  <line x1="1326" y1="2430" x2="1326" y2="2458" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="1110" y="2460" width="432" height="80" rx="8" fill="#E1BEE7" stroke="#CE93D8" stroke-width="2" filter="url(#shadow)"/>
+  <text x="1326" y="2484" text-anchor="middle" fill="#4A148C" font-size="13" font-weight="700">🔀 MultiRetriever</text>
+  <text x="1326" y="2504" text-anchor="middle" fill="#6A1B9A" font-size="10">Merge + Deduplicate results</text>
+  <text x="1326" y="2520" text-anchor="middle" fill="#6A1B9A" font-size="10">by chunk_id deduplication</text>
+  <text x="1326" y="2532" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">helpers/multi_retriever.py</text>
+
+  <line x1="1326" y1="2540" x2="1326" y2="2568" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="1110" y="2570" width="432" height="80" rx="8" fill="#E1BEE7" stroke="#CE93D8" stroke-width="2" filter="url(#shadow)"/>
+  <text x="1326" y="2594" text-anchor="middle" fill="#4A148C" font-size="13" font-weight="700">🏆 Cross-Encoder Reranker</text>
+  <text x="1326" y="2614" text-anchor="middle" fill="#6A1B9A" font-size="10">ms-marco-MiniLM-L-6-v2</text>
+  <text x="1326" y="2630" text-anchor="middle" fill="#6A1B9A" font-size="10">Top-K = 3 final results</text>
+  <text x="1326" y="2642" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">helpers/reranker.py</text>
+
+  <line x1="1326" y1="2650" x2="1326" y2="2678" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="1110" y="2680" width="432" height="60" rx="8" fill="#B2DFDB" stroke="#80CBC4" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1326" y="2704" text-anchor="middle" fill="#004D40" font-size="12" font-weight="700">Final Top-K Chunks → Agent / LLM</text>
+  <text x="1326" y="2724" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">→ RAGAgent context window</text>
+
+
+  <!-- ── Arrow Layer6 → Layer7 ── -->
+  <line x1="800" y1="2771" x2="800" y2="2805" stroke="#90A4AE" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arr-d)"/>
+  <text x="800" y="2790" text-anchor="middle" fill="#78909C" font-size="10">LLM Abstraction + Background Jobs</text>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!--  LAYER 7 — LLM PROVIDERS + CELERY TASKS  (y=2808 h=520)           -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <rect x="20" y="2808" width="1560" height="520" rx="12" fill="#ECEFF1" stroke="#90A4AE" stroke-width="2" filter="url(#lane-shadow)"/>
+  <text x="36" y="2831" fill="#263238" font-size="13" font-weight="700" letter-spacing="1">🔌  LAYER 7 — LLM ABSTRACTION &amp; BACKGROUND TASKS</text>
+
+  <!-- LLM Factory -->
+  <rect x="36" y="2841" width="900" height="470" rx="9" fill="rgba(255,255,255,0.5)" stroke="#90A4AE" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="50" y="2859" fill="#263238" font-size="11" font-weight="700">🤖  LLM PROVIDER FACTORY  (Pluggable Architecture)</text>
+
+  <rect x="200" y="2867" width="500" height="70" rx="9" fill="#F0F4C3" stroke="#E6EE9C" stroke-width="2.5" filter="url(#shadow)"/>
+  <text x="450" y="2893" text-anchor="middle" fill="#827717" font-size="14" font-weight="700">🏭 LLMProviderFactory</text>
+  <text x="450" y="2913" text-anchor="middle" fill="#9E9D24" font-size="11">Central factory for provider selection and instantiation</text>
+  <text x="450" y="2927" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">story/llm/LLMproviderfactory.py</text>
+
+  <line x1="450" y1="2937" x2="450" y2="2960" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- LLM Provider nodes -->
+  <rect x="46"  y="2966" width="166" height="120" rx="8" fill="#F0F4C3" stroke="#E6EE9C" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="129" y="2990" text-anchor="middle" fill="#827717" font-size="12" font-weight="700">Gemini</text>
+  <text x="129" y="3008" text-anchor="middle" fill="#9E9D24" font-size="10">gemini-2.0-flash</text>
+  <text x="129" y="3024" text-anchor="middle" fill="#9E9D24" font-size="10">Primary Generator</text>
+  <text x="129" y="3040" text-anchor="middle" fill="#E53935" font-size="9" font-weight="700">★ Default</text>
+  <text x="129" y="3078" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">providers/Gemini.py</text>
+
+  <rect x="222" y="2966" width="166" height="120" rx="8" fill="#F0F4C3" stroke="#E6EE9C" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="305" y="2990" text-anchor="middle" fill="#827717" font-size="12" font-weight="700">Ollama</text>
+  <text x="305" y="3008" text-anchor="middle" fill="#9E9D24" font-size="10">Local Llama3</text>
+  <text x="305" y="3024" text-anchor="middle" fill="#9E9D24" font-size="10">Port 11434</text>
+  <text x="305" y="3040" text-anchor="middle" fill="#9E9D24" font-size="10">WSL2 + Docker</text>
+  <text x="305" y="3078" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">providers/Ollama.py</text>
+
+  <rect x="398" y="2966" width="166" height="120" rx="8" fill="#F0F4C3" stroke="#E6EE9C" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="481" y="2990" text-anchor="middle" fill="#827717" font-size="12" font-weight="700">OpenAI</text>
+  <text x="481" y="3008" text-anchor="middle" fill="#9E9D24" font-size="10">GPT-3.5 / GPT-4</text>
+  <text x="481" y="3024" text-anchor="middle" fill="#9E9D24" font-size="10">api.openai.com</text>
+  <text x="481" y="3078" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">providers/OpenAI.py</text>
+
+  <rect x="574" y="2966" width="166" height="120" rx="8" fill="#F0F4C3" stroke="#E6EE9C" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="657" y="2990" text-anchor="middle" fill="#827717" font-size="12" font-weight="700">Cohere</text>
+  <text x="657" y="3008" text-anchor="middle" fill="#9E9D24" font-size="10">embed-multilingual</text>
+  <text x="657" y="3024" text-anchor="middle" fill="#9E9D24" font-size="10">light-v3.0 · 384-dim</text>
+  <text x="657" y="3040" text-anchor="middle" fill="#9E9D24" font-size="10">Primary Embedder</text>
+  <text x="657" y="3078" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">providers/Cohere.py</text>
+
+  <rect x="750" y="2966" width="166" height="120" rx="8" fill="#F0F4C3" stroke="#E6EE9C" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="833" y="2990" text-anchor="middle" fill="#827717" font-size="12" font-weight="700">Llama3</text>
+  <text x="833" y="3008" text-anchor="middle" fill="#9E9D24" font-size="10">Direct integration</text>
+  <text x="833" y="3024" text-anchor="middle" fill="#9E9D24" font-size="10">Alternative local</text>
+  <text x="833" y="3078" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">providers/Llama3.py</text>
+
+  <!-- VectorDB Factory -->
+  <rect x="46" y="3100" width="880" height="110" rx="8" fill="#B3E5FC" stroke="#81D4FA" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="486" y="3124" text-anchor="middle" fill="#01579B" font-size="13" font-weight="700">🔷 VectorDBProviderFactory → Qdrant Provider</text>
+  <text x="486" y="3144" text-anchor="middle" fill="#0277BD" font-size="11">Abstraction layer for vector database operations</text>
+  <text x="486" y="3162" text-anchor="middle" fill="#0277BD" font-size="10">search_by_vector() · upsert() · delete_collection() · create_collection()</text>
+  <text x="486" y="3198" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">story/vectordb/VectorDBProviderFactory.py  ·  story/vectordb/provider/Qdrant.py</text>
+
+  <!-- Celery Tasks -->
+  <rect x="952" y="2841" width="618" height="470" rx="9" fill="rgba(255,255,255,0.5)" stroke="#90A4AE" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="966" y="2859" fill="#263238" font-size="11" font-weight="700">⏳  CELERY BACKGROUND TASKS  (Redis Broker)</text>
+
+  <rect x="962" y="2867" width="596" height="110" rx="8" fill="#CFD8DC" stroke="#B0BEC5" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1260" y="2891" text-anchor="middle" fill="#263238" font-size="12" font-weight="700">📄 process_file_task</text>
+  <text x="1260" y="2909" text-anchor="middle" fill="#37474F" font-size="10">Load file → Parse → Chunk → Save chunks to MongoDB</text>
+  <text x="1260" y="2927" text-anchor="middle" fill="#37474F" font-size="10">Batch save (50 chunks/batch) · Progress updates via task state</text>
+  <text x="1260" y="2945" text-anchor="middle" fill="#37474F" font-size="10">task_soft_time_limit=600s · Max 10 minutes</text>
+  <text x="1260" y="2967" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">tasks/process_tasks.py  ·  @celery_app.task(name="process_file")</text>
+
+  <rect x="962" y="2993" width="596" height="110" rx="8" fill="#CFD8DC" stroke="#B0BEC5" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1260" y="3017" text-anchor="middle" fill="#263238" font-size="12" font-weight="700">🔢 index_project_task</text>
+  <text x="1260" y="3035" text-anchor="middle" fill="#37474F" font-size="10">Batch embed all project chunks → Push to Qdrant VectorDB</text>
+  <text x="1260" y="3053" text-anchor="middle" fill="#37474F" font-size="10">Page-by-page: 50 chunks/page · Batch async upsert</text>
+  <text x="1260" y="3071" text-anchor="middle" fill="#37474F" font-size="10">do_reset=True → Drop + recreate collection</text>
+  <text x="1260" y="3093" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">tasks/process_tasks.py  ·  @celery_app.task(name="index_project")</text>
+
+  <rect x="962" y="3119" width="596" height="110" rx="8" fill="#CFD8DC" stroke="#B0BEC5" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1260" y="3143" text-anchor="middle" fill="#263238" font-size="12" font-weight="700">📋 check_absent_students</text>
+  <text x="1260" y="3161" text-anchor="middle" fill="#37474F" font-size="10">Daily Celery Beat cron (every 86400s = 24h)</text>
+  <text x="1260" y="3179" text-anchor="middle" fill="#37474F" font-size="10">Detect absent students → WhatsApp notification via Ultramsg</text>
+  <text x="1260" y="3197" text-anchor="middle" fill="#37474F" font-size="10">cooldown=7 days · threshold=3 absences</text>
+  <text x="1260" y="3219" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">tasks/attendance_tasks.py  ·  Celery Beat Schedule</text>
+
+  <!-- Evaluation -->
+  <rect x="962" y="3244" width="596" height="50" rx="8" fill="#E1BEE7" stroke="#CE93D8" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1260" y="3263" text-anchor="middle" fill="#4A148C" font-size="12" font-weight="700">📊 ArabicRAGBenchmark  +  RetrievalMetrics</text>
+  <text x="1260" y="3283" text-anchor="middle" fill="#6A1B9A" font-size="10">MRR · Recall@K · NDCG  ·  Arabic-focused evaluation</text>
+
+
+  <!-- ── Arrow Layer7 → Layer8 ── -->
+  <line x1="800" y1="3328" x2="800" y2="3362" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="800" y="3347" text-anchor="middle" fill="#546E7A" font-size="10" font-weight="600">Deployed via Docker Compose</text>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!--  LAYER 8 — DEVOPS  (y=3365 h=620)                                 -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <rect x="20" y="3365" width="1560" height="620" rx="12" fill="#E0F2F1" stroke="#80CBC4" stroke-width="2" filter="url(#lane-shadow)"/>
+  <text x="36" y="3388" fill="#004D40" font-size="13" font-weight="700" letter-spacing="1">🐳  LAYER 8 — DevOps &amp; INFRASTRUCTURE  (docker-compose.yml)</text>
+
+  <!-- Network label -->
+  <rect x="36" y="3396" width="1524" height="30" rx="6" fill="rgba(255,255,255,0.6)" stroke="#80CBC4" stroke-width="1"/>
+  <text x="800" y="3416" text-anchor="middle" fill="#00796B" font-size="12" font-weight="700">All services on Docker network: "backend"   ·   Single Docker build → satr_edu_image   ·   Nginx on port 80 as entry</text>
+
+  <!-- NGINX -->
+  <rect x="660" y="3434" width="280" height="120" rx="10" fill="#CFD8DC" stroke="#90A4AE" stroke-width="2.5" filter="url(#shadow)"/>
+  <text x="800" y="3458" text-anchor="middle" fill="#263238" font-size="14" font-weight="700">🔀 NGINX</text>
+  <text x="800" y="3478" text-anchor="middle" fill="#37474F" font-size="11">Reverse Proxy / Load Balancer</text>
+  <text x="800" y="3496" text-anchor="middle" fill="#37474F" font-size="10">Port 80:80</text>
+  <text x="800" y="3514" text-anchor="middle" fill="#37474F" font-size="10">nginx:alpine</text>
+  <text x="800" y="3546" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">docker/nginx.conf</text>
+
+  <!-- Arrow Nginx → App -->
+  <line x1="800" y1="3554" x2="800" y2="3578" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- FastAPI App -->
+  <rect x="540" y="3580" width="260" height="140" rx="10" fill="#B2DFDB" stroke="#004D40" stroke-width="2.5" filter="url(#shadow)"/>
+  <text x="670" y="3606" text-anchor="middle" fill="#004D40" font-size="14" font-weight="700">🚀 satr_edu_app</text>
+  <text x="670" y="3626" text-anchor="middle" fill="#00695C" font-size="11">FastAPI + Uvicorn</text>
+  <text x="670" y="3646" text-anchor="middle" fill="#00695C" font-size="10">Port 8000:8000</text>
+  <text x="670" y="3662" text-anchor="middle" fill="#00695C" font-size="10">satr_edu_image (Dockerfile)</text>
+  <text x="670" y="3678" text-anchor="middle" fill="#00695C" font-size="10">Volumes: /app/src, /app/main.py</text>
+  <text x="670" y="3710" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">Dockerfile · main.py</text>
+
+  <!-- Celery Worker -->
+  <rect x="820" y="3580" width="260" height="140" rx="10" fill="#CFD8DC" stroke="#546E7A" stroke-width="2" filter="url(#shadow)"/>
+  <text x="950" y="3606" text-anchor="middle" fill="#263238" font-size="14" font-weight="700">⚡ satr_edu_celery</text>
+  <text x="950" y="3626" text-anchor="middle" fill="#37474F" font-size="11">Celery Worker</text>
+  <text x="950" y="3646" text-anchor="middle" fill="#37474F" font-size="10">Same image as app</text>
+  <text x="950" y="3662" text-anchor="middle" fill="#37474F" font-size="10">celery -A src.tasks worker</text>
+  <text x="950" y="3678" text-anchor="middle" fill="#37474F" font-size="10">Depends: app + redis + mongo + qdrant</text>
+  <text x="950" y="3710" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">tasks/process_tasks.py</text>
+
+  <!-- Databases row -->
+  <rect x="36" y="3740" width="300" height="120" rx="10" fill="#B3E5FC" stroke="#81D4FA" stroke-width="2" filter="url(#shadow)"/>
+  <text x="186" y="3768" text-anchor="middle" fill="#01579B" font-size="14" font-weight="700">🍃 mongodb</text>
+  <text x="186" y="3788" text-anchor="middle" fill="#0277BD" font-size="10">mongo:7</text>
+  <text x="186" y="3806" text-anchor="middle" fill="#0277BD" font-size="10">Port 27017:27017</text>
+  <text x="186" y="3824" text-anchor="middle" fill="#0277BD" font-size="10">Volume: ./data/mongodb:/data/db</text>
+  <text x="186" y="3850" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">restart: always</text>
+
+  <rect x="356" y="3740" width="300" height="120" rx="10" fill="#B3E5FC" stroke="#81D4FA" stroke-width="2" filter="url(#shadow)"/>
+  <text x="506" y="3768" text-anchor="middle" fill="#01579B" font-size="14" font-weight="700">🔷 qdrant</text>
+  <text x="506" y="3788" text-anchor="middle" fill="#0277BD" font-size="10">qdrant/qdrant:latest</text>
+  <text x="506" y="3806" text-anchor="middle" fill="#0277BD" font-size="10">Ports 6333 / 6334</text>
+  <text x="506" y="3824" text-anchor="middle" fill="#0277BD" font-size="10">Volume: ./data/qdrant</text>
+  <text x="506" y="3850" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">restart: always</text>
+
+  <rect x="676" y="3740" width="300" height="120" rx="10" fill="#FFCDD2" stroke="#EF9A9A" stroke-width="2" filter="url(#shadow)"/>
+  <text x="826" y="3768" text-anchor="middle" fill="#B71C1C" font-size="14" font-weight="700">🔴 redis</text>
+  <text x="826" y="3788" text-anchor="middle" fill="#C62828" font-size="10">redis:7-alpine</text>
+  <text x="826" y="3806" text-anchor="middle" fill="#C62828" font-size="10">Port 6379:6379</text>
+  <text x="826" y="3824" text-anchor="middle" fill="#C62828" font-size="10">Broker + Backend</text>
+  <text x="826" y="3850" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">restart: always</text>
+
+  <rect x="996" y="3740" width="300" height="120" rx="10" fill="#FFE0B2" stroke="#FFCC80" stroke-width="2" filter="url(#shadow)"/>
+  <text x="1146" y="3768" text-anchor="middle" fill="#E65100" font-size="14" font-weight="700">📦 minio</text>
+  <text x="1146" y="3788" text-anchor="middle" fill="#EF6C00" font-size="10">minio/minio:latest</text>
+  <text x="1146" y="3806" text-anchor="middle" fill="#EF6C00" font-size="10">Ports 9000/9001</text>
+  <text x="1146" y="3824" text-anchor="middle" fill="#EF6C00" font-size="10">S3 Object Storage</text>
+  <text x="1146" y="3850" text-anchor="middle" fill="#9E9E9E" font-size="9" font-style="italic">healthcheck included</text>
+
+  <!-- Environment note -->
+  <rect x="1316" y="3740" width="264" height="120" rx="10" fill="rgba(255,255,255,0.7)" stroke="#80CBC4" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="1448" y="3762" text-anchor="middle" fill="#004D40" font-size="11" font-weight="700">📋 .env Config</text>
+  <text x="1448" y="3782" text-anchor="middle" fill="#00695C" font-size="10">GEMINI_API_KEY</text>
+  <text x="1448" y="3798" text-anchor="middle" fill="#00695C" font-size="10">MONGODB_URL</text>
+  <text x="1448" y="3814" text-anchor="middle" fill="#00695C" font-size="10">REDIS_URL</text>
+  <text x="1448" y="3830" text-anchor="middle" fill="#00695C" font-size="10">VECTOR_DB_PATH</text>
+  <text x="1448" y="3846" text-anchor="middle" fill="#00695C" font-size="10">JWT_SECRET_KEY + more</text>
+
+  <!-- Dockerfile note -->
+  <rect x="36" y="3876" width="400" height="70" rx="8" fill="rgba(255,255,255,0.6)" stroke="#80CBC4" stroke-width="1"/>
+  <text x="236" y="3898" text-anchor="middle" fill="#004D40" font-size="11" font-weight="700">Dockerfile</text>
+  <text x="236" y="3916" text-anchor="middle" fill="#00695C" font-size="10">python:3.13-slim · WORKDIR /app</text>
+  <text x="236" y="3932" text-anchor="middle" fill="#00695C" font-size="10">requirements.txt · uvicorn main:app --host 0.0.0.0</text>
+
+  <rect x="456" y="3876" width="400" height="70" rx="8" fill="rgba(255,255,255,0.6)" stroke="#80CBC4" stroke-width="1"/>
+  <text x="656" y="3898" text-anchor="middle" fill="#004D40" font-size="11" font-weight="700">Host: host.docker.internal</text>
+  <text x="656" y="3916" text-anchor="middle" fill="#00695C" font-size="10">Surya OCR at port 8765</text>
+  <text x="656" y="3932" text-anchor="middle" fill="#00695C" font-size="10">Ollama LLM at port 11434</text>
+
+  <rect x="876" y="3876" width="400" height="70" rx="8" fill="rgba(255,255,255,0.6)" stroke="#80CBC4" stroke-width="1"/>
+  <text x="1076" y="3898" text-anchor="middle" fill="#004D40" font-size="11" font-weight="700">DNS: 8.8.8.8 / 8.8.4.4</text>
+  <text x="1076" y="3916" text-anchor="middle" fill="#00695C" font-size="10">For external API calls</text>
+  <text x="1076" y="3932" text-anchor="middle" fill="#00695C" font-size="10">Gemini · Cohere · OpenAI</text>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!--  LEGEND BAR                                                        -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <rect x="20" y="4010" width="1560" height="100" rx="12" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1.5"/>
+  <text x="800" y="4030" text-anchor="middle" fill="#37474F" font-size="12" font-weight="700">📖  LEGEND</text>
+
+  <!-- Swatches row 1 -->
+  <rect x="40"  y="4040" width="30" height="16" rx="4" fill="#BBDEFB" stroke="#90CAF9" stroke-width="1"/>
+  <text x="78"  y="4053" fill="#546E7A" font-size="11">API Layer</text>
+
+  <rect x="155" y="4040" width="30" height="16" rx="4" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="1"/>
+  <text x="193" y="4053" fill="#546E7A" font-size="11">Route / Controller</text>
+
+  <rect x="310" y="4040" width="30" height="16" rx="4" fill="#F8BBD0" stroke="#F48FB1" stroke-width="1"/>
+  <text x="348" y="4053" fill="#546E7A" font-size="11">Controller Logic</text>
+
+  <rect x="465" y="4040" width="30" height="16" rx="4" fill="#B2DFDB" stroke="#80CBC4" stroke-width="1"/>
+  <text x="503" y="4053" fill="#546E7A" font-size="11">AI Agent</text>
+
+  <rect x="570" y="4040" width="30" height="16" rx="4" fill="#D1C4E9" stroke="#B39DDB" stroke-width="1"/>
+  <text x="608" y="4053" fill="#546E7A" font-size="11">Agent Tool / Core</text>
+
+  <rect x="730" y="4040" width="30" height="16" rx="4" fill="#FFE0B2" stroke="#FFCC80" stroke-width="1"/>
+  <text x="768" y="4053" fill="#546E7A" font-size="11">Parser</text>
+
+  <rect x="820" y="4040" width="30" height="16" rx="4" fill="#DCEDC8" stroke="#C5E1A5" stroke-width="1"/>
+  <text x="858" y="4053" fill="#546E7A" font-size="11">Chunker</text>
+
+  <rect x="920" y="4040" width="30" height="16" rx="4" fill="#F0F4C3" stroke="#E6EE9C" stroke-width="1"/>
+  <text x="958" y="4053" fill="#546E7A" font-size="11">LLM Provider</text>
+
+  <rect x="1060" y="4040" width="30" height="16" rx="4" fill="#B3E5FC" stroke="#81D4FA" stroke-width="1"/>
+  <text x="1098" y="4053" fill="#546E7A" font-size="11">Database / Storage</text>
+
+  <rect x="1230" y="4040" width="30" height="16" rx="4" fill="#FFCCBC" stroke="#FFAB91" stroke-width="1"/>
+  <text x="1268" y="4053" fill="#546E7A" font-size="11">Data Model</text>
+
+  <rect x="1370" y="4040" width="30" height="16" rx="4" fill="#E1BEE7" stroke="#CE93D8" stroke-width="1"/>
+  <text x="1408" y="4053" fill="#546E7A" font-size="11">Evaluation / Adaptive</text>
+
+  <!-- Arrow legend row 2 -->
+  <line x1="40"  y1="4082" x2="90"  y2="4082" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="98"  y="4086" fill="#546E7A" font-size="11">Direct synchronous call</text>
+
+  <line x1="310" y1="4082" x2="360" y2="4082" stroke="#90A4AE" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arr-d)"/>
+  <text x="368" y="4086" fill="#78909C" font-size="11">Async / Optional / Event-driven</text>
+
+  <text x="630" y="4086" fill="#546E7A" font-size="11" font-weight="700">Tech Stack:</text>
+  <text x="720" y="4086" fill="#546E7A" font-size="11">Python 3.13 · FastAPI · Celery · MongoDB · Qdrant · Redis · MinIO · Docker · NGINX · Gemini · Cohere</text>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!--  FOOTER                                                            -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <rect x="0" y="4130" width="1600" height="70" fill="#263238"/>
+  <text x="800" y="4155" text-anchor="middle" fill="#ECEFF1" font-size="13" font-weight="600">Satr Edu AI — System Architecture Diagram</text>
+  <text x="800" y="4175" text-anchor="middle" fill="#90A4AE" font-size="11">Style: Lucidchart / Draw.io Informal  ·  8 Swim Lanes  ·  17 Routers  ·  10 Controllers  ·  5 Agents  ·  Generated June 2026</text>
+
+</svg>

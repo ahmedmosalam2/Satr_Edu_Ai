@@ -207,3 +207,7 @@ class IntentClassifier:
                 return {"intent": "quiz", "confidence": 0.75, "reasoning": f"keyword: {kw}", "entities": [], "method": "keyword"}
 
         return {"intent": "research", "confidence": 0.6, "reasoning": "default", "entities": [], "method": "keyword"}
+
+    def _keyword_classify(self, query: str) -> Dict[str, Any]:
+        """Alias for _classify_with_keywords to support tests."""
+        return self._classify_with_keywords(query)

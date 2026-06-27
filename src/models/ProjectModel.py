@@ -48,6 +48,8 @@ class ProjectModel(BaseDataModel):
             await self.create_project(project)
             result= await self.collection.find_one(
                 filter={"project_id":project_id})
+            if result is None:
+                return project
         return Project(**result)
     async def update_project(self,project_id:str,project:Project):
         print(f"DEBUG: update_project called for {project_id}. Payload: {project.dict()}")
