@@ -16,6 +16,7 @@ from src.routes import agent
 from src.routes import evaluation
 from src.routes import adaptive
 from src.routes import stream
+from src.routes import data
 # from src.mcp.server import mcp_router
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient 
@@ -103,11 +104,8 @@ async def startup():
         if not connected:
             logger.warning("⚠️ Ollama NOT reachable. Check if Ollama is running on Windows with OLLAMA_HOST=0.0.0.0")
 
-        llm_provider = LLMProviderFactory(settings)
-        # ── Switching to Gemini for better Arabic generation ──
-        app.llm_provider = llm_provider.create_provider(LLMEnums.ProviderType.GEMINI)
-        # ──────────────────────────────────────────────────────
-        app.llm_provider.set_generate_model(settings.GENERATION_MODEL_ID)
+        from src.helpers.nlp_clients import get_generation_client
+        app.llm_provider = get_generation_client().provider
         app.llm_provider.set_embedding_model(settings.EMBEDDING_MODEL_ID, settings.EMBEDDING_MODEL_SIZE)
         logger.info(f"✅ LLM provider initialized (Embed Model: {settings.EMBEDDING_MODEL_ID})")
     except Exception as e:
@@ -164,4 +162,9 @@ app.include_router(agent.agent_router)
 app.include_router(evaluation.eval_router)
 app.include_router(adaptive.adaptive_router)
 app.include_router(stream.stream_router)  # [NEW] Streaming SSE
+app.include_router(data.router)
 # app.include_router(mcp_router)            # [Disabled] MCP Server
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8001)

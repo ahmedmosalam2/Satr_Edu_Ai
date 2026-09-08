@@ -159,14 +159,17 @@ class OCRController:
             logger.info(f"[OCR] PDF: {doc.page_count} pages")
             for page_num, page in enumerate(doc):
                 text = page.get_text("text").strip()
-                if len(text) > 50:
+                if len(text) > 5:
                     all_text.append(f"[Page {page_num + 1}]\n{text}")
                 else:
                     mat = fitz.Matrix(300 / 72, 300 / 72)
                     img_bytes = page.get_pixmap(matrix=mat).tobytes("png")
                     ocr_text = self.extract_from_image_bytes(img_bytes, "image/png")
-                    if ocr_text:
+                    is_error = ocr_text and any(err in ocr_text for err in ["Tesseract error", "OCR unavailable", "Error:"])
+                    if ocr_text and not is_error:
                         all_text.append(f"[Page {page_num + 1} — Surya OCR]\n{ocr_text}")
+                    elif text:
+                        all_text.append(f"[Page {page_num + 1}]\n{text}")
             doc.close()
         except Exception as e:
             logger.error(f"[OCR] PDF error: {e}")
@@ -181,14 +184,17 @@ class OCRController:
             all_text = []
             for page_num, page in enumerate(doc):
                 text = page.get_text("text").strip()
-                if len(text) > 50:
+                if len(text) > 5:
                     all_text.append(f"[Page {page_num + 1}]\n{text}")
                 else:
                     mat = fitz.Matrix(300 / 72, 300 / 72)
                     img_bytes = page.get_pixmap(matrix=mat).tobytes("png")
                     ocr_text = self.extract_from_image_bytes(img_bytes, "image/png")
-                    if ocr_text:
+                    is_error = ocr_text and any(err in ocr_text for err in ["Tesseract error", "OCR unavailable", "Error:"])
+                    if ocr_text and not is_error:
                         all_text.append(f"[Page {page_num + 1} — Surya OCR]\n{ocr_text}")
+                    elif text:
+                        all_text.append(f"[Page {page_num + 1}]\n{text}")
             doc.close()
             return "\n\n".join(all_text)
         except ImportError:

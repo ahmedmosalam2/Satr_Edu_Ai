@@ -29,10 +29,128 @@ router = APIRouter(
 )
 
 
+async def auto_process_and_index(
+    project_id: str,
+    file_id: str,
+    file_name: str,
+    file_path: str,
+    content_type: str,
+    app_client
+):
+    try:
+        from src.controllers.ProcessController import ProcessController
+        from src.models.ChunkModel import ChunkModel
+        from src.models.scheme_db.data_chunk import DataChunk
+        from src.pipeline.pipeline_manager import DocumentPipeline
+        from src.controllers.NLPController import NLPController
+        from src.models.ProjectModel import ProjectModel
+        from src.helpers.nlp_clients import get_vectordb_client, get_embedding_client, get_generation_client, template_parser
+        import os
+        from datetime import datetime
+
+        logger.info(f"[AutoProcess] Starting automatic background processing for file {file_id} in project {project_id}")
+
+        file_ext = os.path.splitext(file_id)[-1].lower()
+        file_chunks = []
+
+        _IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".tiff", ".bmp"}
+        is_image = file_ext in _IMAGE_EXTENSIONS
+
+        class DummyChunk:
+            def __init__(self, text, meta):
+                self.page_content = text
+                self.metadata = meta
+
+        if is_image:
+            from src.controllers.OCRController import OCRController
+            from src.chunking.chunker_factory import get_chunker
+            from src.parsers.base_parser import ParsedPage
+            
+            ocr = OCRController()
+            with open(file_path, "rb") as f:
+                img_bytes = f.read()
+            
+            ocr_text = await ocr.extract_from_image_bytes_async(img_bytes)
+            if ocr_text and len(ocr_text.strip()) >= 5:
+                chunker = get_chunker("structure")
+                page = ParsedPage(page_content=ocr_text, metadata={"source": file_path, "parser": "ocr"})
+                raw_chunks = chunker.chunk([page], chunk_size=500, chunk_overlap=50)
+                file_chunks = [DummyChunk(c.chunk_text, c.chunk_metadata) for c in raw_chunks]
+        else:
+            pipeline = DocumentPipeline()
+            result = pipeline.process(
+                file_path=file_path,
+                chunk_strategy="structure",
+                chunk_size=500,
+                chunk_overlap=50
+            )
+            if result.success:
+                file_chunks = [DummyChunk(c.chunk_text, c.chunk_metadata) for c in result.chunks]
+
+        if not file_chunks:
+            logger.warning(f"[AutoProcess] No chunks generated for file {file_id}")
+            return
+
+        chunk_model = await ChunkModel.create_index(db_client=app_client)
+        now = datetime.now()
+        now_str = now.isoformat()
+        existing_count = await chunk_model.collection.count_documents({"chunk_project_id": project_id})
+        
+        chunks_to_save = [
+            DataChunk(
+                chunk_id=f"{project_id}_{file_id}_{existing_count + i}",
+                chunk_text=chunk.page_content,
+                chunk_metadata={
+                    **(chunk.metadata or {}),
+                    "source_file": file_name,
+                },
+                chunk_order=existing_count + i,
+                chunk_created_at=now_str,
+                chunk_updated_at=now_str,
+                chunk_project_id=project_id,
+            )
+            for i, chunk in enumerate(file_chunks)
+        ]
+
+        if chunks_to_save:
+            await chunk_model.insert_many_chunks(
+                project_id=project_id,
+                chunks=chunks_to_save
+            )
+            logger.info(f"[AutoProcess] Saved {len(chunks_to_save)} chunks to MongoDB")
+
+            # Index into Qdrant Vector DB
+            project_model = await ProjectModel.create_index(db_client=app_client)
+            project = await project_model.get_project(project_id=project_id)
+            if project:
+                nlp_controller = NLPController(
+                    vectordb_client=get_vectordb_client(),
+                    generation_client=get_generation_client(),
+                    embedding_client=get_embedding_client(),
+                    template_parser=template_parser,
+                    chunk_model=chunk_model,
+                )
+                
+                chunks_ids = list(range(existing_count, existing_count + len(chunks_to_save)))
+                await nlp_controller.index_into_vector_db(
+                    project=project,
+                    chunks=chunks_to_save,
+                    chunks_ids=chunks_ids,
+                    do_reset=False,
+                )
+                logger.info(f"[AutoProcess] Indexed {len(chunks_to_save)} chunks into Qdrant for project {project_id}")
+            else:
+                logger.warning(f"[AutoProcess] Project {project_id} not found in DB. Vector indexing skipped.")
+
+    except Exception as e:
+        logger.error(f"[AutoProcess] Exception in automatic background processing: {e}", exc_info=True)
+
+
 @router.post("/upload/{project_id}")
 async def upload(
     request: Request,
     project_id: str,
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     app_settings: Settings = Depends(get_settings)
 ):
@@ -82,9 +200,20 @@ async def upload(
     )
     await asset_model.create_asset(resource_asset)
 
+    # Trigger automatic background processing and indexing
+    background_tasks.add_task(
+        auto_process_and_index,
+        project_id,
+        file_id,
+        file.filename,
+        file_path,
+        file.content_type,
+        request.app.client
+    )
+
     return {
         "status": Response.SUCCESS.value,
-        "message": "File is uploaded successfully",
+        "message": "File is uploaded successfully and processing started in background",
         "data": {
             "project_id": project_id,
             "file_id": file_id,
@@ -104,19 +233,28 @@ async def list_files(request: Request, project_id: str):
             project_id=project_id,
             asset_type=AssetType.FILE.value
         )
+        chunk_model = ChunkModel(client=request.app.client, project_id=project_id)
+        files_list = []
+        for a in assets:
+            chunk_count = 0
+            if chunk_model.collection is not None:
+                chunk_count = await chunk_model.collection.count_documents({
+                    "chunk_project_id": project_id,
+                    "chunk_metadata.source_file": a.asset_name
+                })
+            status_val = "ready" if chunk_count > 0 else "processing"
+            files_list.append({
+                "file_id": a.asset_id,
+                "file_name": a.asset_name,
+                "file_size": a.asset_size,
+                "processing_status": status_val,
+                "uploaded_at": a.asset_created_at.isoformat() if a.asset_created_at else None
+            })
         return {
             "status": Response.SUCCESS.value,
             "project_id": project_id,
             "total_files": len(assets),
-            "files": [
-                {
-                    "file_id": a.asset_id,
-                    "file_name": a.asset_name,
-                    "file_size": a.asset_size,
-                    "uploaded_at": a.asset_created_at.isoformat() if a.asset_created_at else None
-                }
-                for a in assets
-            ]
+            "files": files_list
         }
     except Exception as e:
         logger.error(f"Error listing files: {e}")

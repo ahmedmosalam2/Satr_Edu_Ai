@@ -25,12 +25,13 @@ TUTOR_PROMPT_AR = """أنت معلم خبير ودود. اسمك "المعلم �
 {context}
 
 قواعد مهمة:
-1. اشرح بأسلوب بسيط يناسب مستوى الطالب
-2. استخدم أمثلة وتشبيهات من الحياة اليومية
-3. قسّم الشرح لخطوات واضحة
-4. إذا كان الطالب مبتدئ: ابدأ من الأساسيات
-5. إذا كان الطالب متقدم: ركز على التفاصيل العميقة
-6. أجب بالعربي
+1. اشرح بأسلوب بسيط يناسب مستوى الطالب.
+2. استخدم أمثلة وتشبيهات من الحياة اليومية.
+3. قسّم الشرح لخطوات واضحة.
+4. إذا كان الطالب مبتدئ: ابدأ من الأساسيات.
+5. إذا كان الطالب متقدم: ركز على التفاصيل العميقة.
+6. إذا كانت المعلومات المتاحة فارغة أو غير متوفرة (مثل "لا توجد معلومات متاحة" أو "No relevant documents found")، أخبر الطالب بوضوح ولطف أنه لا توجد مستندات أو ملفات تعليمية مرفوعة في قاعدة معرفة هذا الكورس حالياً، واطلب منه رفع مستندات تعليمية (مثل كتب أو محاضرات PDF) عبر زر المرفقات لتتمكن من شرحها بدقة، وتجنب اختراع أو شرح مواضيع عامة خارج سياق المنهج.
+7. أجب بالعربي.
 
 السؤال: {query}
 
@@ -45,11 +46,12 @@ Use the following educational content:
 {context}
 
 Rules:
-1. Explain in a simple way appropriate to the student's level
-2. Use real-life examples and analogies
-3. Break the explanation into clear steps
-4. If beginner: start from basics
-5. If advanced: focus on deep details
+1. Explain in a simple way appropriate to the student's level.
+2. Use real-life examples and analogies.
+3. Break the explanation into clear steps.
+4. If beginner: start from basics.
+5. If advanced: focus on deep details.
+6. If the educational content is empty or states that no documents are found (e.g. "No relevant documents found" or "لا توجد معلومات متاحة"), state clearly and politely that no educational documents have been uploaded to this course's knowledge base yet, and ask the user to upload PDF files or slides using the attachment button so that you can explain them accurately. Do not make up general explanations.
 
 Question: {query}
 
@@ -68,7 +70,7 @@ class TutorAgent(BaseAgent):
         self.student_level = student_level
         self.student_context = student_context
 
-    async def run(self, query: str, **kwargs) -> AgentResult:
+    async def run(self, query: str, chat_history: list = None, **kwargs) -> AgentResult:
         actions = []
         context_parts = []
 
@@ -99,7 +101,11 @@ class TutorAgent(BaseAgent):
         )
 
         import inspect
-        result = self.generation_client.generate_text(prompt=prompt, max_tokens=1500)
+        result = self.generation_client.generate_text(
+            prompt=prompt,
+            chat_history=chat_history,
+            max_tokens=1500
+        )
         if inspect.isawaitable(result):
             answer = await result
         else:

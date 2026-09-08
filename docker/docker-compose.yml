@@ -39,7 +39,7 @@ services:
       - ../main.py:/app/main.py
       - ./data/assets:/app/src/assets  # docker/data/assets
     ports:
-      - "8000:8000"
+      - "8001:8000"
     networks:
       - backend
     dns:

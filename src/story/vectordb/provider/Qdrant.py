@@ -22,9 +22,9 @@ class Qdrant(VectorDBinferance):
 
     def connect(self):
         if self.db_path.startswith("http"):
-            self.client = QdrantClient(url=self.db_path, api_key=self.api_key)
+            self.client = QdrantClient(url=self.db_path, api_key=self.api_key, timeout=60.0)
         else:
-            self.client = QdrantClient(path=self.db_path)
+            self.client = QdrantClient(path=self.db_path, timeout=60.0)
 
     def disconnect(self):
         self.client = None

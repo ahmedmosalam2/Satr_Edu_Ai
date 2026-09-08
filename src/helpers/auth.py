@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordBearer
 from src.helpers.config import get_settings
 
@@ -19,7 +19,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 # ────────────────────────────────────────────────────────
 # JWT token helpers
 # ────────────────────────────────────────────────────────
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None, expires_minutes: Optional[int] = None) -> str:
     settings = get_settings()
@@ -55,8 +55,26 @@ def verify_token(token: str) -> Optional[dict]:
 # ────────────────────────────────────────────────────────
 # FastAPI Dependencies
 # ────────────────────────────────────────────────────────
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
-    """Returns the decoded token payload (user_id, user_role, etc.)"""
+async def get_current_user(
+    token: Optional[str] = Depends(oauth2_scheme),
+    x_internal_api_key: Optional[str] = Header(None, alias="X-Internal-API-Key"),
+    x_user_id: Optional[str] = Header(None, alias="X-User-Id"),
+    x_user_role: Optional[str] = Header(None, alias="X-User-Role"),
+) -> dict:
+    """Returns the decoded token payload (user_id, user_role, etc.) or mock payload via Internal API key."""
+    settings = get_settings()
+    if x_internal_api_key and x_internal_api_key == settings.INTERNAL_API_KEY:
+        return {
+            "user_id": x_user_id or "internal_service",
+            "user_role": x_user_role or "operations",
+        }
+
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return decode_token(token)
 
 

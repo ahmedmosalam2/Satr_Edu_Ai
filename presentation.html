@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Satr Edu AI — Graduation Presentation</title>
+<meta name="description" content="Satr Edu AI: Enterprise-grade AI-powered adaptive learning platform — Graduation Project Presentation"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--c-bg:#060c1a;--c-surface:#0d1628;--c-card:#111e35;--c-border:rgba(99,179,237,0.15);--c-primary:#4facfe;--c-secondary:#a78bfa;--c-accent:#34d399;--c-warn:#fb923c;--c-text:#e2e8f0;--c-muted:#94a3b8;--c-dim:#475569;--grad-hero:linear-gradient(135deg,#4facfe 0%,#a78bfa 50%,#34d399 100%);--r:16px;--font-mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--c-bg);color:var(--c-text);overflow:hidden;user-select:none}
+#deck{width:100vw;height:100vh;position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;transform:translateX(60px);transition:opacity .5s ease,transform .5s ease;pointer-events:none;overflow:hidden}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:all}
+.slide.exit{opacity:0;transform:translateX(-60px)}
+.slide-inner{flex:1;overflow-y:auto;overflow-x:hidden;padding:48px 64px 80px;scrollbar-width:thin;scrollbar-color:var(--c-primary) transparent}
+.slide-inner::-webkit-scrollbar{width:4px}
+.slide-inner::-webkit-scrollbar-thumb{background:var(--c-primary);border-radius:2px}
+#nav{position:fixed;bottom:0;left:0;right:0;height:64px;background:rgba(6,12,26,.92);backdrop-filter:blur(20px);border-top:1px solid var(--c-border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;z-index:1000}
+#nav-left,#nav-right{display:flex;align-items:center;gap:12px}
+#nav-center{font-size:13px;color:var(--c-muted);letter-spacing:.05em}
+.nav-btn{background:var(--c-card);border:1px solid var(--c-border);color:var(--c-text);padding:8px 22px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s ease}
+.nav-btn:hover{background:var(--c-primary);color:var(--c-bg);border-color:var(--c-primary)}
+#progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--grad-hero);transition:width .4s ease;z-index:2000;border-radius:0 2px 2px 0}
+.slide-num-badge{position:fixed;top:18px;right:20px;background:rgba(6,12,26,.7);border:1px solid var(--c-border);border-radius:6px;padding:4px 10px;font-size:12px;font-family:var(--font-mono);color:var(--c-dim);pointer-events:none;z-index:900}
+.hero-slide .slide-inner{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(79,172,254,.12) 0%,transparent 70%);min-height:100%;padding:80px 64px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(79,172,254,.12);border:1px solid rgba(79,172,254,.35);color:var(--c-primary);padding:6px 18px;border-radius:999px;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:32px;animation:fadein .8s ease .2s both}
+.hero-title{font-size:clamp(42px,5vw,72px);font-weight:900;line-height:1.1;margin-bottom:24px;background:var(--grad-hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:fadein .8s ease .3s both}
+.hero-subtitle{font-size:clamp(18px,2vw,24px);color:var(--c-muted);font-weight:400;max-width:700px;line-height:1.6;margin-bottom:40px;animation:fadein .8s ease .4s both}
+.hero-meta{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;animation:fadein .8s ease .5s both}
+.hero-meta-item{background:var(--c-card);border:1px solid var(--c-border);border-radius:12px;padding:14px 24px;text-align:center;min-width:130px}
+.hero-meta-item .val{font-size:26px;font-weight:800;color:var(--c-primary);display:block}
+.hero-meta-item .lbl{font-size:12px;color:var(--c-muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+.slide-tag{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--c-primary);margin-bottom:8px;opacity:.8}
+.slide-h1{font-size:clamp(28px,3.5vw,46px);font-weight:900;line-height:1.15;background:var(--grad-hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px}
+.slide-h3{font-size:18px;font-weight:700;color:var(--c-primary);margin-bottom:6px}
+.slide-lead{font-size:16px;color:var(--c-muted);line-height:1.7;max-width:820px;margin-bottom:32px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+.split.wide{grid-template-columns:2fr 1fr}
+.card{background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--r);padding:22px;transition:border-color .25s ease,transform .25s ease,box-shadow .25s ease}
+.card:hover{border-color:rgba(79,172,254,.4);transform:translateY(-2px);box-shadow:0 8px 32px rgba(79,172,254,.1)}
+.card-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;background:rgba(79,172,254,.12)}
+.card-title{font-size:15px;font-weight:700;color:var(--c-text);margin-bottom:6px}
+.card-body{font-size:13px;color:var(--c-muted);line-height:1.6}
+.card.blue{border-left:3px solid #4facfe}
+.card.purple{border-left:3px solid #a78bfa}
+.card.green{border-left:3px solid #34d399}
+.card.orange{border-left:3px solid #fb923c}
+.card.pink{border-left:3px solid #f472b6}
+.code-block{background:#060c1a;border:1px solid var(--c-border);border-radius:10px;padding:18px 22px;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:#a5f3fc;overflow-x:auto;white-space:pre}
+.code-block .kw{color:#818cf8}.code-block .str{color:#34d399}.code-block .cm{color:#475569}.code-block .num{color:#fb923c}
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:4px;padding-bottom:8px}
+.flow-node{background:var(--c-card);border:1px solid var(--c-border);border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;white-space:nowrap;color:var(--c-text);flex-shrink:0}
+.flow-node.primary{border-color:var(--c-primary);color:var(--c-primary)}
+.flow-node.accent{border-color:var(--c-accent);color:var(--c-accent)}
+.flow-node.warn{border-color:var(--c-warn);color:var(--c-warn)}
+.flow-node.purple{border-color:var(--c-secondary);color:var(--c-secondary)}
+.flow-arrow{width:28px;text-align:center;color:var(--c-dim);font-size:16px}
+.vflow{display:flex;flex-direction:column;align-items:flex-start;gap:0}
+.vflow-node{background:var(--c-card);border:1px solid var(--c-border);border-radius:10px;padding:12px 20px;font-size:13px;font-weight:600;color:var(--c-text);width:100%}
+.vflow-node.primary{border-left:3px solid var(--c-primary)}
+.vflow-node.accent{border-left:3px solid var(--c-accent)}
+.vflow-node.warn{border-left:3px solid var(--c-warn)}
+.vflow-node.purple{border-left:3px solid var(--c-secondary)}
+.vflow-node.pink{border-left:3px solid #f472b6}
+.vflow-arrow{padding:4px 0 4px 20px;color:var(--c-dim);font-size:16px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:rgba(79,172,254,.08)}
+th{text-align:left;padding:12px 16px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c-primary);border-bottom:1px solid var(--c-border)}
+td{padding:11px 16px;border-bottom:1px solid rgba(99,179,237,.07);color:var(--c-muted);line-height:1.5}
+tr:hover td{background:rgba(79,172,254,.04)}
+.tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.05em}
+.tag.blue{background:rgba(79,172,254,.12);color:#4facfe}
+.tag.green{background:rgba(52,211,153,.12);color:#34d399}
+.tag.purple{background:rgba(167,139,250,.12);color:#a78bfa}
+.tag.orange{background:rgba(251,146,60,.12);color:#fb923c}
+.tag.pink{background:rgba(244,114,182,.12);color:#f472b6}
+.stat-block{text-align:center;padding:20px 16px}
+.stat-val{font-size:40px;font-weight:900;line-height:1;margin-bottom:6px;background:var(--grad-hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-lbl{font-size:12px;color:var(--c-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.check-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.check-list li{display:flex;gap:12px;align-items:flex-start;font-size:14px;color:var(--c-muted);line-height:1.5}
+.check-list li::before{content:'✓';color:var(--c-accent);font-weight:800;flex-shrink:0;margin-top:1px}
+.bullet-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.bullet-list li{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--c-muted);line-height:1.5}
+.bullet-list li::before{content:'›';color:var(--c-primary);font-weight:800;flex-shrink:0}
+.callout{border-left:4px solid var(--c-primary);background:rgba(79,172,254,.06);border-radius:0 10px 10px 0;padding:16px 20px;font-size:14px;color:var(--c-muted);line-height:1.7;margin:20px 0}
+.callout strong{color:var(--c-text)}
+.sec-header{margin-bottom:28px}
+.sec-divider{height:1px;background:linear-gradient(90deg,var(--c-primary) 0%,transparent 100%);margin:10px 0 20px;opacity:.3}
+.timeline{position:relative;padding-left:32px;display:flex;flex-direction:column;gap:0}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--c-primary),var(--c-secondary),var(--c-accent))}
+.tl-item{position:relative;padding:0 0 20px 16px}
+.tl-item::before{content:'';position:absolute;left:-28px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--c-primary);border:2px solid var(--c-bg)}
+.tl-title{font-size:14px;font-weight:700;color:var(--c-text);margin-bottom:4px}
+.tl-body{font-size:13px;color:var(--c-muted);line-height:1.5}
+.arch-box{border:1px solid var(--c-border);border-radius:12px;overflow:hidden}
+.arch-layer{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--c-border);font-size:13px;font-weight:600}
+.arch-layer:last-child{border-bottom:none}
+.arch-layer.l1{background:rgba(79,172,254,.08);color:var(--c-primary)}
+.arch-layer.l2{background:rgba(167,139,250,.08);color:var(--c-secondary)}
+.arch-layer.l3{background:rgba(52,211,153,.08);color:var(--c-accent)}
+.arch-layer.l4{background:rgba(251,146,60,.08);color:var(--c-warn)}
+.arch-layer.l5{background:rgba(244,114,182,.08);color:#f472b6}
+.arch-arrow-row{text-align:center;padding:4px;color:var(--c-dim);font-size:14px;background:var(--c-surface)}
+.arch-layer-items{flex:1;display:flex;flex-wrap:wrap;gap:8px}
+.metric-bar-wrap{margin-bottom:14px}
+.metric-bar-header{display:flex;justify-content:space-between;margin-bottom:5px;font-size:13px}
+.metric-bar-name{color:var(--c-text);font-weight:600}
+.metric-bar-val{color:var(--c-primary);font-weight:700}
+.metric-bar-bg{height:6px;background:var(--c-surface);border-radius:3px;overflow:hidden}
+.metric-bar-fill{height:100%;border-radius:3px;background:var(--grad-hero)}
+.ocr-chain{display:flex;flex-direction:column;gap:4px}
+.ocr-step{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;border:1px solid var(--c-border);font-size:13px;font-weight:600}
+.ocr-step .rank{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.ocr-step.s1{border-color:rgba(52,211,153,.5);background:rgba(52,211,153,.06)}.ocr-step.s1 .rank{background:rgba(52,211,153,.2);color:#34d399}
+.ocr-step.s2{border-color:rgba(79,172,254,.4);background:rgba(79,172,254,.05)}.ocr-step.s2 .rank{background:rgba(79,172,254,.2);color:#4facfe}
+.ocr-step.s3{border-color:rgba(167,139,250,.35);background:rgba(167,139,250,.05)}.ocr-step.s3 .rank{background:rgba(167,139,250,.2);color:#a78bfa}
+.ocr-step.s4{border-color:rgba(251,146,60,.3);background:rgba(251,146,60,.04)}.ocr-step.s4 .rank{background:rgba(251,146,60,.2);color:#fb923c}
+.ocr-step.s5{border-color:rgba(244,114,182,.25);background:rgba(244,114,182,.04)}.ocr-step.s5 .rank{background:rgba(244,114,182,.2);color:#f472b6}
+.ocr-arrow{text-align:center;color:var(--c-dim);font-size:13px}
+#toc-overlay{display:none;position:fixed;inset:0;background:rgba(6,12,26,.96);backdrop-filter:blur(12px);z-index:5000;overflow-y:auto;padding:48px}
+#toc-overlay.open{display:block}
+.toc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:24px}
+.toc-item{background:var(--c-card);border:1px solid var(--c-border);border-radius:10px;padding:14px 18px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:14px}
+.toc-item:hover{border-color:var(--c-primary);background:rgba(79,172,254,.08)}
+.toc-num{width:32px;height:32px;border-radius:8px;background:rgba(79,172,254,.12);color:var(--c-primary);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.toc-name{font-size:13px;font-weight:600;color:var(--c-text)}
+#fs-btn{background:none;border:1px solid var(--c-border);color:var(--c-muted);padding:6px 12px;border-radius:7px;cursor:pointer;font-size:14px;transition:all .2s;font-family:'Inter',sans-serif}
+#fs-btn:hover{border-color:var(--c-primary);color:var(--c-primary)}
+.kbd{display:inline-block;background:var(--c-card);border:1px solid var(--c-border);border-radius:4px;padding:2px 7px;font-size:11px;font-family:var(--font-mono);color:var(--c-muted)}
+.hl{color:var(--c-primary);font-weight:700}
+.hl-green{color:var(--c-accent);font-weight:700}
+.hl-orange{color:var(--c-warn);font-weight:700}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}.mt24{margin-top:24px}.mt32{margin-top:32px}.mb16{margin-bottom:16px}.mb12{margin-bottom:12px}
+.stagger>*{animation:fadein .5s ease both}
+.stagger>*:nth-child(1){animation-delay:.05s}.stagger>*:nth-child(2){animation-delay:.12s}.stagger>*:nth-child(3){animation-delay:.19s}
+.stagger>*:nth-child(4){animation-delay:.26s}.stagger>*:nth-child(5){animation-delay:.33s}.stagger>*:nth-child(6){animation-delay:.4s}
+@keyframes fadein{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){.slide-inner{padding:28px 24px 80px}.grid-2,.grid-3,.grid-4,.split{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="progress-bar" style="width:0%"></div>
+<div class="slide-num-badge" id="slide-num-badge">1 / 30</div>
+<div id="toc-overlay">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <h2 style="font-size:28px;font-weight:900;background:var(--grad-hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">All Slides</h2>
+    <button class="nav-btn" onclick="toggleTOC()">✕ Close</button>
+  </div>
+  <p style="color:var(--c-muted);font-size:13px;margin-bottom:24px">Click any slide to jump to it.</p>
+  <div class="toc-grid" id="toc-grid"></div>
+</div>
+<div id="deck">
+
+<!-- SLIDE 1: HERO -->
+<div class="slide hero-slide active" data-title="Title — Satr Edu AI">
+<div class="slide-inner">
+  <div class="hero-badge">🎓 Graduation Project Presentation</div>
+  <h1 class="hero-title">Satr Edu AI</h1>
+  <p class="hero-subtitle">An Enterprise-Grade, Multi-Agent AI Platform for Adaptive Personalized Education — Transforming Static Course Documents into an Intelligent, Context-Aware Tutor</p>
+  <div class="hero-meta stagger">
+    <div class="hero-meta-item"><span class="val">3-Tier</span><span class="lbl">Distributed Architecture</span></div>
+    <div class="hero-meta-item"><span class="val">5+</span><span class="lbl">AI Agents & Tools</span></div>
+    <div class="hero-meta-item"><span class="val">30+</span><span class="lbl">API Endpoints</span></div>
+    <div class="hero-meta-item"><span class="val">5-Layer</span><span class="lbl">OCR Fallback Chain</span></div>
+    <div class="hero-meta-item"><span class="val">IRT</span><span class="lbl">Adaptive Learning</span></div>
+  </div>
+  <div class="mt32" style="color:var(--c-dim);font-size:13px">Use <span class="kbd">←</span> <span class="kbd">→</span> to navigate &nbsp;·&nbsp; <span class="kbd">T</span> for slide list &nbsp;·&nbsp; <span class="kbd">F</span> for fullscreen</div>
+</div>
+</div>
+
+<!-- SLIDE 2: PROBLEM STATEMENT -->
+<div class="slide" data-title="Problem Statement">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Vision</div>
+    <h1 class="slide-h1">The Problem We Solve</h1>
+    <div class="sec-divider"></div>
+    <p class="slide-lead">Traditional e-learning is fundamentally broken. Students get identical content regardless of level, LLMs hallucinate course-irrelevant answers, and exams never adapt to individual weaknesses.</p>
+  </div>
+  <div class="grid-3 stagger">
+    <div class="card orange"><div class="card-icon" style="font-size:26px;background:rgba(251,146,60,.12)">📚</div><div class="card-title">One-Size-Fits-All</div><div class="card-body">Every student receives identical materials, ignoring knowledge gaps and learning pace differences.</div></div>
+    <div class="card blue"><div class="card-icon" style="font-size:26px;background:rgba(79,172,254,.12)">🤖</div><div class="card-title">LLM Hallucination</div><div class="card-body">General-purpose chatbots generate confident but factually wrong answers, not grounded in actual course content.</div></div>
+    <div class="card purple"><div class="card-icon" style="font-size:26px;background:rgba(167,139,250,.12)">📊</div><div class="card-title">Static Assessment</div><div class="card-body">Exams are manually created, never adapt to performance, and fail to identify where each student struggles.</div></div>
+  </div>
+  <div class="callout mt24"><strong>Our Answer:</strong> Satr Edu AI transforms any uploaded academic document — PDF, DOCX, PPTX, scanned image — into a fully interactive, context-aware intelligent tutor that knows exactly what the course material says, adapts to each student's proficiency in real time, and never hallucinates.</div>
+  <div class="grid-2 mt24">
+    <div>
+      <div class="slide-h3 mb12">Target Users</div>
+      <ul class="check-list stagger">
+        <li><strong style="color:var(--c-text)">Students:</strong> Personalized explanations, adaptive quizzes, immediate academic support</li>
+        <li><strong style="color:var(--c-text)">Teachers:</strong> Auto-generate exams, monitor analytics, upload course materials</li>
+        <li><strong style="color:var(--c-text)">Admins:</strong> Manage infrastructure health, user access, system content</li>
+        <li><strong style="color:var(--c-text)">Parents:</strong> Portal to track their child's academic progress and risk levels</li>
+      </ul>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">Educational Science Embedded</div>
+      <ul class="check-list stagger">
+        <li><strong style="color:var(--c-text)">Spaced Repetition:</strong> Reviews scheduled precisely when student is about to forget</li>
+        <li><strong style="color:var(--c-text)">Item Response Theory (IRT):</strong> Mathematical ELO rating updates based on question difficulty</li>
+        <li><strong style="color:var(--c-text)">Socratic Method:</strong> AI agent guides students to discover answers through targeted questions</li>
+        <li><strong style="color:var(--c-text)">Hybrid RAG:</strong> Every answer strictly grounded in uploaded academic materials</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 3: SYSTEM ARCHITECTURE -->
+<div class="slide" data-title="System Architecture">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Architecture</div>
+    <h1 class="slide-h1">Three-Tier System Architecture</h1>
+    <div class="sec-divider"></div>
+    <p class="slide-lead">A microservices-inspired monolithic AI backend, bridged to a production Django REST API, served by a React frontend — each tier with a specialized, non-overlapping role.</p>
+  </div>
+  <div class="arch-box stagger">
+    <div class="arch-layer l1"><span style="font-size:20px">🖥️</span><div class="arch-layer-items"><span class="tag blue">React 18 + Vite</span><span class="tag blue">TailwindCSS</span><span class="tag blue">Axios</span><span class="tag blue">Context API</span><span class="tag blue">Physics/Chemistry Tools</span></div><span style="color:var(--c-muted);font-size:12px;margin-left:auto;white-space:nowrap">TIER 1 — Frontend</span></div>
+    <div class="arch-arrow-row">↓ HTTP/REST + JWT Bearer Tokens ↓</div>
+    <div class="arch-layer l2"><span style="font-size:20px">⚙️</span><div class="arch-layer-items"><span class="tag purple">Django 4.2 + DRF</span><span class="tag purple">PostgreSQL</span><span class="tag purple">Redis Cache</span><span class="tag purple">JWT Auth</span><span class="tag purple">Celery</span></div><span style="color:var(--c-muted);font-size:12px;margin-left:auto;white-space:nowrap">TIER 2 — Django Gateway</span></div>
+    <div class="arch-arrow-row">↓ X-Internal-API-Key + X-User-Id + X-User-Role headers ↓</div>
+    <div class="arch-layer l3"><span style="font-size:20px">🧠</span><div class="arch-layer-items"><span class="tag green">FastAPI + Uvicorn</span><span class="tag green">Multi-Agent ReAct</span><span class="tag green">Hybrid RAG Pipeline</span><span class="tag green">OCR Chain</span><span class="tag green">LLM Factory</span></div><span style="color:var(--c-muted);font-size:12px;margin-left:auto;white-space:nowrap">TIER 3 — AI Engine</span></div>
+    <div class="arch-arrow-row">↓ Docker Bridge Network (satr_net) ↓</div>
+    <div class="arch-layer l4"><span style="font-size:20px">🗄️</span><div class="arch-layer-items"><span class="tag orange">MongoDB</span><span class="tag orange">Qdrant Vector DB</span><span class="tag orange">Redis Broker</span><span class="tag orange">MinIO Storage</span></div><span style="color:var(--c-muted);font-size:12px;margin-left:auto;white-space:nowrap">TIER 4 — Infrastructure</span></div>
+    <div class="arch-arrow-row">↓ External AI Providers ↓</div>
+    <div class="arch-layer l5"><span style="font-size:20px">☁️</span><div class="arch-layer-items"><span class="tag pink">OpenAI GPT-3.5</span><span class="tag pink">Cohere Embeddings</span><span class="tag pink">Google Gemini Vision</span><span class="tag pink">Ollama Local LLM</span><span class="tag pink">Surya OCR</span></div><span style="color:var(--c-muted);font-size:12px;margin-left:auto;white-space:nowrap">TIER 5 — AI Providers</span></div>
+  </div>
+  <div class="grid-3 mt20 stagger">
+    <div class="card blue"><div class="card-title">🔒 Security Bridge</div><div class="card-body">JWT (HS256) for frontend↔Django, Internal API Key for Django↔FastAPI, RBAC at every route layer</div></div>
+    <div class="card green"><div class="card-title">⚡ Performance Bridge</div><div class="card-body">Celery workers for async heavy jobs, Redis caching hot queries, SSE streaming for real-time LLM responses</div></div>
+    <div class="card purple"><div class="card-title">📦 Container Bridge</div><div class="card-body">Docker Compose: 6 services — satr-app, celery-worker, redis, mongodb, qdrant, nginx</div></div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 4: FASTAPI BACKEND -->
+<div class="slide" data-title="FastAPI AI Backend Architecture">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Backend Architecture</div>
+    <h1 class="slide-h1">FastAPI AI Backend — Domain-Driven Design</h1>
+    <div class="sec-divider"></div>
+    <p class="slide-lead">Strict separation of concerns. Every layer has exactly one responsibility. No god classes, no cross-domain leakage.</p>
+  </div>
+  <div class="split">
+    <div>
+      <div class="slide-h3 mb12">Layer-by-Layer Structure</div>
+      <div class="vflow stagger">
+        <div class="vflow-node primary">🌐 Routes Layer — HTTP endpoints, request validation, status codes</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node purple">🧠 Controllers Layer — Business logic, inter-service orchestration</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node accent">🤖 Agent Layer — ReAct orchestrator, specialized agents, tool registry</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node warn">📦 Models Layer — Pydantic v2 schemas + Motor async DB operations</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node pink">⚙️ Worker Layer — Celery background tasks (OCR, embedding, indexing)</div>
+      </div>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">Key Controllers</div>
+      <div class="grid-auto stagger">
+        <div class="card blue" style="padding:14px"><div class="card-title" style="font-size:13px">AIController</div><div class="card-body" style="font-size:12px">Exam generation, LLM grading, summarization, JSON repair</div></div>
+        <div class="card purple" style="padding:14px"><div class="card-title" style="font-size:13px">NLPController</div><div class="card-body" style="font-size:12px">Embeddings, vector search, RAG context building, reranking</div></div>
+        <div class="card green" style="padding:14px"><div class="card-title" style="font-size:13px">OCRController</div><div class="card-body" style="font-size:12px">5-layer OCR fallback chain, image preprocessing pipeline</div></div>
+        <div class="card orange" style="padding:14px"><div class="card-title" style="font-size:13px">ProcessController</div><div class="card-body" style="font-size:12px">Parser factory, chunker factory, document ingestion pipeline</div></div>
+        <div class="card pink" style="padding:14px"><div class="card-title" style="font-size:13px">ProjectController</div><div class="card-body" style="font-size:12px">Project CRUD, file management, Qdrant collection initialization</div></div>
+        <div class="card blue" style="padding:14px"><div class="card-title" style="font-size:13px">AnalyticsController</div><div class="card-body" style="font-size:12px">Student & teacher metrics, risk forecasting, weakness mapping</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="mt20">
+    <div class="slide-h3 mb12">Technology Stack Rationale</div>
+    <table>
+      <thead><tr><th>Technology</th><th>Why Chosen</th><th>Alternative Rejected</th></tr></thead>
+      <tbody>
+        <tr><td>FastAPI + Uvicorn</td><td>Native async/await, auto OpenAPI docs, Pydantic v2 validation built-in</td><td>Flask (no async), Django (too heavyweight for AI engine)</td></tr>
+        <tr><td>MongoDB + Motor</td><td>Flexible schema for evolving document metadata, fully async driver</td><td>PostgreSQL only (rigid schema)</td></tr>
+        <tr><td>Qdrant</td><td>Dedicated vector DB, HNSW O(log N) search, native payload filters, multi-tenant</td><td>pgvector (slower, fewer features)</td></tr>
+        <tr><td>Celery + Redis</td><td>Non-blocking heavy jobs, retry logic, soft/hard timeouts, independent scaling</td><td>Background threads (unreliable, no retry)</td></tr>
+        <tr><td>Pydantic v2</td><td>Rust-based core, 5–17× faster serialization than v1</td><td>Marshmallow, dataclasses</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 5: API ARCHITECTURE -->
+<div class="slide" data-title="API Architecture & Request Flow">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">API Layer</div>
+    <h1 class="slide-h1">API Architecture &amp; Request Flow</h1>
+    <div class="sec-divider"></div>
+  </div>
+  <div class="split wide">
+    <div>
+      <div class="slide-h3 mb12">Core Endpoints — FastAPI <code style="font-family:var(--font-mono);color:var(--c-primary)">/api/v1/</code></div>
+      <table>
+        <thead><tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag green">POST</span></td><td><code style="font-family:var(--font-mono);font-size:12px;color:#a5f3fc">/projects</code></td><td>Create course workspace + Qdrant collection</td></tr>
+          <tr><td><span class="tag green">POST</span></td><td><code style="font-family:var(--font-mono);font-size:12px;color:#a5f3fc">/documents/{id}/upload</code></td><td>Upload file → async Celery task (202 Accepted)</td></tr>
+          <tr><td><span class="tag green">POST</span></td><td><code style="font-family:var(--font-mono);font-size:12px;color:#a5f3fc">/chat/{project_id}</code></td><td>RAG chat — Server-Sent Events streaming</td></tr>
+          <tr><td><span class="tag green">POST</span></td><td><code style="font-family:var(--font-mono);font-size:12px;color:#a5f3fc">/agent/ask</code></td><td>Multi-agent Smart Ask with intent classification</td></tr>
+          <tr><td><span class="tag green">POST</span></td><td><code style="font-family:var(--font-mono);font-size:12px;color:#a5f3fc">/ai/exam/generate</code></td><td>AI exam question generation from course material</td></tr>
+          <tr><td><span class="tag green">POST</span></td><td><code style="font-family:var(--font-mono);font-size:12px;color:#a5f3fc">/ai/exam/grade-answer</code></td><td>LLM-based essay grading with rubric</td></tr>
+          <tr><td><span class="tag green">POST</span></td><td><code style="font-family:var(--font-mono);font-size:12px;color:#a5f3fc">/ai/summarize</code></td><td>Document summarization</td></tr>
+          <tr><td><span class="tag green">POST</span></td><td><code style="font-family:var(--font-mono);font-size:12px;color:#a5f3fc">/ocr/process-image</code></td><td>Image OCR via 5-layer fallback chain</td></tr>
+        </tbody>
+      </table>
+      <div class="callout mt16"><strong>Django → FastAPI Security Bridge:</strong> Every proxied request carries <code style="font-family:var(--font-mono)">X-Internal-API-Key</code>, <code style="font-family:var(--font-mono)">X-User-Id</code>, and <code style="font-family:var(--font-mono)">X-User-Role</code> headers. FastAPI trusts Django's auth — no double JWT verification overhead.</div>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">Request Lifecycle</div>
+      <div class="vflow stagger">
+        <div class="vflow-node primary">1️⃣ Client HTTP Request (React)</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node purple">2️⃣ Django: JWT validation + RBAC</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node accent">3️⃣ Django proxies to FastAPI with security headers</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node warn">4️⃣ FastAPI: Pydantic validation + Depends()</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node pink">5️⃣ Controller → Agent/AI Processing</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node primary">6️⃣ SSE Token Stream / JSON Response</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 6: DATABASE DESIGN -->
+<div class="slide" data-title="Database Design">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Data Layer</div>
+    <h1 class="slide-h1">Hybrid Database Architecture</h1>
+    <div class="sec-divider"></div>
+    <p class="slide-lead">Three complementary databases, each optimized for its role — zero overlap, maximum performance, purpose-built for an AI educational platform.</p>
+  </div>
+  <div class="grid-3 stagger">
+    <div class="card blue"><div class="card-icon" style="font-size:28px">🍃</div><div class="card-title">MongoDB — Transactional Store</div><div class="card-body"><ul class="bullet-list mt8"><li>Users, Projects, Documents, Chunks</li><li>Text Index on chunks (language=none for Arabic)</li><li>Conversations (full chat history)</li><li>Exams, Questions, Answers, Results</li><li>Attendance records, Analytics data</li></ul></div></div>
+    <div class="card purple"><div class="card-icon" style="font-size:28px">⚡</div><div class="card-title">Qdrant — Vector Store</div><div class="card-body"><ul class="bullet-list mt8"><li>384-dim Cohere multilingual embeddings</li><li>Per-project collections: <code style="font-family:var(--font-mono);font-size:11px;color:#a78bfa">collection_384_{pid}</code></li><li>Cosine similarity + HNSW O(log N) index</li><li>Payload filters for cross-project isolation</li><li>Deterministic upsert IDs — no duplicates</li></ul></div></div>
+    <div class="card green"><div class="card-icon" style="font-size:28px">🐘</div><div class="card-title">PostgreSQL — Relational Store</div><div class="card-body"><ul class="bullet-list mt8"><li>User accounts (Django auth system)</li><li>Courses, Lessons, Materials</li><li>Enrollments, Progress tracking</li><li>Final exam results + grade records</li><li>Notifications, Parent portal data</li></ul></div></div>
+  </div>
+  <div class="mt20">
+    <div class="slide-h3 mb12">MongoDB Indexing Strategy (Performance-Critical)</div>
+    <table>
+      <thead><tr><th>Collection</th><th>Index Type</th><th>Engineering Rationale</th></tr></thead>
+      <tbody>
+        <tr><td>users</td><td>Unique on <code style="font-family:var(--font-mono);color:#a5f3fc">user_email</code></td><td>O(1) login lookups; enforces uniqueness constraint</td></tr>
+        <tr><td>chunks</td><td>Text Index on <code style="font-family:var(--font-mono);color:#a5f3fc">chunk_text</code> (language=none)</td><td>Arabic+English keyword search — bypasses English-centric stemming that garbles Arabic roots</td></tr>
+        <tr><td>documents</td><td>Composite: <code style="font-family:var(--font-mono);color:#a5f3fc">project_id + status</code></td><td>Filter processing backlogs in O(log N)</td></tr>
+        <tr><td>exam_results</td><td>Unique composite: <code style="font-family:var(--font-mono);color:#a5f3fc">exam_id + student_id</code></td><td>Prevents duplicate grade record submissions</td></tr>
+        <tr><td>attendance</td><td>Unique composite: <code style="font-family:var(--font-mono);color:#a5f3fc">student_id + session_id + source</code></td><td>Prevents duplicate check-in records</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 7: AUTH & SECURITY -->
+<div class="slide" data-title="Authentication & Security">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Security</div>
+    <h1 class="slide-h1">Authentication &amp; Security Architecture</h1>
+    <div class="sec-divider"></div>
+  </div>
+  <div class="split">
+    <div>
+      <div class="slide-h3 mb12">Authentication Flow</div>
+      <div class="vflow stagger">
+        <div class="vflow-node primary">1. POST /api/auth/login — credentials submitted</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node purple">2. bcrypt hash verification against DB record</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node accent">3. Sign JWT (HS256 + role claim + exp timestamp)</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node warn">4. Client stores token (Authorization header)</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node primary">5. FastAPI Depends(get_current_user) validates on every route</div>
+      </div>
+      <div class="mt16">
+        <div class="slide-h3 mb12">LLM-Specific Vulnerabilities Addressed</div>
+        <div class="card orange" style="padding:14px;margin-bottom:10px"><div class="card-title" style="font-size:13px">Prompt Injection Defense</div><div class="card-body" style="font-size:12px">System/Context/User demarcation tags physically separate instructions from user input. Intent classifier acts as input filter — off-topic queries never reach main LLM.</div></div>
+        <div class="card purple" style="padding:14px"><div class="card-title" style="font-size:13px">RAG Poisoning Defense</div><div class="card-body" style="font-size:12px">Context chunks validated and cleaned before embedding. Cross-Encoder reranker filters irrelevant or malicious snippets before LLM generation.</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">Security Measures</div>
+      <ul class="check-list stagger">
+        <li><strong style="color:var(--c-text)">Magic Byte Validation:</strong> File uploads validated by content headers (python-magic), not extension</li>
+        <li><strong style="color:var(--c-text)">File Size Limit:</strong> MAX 50MB enforced — prevents DoS attacks</li>
+        <li><strong style="color:var(--c-text)">Path Sanitization:</strong> Blocks directory traversal (../../etc/passwd)</li>
+        <li><strong style="color:var(--c-text)">Python Sandbox:</strong> subprocess isolation, 3s timeout, env vars scrubbed</li>
+        <li><strong style="color:var(--c-text)">RBAC:</strong> Depends(require_role(["teacher"])) on every protected route</li>
+        <li><strong style="color:var(--c-text)">CORS:</strong> Whitelist-only origins; blocks third-party requests</li>
+        <li><strong style="color:var(--c-text)">Stateless JWT:</strong> No DB lookup per request — role from token payload</li>
+      </ul>
+      <div class="mt16">
+        <div class="slide-h3 mb12">Role-Based Access Matrix</div>
+        <table>
+          <thead><tr><th>Action</th><th>Student</th><th>Teacher</th><th>Admin</th><th>Parent</th></tr></thead>
+          <tbody>
+            <tr><td>Upload materials</td><td>❌</td><td>✅</td><td>✅</td><td>❌</td></tr>
+            <tr><td>Generate AI exams</td><td>❌</td><td>✅</td><td>✅</td><td>❌</td></tr>
+            <tr><td>Chat with AI tutor</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td></tr>
+            <tr><td>Submit exam answers</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td></tr>
+            <tr><td>View class analytics</td><td>❌</td><td>✅</td><td>✅</td><td>❌</td></tr>
+            <tr><td>View child progress</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 8: DOCUMENT INGESTION -->
+<div class="slide" data-title="Document Ingestion Pipeline">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Processing Pipeline</div>
+    <h1 class="slide-h1">Document Ingestion Pipeline — 9 Stages</h1>
+    <div class="sec-divider"></div>
+    <p class="slide-lead">From raw file upload to searchable vector index — an asynchronous, fault-tolerant pipeline designed for any document format, including scanned Arabic PDFs.</p>
+  </div>
+  <div class="split">
+    <div>
+      <div class="vflow stagger">
+        <div class="vflow-node primary">📤 1. File Upload → disk: data/projects/{id}/{file}</div>
+        <div class="vflow-arrow">↓ 202 Accepted immediately — client not blocked</div>
+        <div class="vflow-node purple">⚙️ 2. Celery task queued → MongoDB status = "processing"</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node accent">📖 3. Parser Factory — PDF / DOCX / PPTX / HTML / XLSX / TXT</div>
+        <div class="vflow-arrow">↓ if extracted text &lt; 50 chars (scanned page)</div>
+        <div class="vflow-node warn">🔬 4. OCR Fallback Chain: Surya → Gemini → DeepSeek → Paddle → Tesseract</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node pink">🔤 5. Arabic Reconstruction: arabic_reshaper + python-bidi</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node primary">✂️ 6. Chunking: Naive Recursive or DeepDoc Layout-Aware</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node purple">📦 7. Bulk write chunks to MongoDB (batches of 100)</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node accent">🧮 8. Cohere embed-multilingual → upsert to Qdrant</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node accent">✅ 9. MongoDB status = "indexed" → SSE success event</div>
+      </div>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">Parser Factory — Supported Formats</div>
+      <div class="card blue" style="padding:14px;margin-bottom:14px">
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <span class="tag blue">PDF (PyMuPDF)</span><span class="tag blue">DOCX</span><span class="tag blue">PPTX</span><span class="tag blue">HTML</span><span class="tag blue">XLSX</span><span class="tag blue">CSV</span><span class="tag blue">TXT</span><span class="tag blue">MD</span><span class="tag blue">JSON</span><span class="tag blue">PNG/JPG</span><span class="tag blue">MP4/Video</span>
+        </div>
+        <div class="mt12" style="font-size:12px;color:var(--c-muted)">PDF: PyMuPDF → pdfplumber → pypdf triple fallback. Video: OpenCV frame sampling at 0.5 FPS + OCR per frame.</div>
+      </div>
+      <div class="slide-h3 mb12">Celery Task Limits</div>
+      <ul class="bullet-list">
+        <li>Soft timeout: <span class="hl">10 minutes</span> → graceful warning + save progress</li>
+        <li>Hard timeout: <span class="hl">11 minutes</span> → force terminate</li>
+        <li>Retries: <span class="hl">3 attempts</span> with exponential backoff</li>
+        <li>Status tracked: uploaded → processing → indexed / failed</li>
+      </ul>
+      <div class="card orange mt16" style="padding:14px">
+        <div class="card-title" style="font-size:13px">Why 202 Accepted?</div>
+        <div class="card-body" style="font-size:12px">Heavy jobs (OCR + embedding) can take minutes. Returning 202 immediately keeps the UI responsive. The client polls /task/{task_id} or receives SSE status updates when complete.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 9: OCR PIPELINE -->
+<div class="slide" data-title="OCR Pipeline — 5-Layer Fallback">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">OCR System</div>
+    <h1 class="slide-h1">5-Layer OCR Fallback Pipeline</h1>
+    <div class="sec-divider"></div>
+    <p class="slide-lead">Cost-effective redundancy: Local models first (zero API cost), cloud APIs as high-quality fallback, open-source tools as last resort. No single point of failure.</p>
+  </div>
+  <div class="split">
+    <div>
+      <div class="ocr-chain stagger">
+        <div class="ocr-step s1"><div class="rank">1</div><div><div style="font-size:14px;font-weight:700;color:#34d399">Surya OCR — Local Deep Learning</div><div style="font-size:12px;color:var(--c-muted);margin-top:3px">GPU-accelerated, excellent Arabic layout analysis, ~95% accuracy, $0 cost. Primary choice.</div></div></div>
+        <div class="ocr-arrow">↓ if unavailable or failed</div>
+        <div class="ocr-step s2"><div class="rank">2</div><div><div style="font-size:14px;font-weight:700;color:#4facfe">Gemini Vision API — Cloud Multimodal</div><div style="font-size:12px;color:var(--c-muted);margin-top:3px">1–2.5 sec/page, ~92% Arabic accuracy. Excellent on handwritten + low-res. Paid per image.</div></div></div>
+        <div class="ocr-arrow">↓ if rate-limited</div>
+        <div class="ocr-step s3"><div class="rank">3</div><div><div style="font-size:14px;font-weight:700;color:#a78bfa">DeepSeek OCR — HuggingFace Space API</div><div style="font-size:12px;color:var(--c-muted);margin-top:3px">Secondary cloud redundancy. ~82% accuracy. Free but rate-limited. Prevents total failure.</div></div></div>
+        <div class="ocr-arrow">↓ if API down</div>
+        <div class="ocr-step s4"><div class="rank">4</div><div><div style="font-size:14px;font-weight:700;color:#fb923c">PaddleOCR — Local Python Framework</div><div style="font-size:12px;color:var(--c-muted);margin-top:3px">Lightweight, good for single-line text and math equations. ~65% Arabic accuracy.</div></div></div>
+        <div class="ocr-arrow">↓ absolute last resort</div>
+        <div class="ocr-step s5"><div class="rank">5</div><div><div style="font-size:14px;font-weight:700;color:#f472b6">Tesseract — Classic Open Source</div><div style="font-size:12px;color:var(--c-muted);margin-top:3px">With 6-step image preprocessing pipeline. lang=ara+eng. ~42% Arabic accuracy.</div></div></div>
+      </div>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">Arabic OCR Accuracy Comparison</div>
+      <div class="metric-bar-wrap"><div class="metric-bar-header"><span class="metric-bar-name">Surya (GPU/CPU)</span><span class="metric-bar-val">~95%</span></div><div class="metric-bar-bg"><div class="metric-bar-fill" style="width:95%"></div></div></div>
+      <div class="metric-bar-wrap"><div class="metric-bar-header"><span class="metric-bar-name">Gemini Vision</span><span class="metric-bar-val">~92%</span></div><div class="metric-bar-bg"><div class="metric-bar-fill" style="width:92%"></div></div></div>
+      <div class="metric-bar-wrap"><div class="metric-bar-header"><span class="metric-bar-name">DeepSeek OCR</span><span class="metric-bar-val">~82%</span></div><div class="metric-bar-bg"><div class="metric-bar-fill" style="width:82%"></div></div></div>
+      <div class="metric-bar-wrap"><div class="metric-bar-header"><span class="metric-bar-name">PaddleOCR</span><span class="metric-bar-val">~65%</span></div><div class="metric-bar-bg"><div class="metric-bar-fill" style="width:65%"></div></div></div>
+      <div class="metric-bar-wrap"><div class="metric-bar-header"><span class="metric-bar-name">Tesseract (preprocessed)</span><span class="metric-bar-val">~42%</span></div><div class="metric-bar-bg"><div class="metric-bar-fill" style="width:42%"></div></div></div>
+      <div class="card orange mt16" style="padding:14px">
+        <div class="card-title" style="font-size:13px">Tesseract Preprocessing Pipeline</div>
+        <div class="card-body" style="font-size:12px">
+          <ol style="padding-left:16px;line-height:1.8">
+            <li>Convert image to grayscale (L mode)</li>
+            <li>Enhance contrast ×2.0 (ImageEnhance)</li>
+            <li>Apply sharpening filter (ImageFilter.SHARPEN)</li>
+            <li>Upscale to minimum 1000px width (LANCZOS)</li>
+            <li>Binarize: pixel &gt;140 → white, else black</li>
+            <li>Tesseract PSM 6 (ara+eng → eng fallback)</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 10: CHUNKING STRATEGIES -->
+<div class="slide" data-title="Chunking & Arabic Reconstruction">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Document Intelligence</div>
+    <h1 class="slide-h1">Structure-Aware Chunking Strategies</h1>
+    <div class="sec-divider"></div>
+    <p class="slide-lead">How we split documents directly determines retrieval quality. We implement two strategies — naive for speed, structure-aware for accuracy.</p>
+  </div>
+  <div class="split">
+    <div class="card blue">
+      <div class="card-title" style="font-size:16px;margin-bottom:12px">📏 Strategy 1: Naive Recursive Splitting</div>
+      <div class="card-body">
+        <div style="font-size:13px;color:var(--c-muted);margin-bottom:12px">Fast baseline. Works on all file types. Good for simple docs.</div>
+        <div class="slide-h3" style="font-size:13px;margin-bottom:8px">Separator Cascade:</div>
+        <div class="flow" style="gap:4px;margin-bottom:10px">
+          <div class="flow-node primary" style="padding:6px 10px;font-size:11px">Paragraphs<br>(\n\n)</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node purple" style="padding:6px 10px;font-size:11px">Lines<br>(\n)</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node accent" style="padding:6px 10px;font-size:11px">Sentences<br>(. )</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node warn" style="padding:6px 10px;font-size:11px">Words<br>(space)</div>
+        </div>
+        <div style="font-size:12px;color:#fb923c">⚠️ Can split tables and bullet lists across chunk boundaries — hurts RAG quality for structured docs</div>
+      </div>
+    </div>
+    <div class="card purple">
+      <div class="card-title" style="font-size:16px;margin-bottom:12px">🏗️ Strategy 2: DeepDoc Layout-Aware</div>
+      <div class="card-body">
+        <div style="font-size:13px;color:var(--c-muted);margin-bottom:12px">Inspired by RAGFlow. Preserves semantic units. Superior RAG accuracy.</div>
+        <ul class="check-list">
+          <li><strong style="color:var(--c-text)">Header Detection:</strong> PyMuPDF font-size + bold flags + Arabic regex (أولاً, الفصل) + English numbered headings</li>
+          <li><strong style="color:var(--c-text)">Table Preservation:</strong> Entire table extracted as one atomic chunk — row associations intact</li>
+          <li><strong style="color:var(--c-text)">List Grouping:</strong> Consecutive bullet items combined into a single contextual chunk</li>
+          <li><strong style="color:var(--c-text)">Context Prepending:</strong> Section heading prepended to each sub-chunk for retrieval relevance</li>
+        </ul>
+        <div class="mt12" style="font-size:12px;color:#34d399">✅ Dramatically improves RAG accuracy for structured academic PDFs and presentations</div>
+      </div>
+    </div>
+  </div>
+  <div class="mt20">
+    <div class="slide-h3 mb12">Arabic Text Reconstruction — A Critical Engineering Step</div>
+    <div class="callout">
+      <strong>The Problem:</strong> Arabic characters change shape based on position in a word (initial, medial, final, isolated). Raw PDF text extraction outputs isolated letters in wrong order — completely unembeddable.<br/><br/>
+      <strong>Step 1:</strong> <code style="font-family:var(--font-mono);color:#a5f3fc">arabic_reshaper.reshape(text)</code> — Combines letters into correct positional forms (Arabic reshaping algorithm)<br/>
+      <strong>Step 2:</strong> <code style="font-family:var(--font-mono);color:#a5f3fc">bidi.algorithm.get_display(reshaped)</code> — Resolves RTL/LTR bidirectional character ordering per Unicode BiDi standard
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 11: VECTOR DB & EMBEDDINGS -->
+<div class="slide" data-title="Vector Database & Embeddings">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Semantic Intelligence</div>
+    <h1 class="slide-h1">Vector Database &amp; Embedding Architecture</h1>
+    <div class="sec-divider"></div>
+  </div>
+  <div class="grid-2 stagger">
+    <div>
+      <div class="slide-h3 mb12">Embedding Pipeline</div>
+      <div class="vflow">
+        <div class="vflow-node primary">Chunk text extracted from document</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node purple">Cohere embed-multilingual-light-v3.0<br><span style="font-size:11px;color:var(--c-muted)">type=DOCUMENT for indexing, type=QUERY for search</span></div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node accent">384-dimensional float vector generated</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node warn">Upsert to: collection_384_{project_id}<br><span style="font-size:11px;color:var(--c-muted)">deterministic ID: {project_id}_{file_id}_{order}</span></div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node pink">Payload: text, chunk_id, page, source_file, order</div>
+      </div>
+      <div class="callout mt16"><strong>Why Cohere embed-multilingual-light-v3.0?</strong> Natively supports Arabic + English in a shared vector space. A single model handles all bilingual academic content without switching models. 384 dims = memory-efficient with strong accuracy.</div>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">Qdrant Collection Design</div>
+      <div class="card purple" style="padding:16px;margin-bottom:14px">
+        <ul class="bullet-list">
+          <li><strong style="color:var(--c-text)">Naming:</strong> <code style="font-family:var(--font-mono);font-size:11px;color:#a78bfa">collection_{dim}_{project_id}</code> — isolates per-course vectors at DB layer</li>
+          <li><strong style="color:var(--c-text)">Multi-tenant:</strong> Queries physically cannot cross project boundaries</li>
+          <li><strong style="color:var(--c-text)">Distance:</strong> Cosine Similarity — direction-based, normalizes for text length variation</li>
+          <li><strong style="color:var(--c-text)">Index:</strong> HNSW (Hierarchical Navigable Small World) — O(log N) nearest neighbor search</li>
+          <li><strong style="color:var(--c-text)">Upsert:</strong> Deterministic IDs ensure no duplicate vectors on re-index</li>
+        </ul>
+      </div>
+      <div class="slide-h3 mb12">Supported Embedding Backends</div>
+      <div class="grid-2" style="gap:8px">
+        <div class="card green" style="padding:12px"><div class="card-title" style="font-size:12px">Cohere (Default)</div><div class="card-body" style="font-size:11px">embed-multilingual-light-v3.0 · 384 dims · Arabic+English native</div></div>
+        <div class="card blue" style="padding:12px"><div class="card-title" style="font-size:12px">OpenAI</div><div class="card-body" style="font-size:11px">text-embedding-3-small · 1536 dims · High accuracy</div></div>
+        <div class="card orange" style="padding:12px"><div class="card-title" style="font-size:12px">Google Gemini</div><div class="card-body" style="font-size:11px">text-embedding-004 · 768 dims</div></div>
+        <div class="card purple" style="padding:12px"><div class="card-title" style="font-size:12px">Ollama (Local)</div><div class="card-body" style="font-size:11px">bge-small-en-v1.5 · 384 dims · Zero API cost</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 12: HYBRID RAG -->
+<div class="slide" data-title="Hybrid RAG Pipeline">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">AI Core</div>
+    <h1 class="slide-h1">Hybrid RAG Pipeline — Three-Stage Retrieval</h1>
+    <div class="sec-divider"></div>
+    <p class="slide-lead">Dense semantic search + Sparse keyword search + Cross-Encoder reranking. Every answer is factual, cited, and strictly grounded in course material.</p>
+  </div>
+  <div class="split">
+    <div>
+      <div class="slide-h3 mb12">Retrieval Architecture</div>
+      <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:12px;padding:20px">
+        <div style="text-align:center;padding:10px 16px;background:rgba(79,172,254,.1);border:1px solid rgba(79,172,254,.3);border-radius:8px;font-size:13px;font-weight:700;color:#4facfe;margin-bottom:16px">User Query (Arabic or English)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div style="background:rgba(79,172,254,.08);border:1px solid rgba(79,172,254,.3);border-radius:8px;padding:12px;font-size:12px;font-weight:600;color:#4facfe;text-align:center">🔷 Dense Search<br><span style="color:var(--c-muted);font-weight:400">Qdrant Cosine Similarity<br>Semantic intent matching</span></div>
+          <div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.3);border-radius:8px;padding:12px;font-size:12px;font-weight:600;color:#a78bfa;text-align:center">🔶 Sparse Search<br><span style="color:var(--c-muted);font-weight:400">MongoDB $text Index<br>Exact keyword matching</span></div>
+        </div>
+        <div style="text-align:center;color:var(--c-dim);font-size:12px;margin-bottom:10px">↓ Merge + Deduplicate by chunk_id ↓</div>
+        <div style="background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);border-radius:8px;padding:12px;font-size:12px;font-weight:600;color:#34d399;text-align:center;margin-bottom:10px">🎯 Cross-Encoder Reranker<br><span style="color:var(--c-muted);font-weight:400">ms-marco-MiniLM-L-6-v2 · Scores query-doc pairs end-to-end · Highest scores win</span></div>
+        <div style="text-align:center;color:var(--c-dim);font-size:12px;margin-bottom:10px">↓ Top-K ranked chunks → Prompt Construction ↓</div>
+        <div style="background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.3);border-radius:8px;padding:10px;font-size:12px;font-weight:600;color:#fb923c;text-align:center">📝 LLM Generation (T=0.2) → SSE Token Stream → Client</div>
+      </div>
+      <div class="callout mt16"><strong>Why Three Stages?</strong> Dense catches synonyms and paraphrases. Sparse nails exact technical terms and Arabic names. Cross-Encoder re-scores everything end-to-end, eliminating weak chunks that passed earlier filters.</div>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">RAG Prompt Template</div>
+      <div class="code-block" style="font-size:11px"><span class="kw">&lt;SYSTEM&gt;</span>
+You are an expert academic tutor.
+Rules (MUST follow strictly):
+1. Answer ONLY from provided docs.
+2. If answer missing → say exactly:
+   <span class="str">"Cannot find in course materials."</span>
+3. Never extrapolate or assume facts.
+4. Cite every claim: [Doc X]
+5. Maintain academic integrity.
+<span class="kw">&lt;/SYSTEM&gt;</span>
+<span class="str">--- DOCUMENT [Doc 1] ---</span>
+Source: physics_ch1.pdf (Page 4)
+{chunk_text}
+<span class="str">-----------------------</span>
+<span class="kw">Student:</span> {query}
+<span class="kw">Tutor:</span></div>
+      <div class="card green mt12" style="padding:14px">
+        <div class="card-title" style="font-size:13px">Citation Mapping</div>
+        <div class="card-body" style="font-size:12px">Every source chunk returned to frontend as: <code style="font-family:var(--font-mono);display:block;margin-top:6px;color:#a5f3fc;font-size:11px">{ doc_num, source_file, page, score: 0.89 }</code><br>Students click to jump directly to the source document excerpt.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 13: MULTI-AGENT SYSTEM -->
+<div class="slide" data-title="Multi-Agent ReAct System">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">AI Architecture</div>
+    <h1 class="slide-h1">Multi-Agent ReAct Orchestration System</h1>
+    <div class="sec-divider"></div>
+    <p class="slide-lead">Not a chatbot — a coordinating intelligence. Intent classification routes each query to a specialized agent persona with custom tools and unique behavioral constraints.</p>
+  </div>
+  <div class="split wide">
+    <div>
+      <div class="grid-auto stagger">
+        <div class="card blue"><div class="card-icon" style="font-size:22px">🔍</div><div class="card-title">RAG Agent</div><div class="card-body">Multi-step query decomposition. Breaks complex questions into sub-queries. Loops through vector DB. Merges citations from multiple documents. Calls Calculator for math.</div></div>
+        <div class="card green"><div class="card-icon" style="font-size:22px">🎓</div><div class="card-title">Tutor Agent</div><div class="card-body">Adapts explanation depth to student proficiency. Beginner: analogies + step-by-step. Advanced: technical formalism + edge cases. Bilingual: TUTOR_PROMPT_AR / EN.</div></div>
+        <div class="card purple"><div class="card-icon" style="font-size:22px">🏛️</div><div class="card-title">Socratic Agent</div><div class="card-body">FORBIDDEN: direct answers. REQUIRED: one guiding question per turn. After 2 wrong attempts: subtle hint. Never reveals final answer. Pure Socratic method.</div></div>
+        <div class="card orange"><div class="card-icon" style="font-size:22px">📝</div><div class="card-title">Quiz Agent</div><div class="card-body">Generates N questions from recent context. Outputs structured JSON: question, options, correct_answer, hints. Validates with regex. Temperature 0.7 for variety.</div></div>
+      </div>
+      <div class="mt16">
+        <div class="slide-h3 mb12">ReAct Execution Loop</div>
+        <div class="flow">
+          <div class="flow-node primary">💭 Thought</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node accent">⚡ Tool Call</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node purple">👁️ Observe</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node warn">🔄 Repeat (≤5 steps)</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node accent">✅ Final Answer</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">Agent Tool Registry</div>
+      <div class="vflow stagger">
+        <div class="vflow-node primary">🔎 KnowledgeSearchTool<br><span style="font-size:11px;color:var(--c-muted)">Hybrid Qdrant + MongoDB search, returns citations {chunk_id, source_file, page, score}</span></div>
+        <div class="vflow-arrow"> </div>
+        <div class="vflow-node purple">🗺️ ConceptMapTool<br><span style="font-size:11px;color:var(--c-muted)">LLM generates Mermaid.js mind map from course context for visual learning</span></div>
+        <div class="vflow-arrow"> </div>
+        <div class="vflow-node accent">🐍 PythonScratchpadTool<br><span style="font-size:11px;color:var(--c-muted)">subprocess isolation, 3s timeout, env scrubbed, UTF-8 enforced, safe for code execution</span></div>
+        <div class="vflow-arrow"> </div>
+        <div class="vflow-node warn">🔢 CalculatorTool<br><span style="font-size:11px;color:var(--c-muted)">Safe eval with SAFE_MATH whitelist (sqrt, sin, log, factorial). No __builtins__ access.</span></div>
+      </div>
+      <div class="card green mt16" style="padding:14px">
+        <div class="card-title" style="font-size:13px">Safety: Python Sandbox</div>
+        <div class="card-body" style="font-size:12px"><ul class="bullet-list"><li>subprocess.run (separate OS process)</li><li>3s hard timeout (prevents infinite loops)</li><li>All env variables scrubbed before exec</li><li>stdout + stderr captured → returned to agent</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 14: INTENT CLASSIFICATION -->
+<div class="slide" data-title="Intent Classification Engine">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">AI Routing</div>
+    <h1 class="slide-h1">Intent Classification Engine</h1>
+    <div class="sec-divider"></div>
+    <p class="slide-lead">The routing brain of the system. Before any heavy LLM processing, the Orchestrator classifies what the student actually needs — with Arabic and English support.</p>
+  </div>
+  <div class="split">
+    <div>
+      <div class="slide-h3 mb12">LLM-Based Classification</div>
+      <div class="code-block" style="font-size:12px"><span class="cm">// System Prompt instructs LLM to return JSON:</span>
+{
+  <span class="str">"intent"</span>: <span class="str">"research | tutor | quiz |
+           greeting | off_topic |
+           concept_map | python_scratchpad |
+           socratic"</span>,
+  <span class="str">"confidence"</span>: <span class="num">0.92</span>,
+  <span class="str">"reasoning"</span>: <span class="str">"User asked to explain..."</span>,
+  <span class="str">"entities"</span>: [<span class="str">"Newton's 2nd law"</span>]
+}
+<span class="cm">// Regex strips markdown wrappers before parse</span>
+<span class="cm">// Confidence &gt;= 0.5 → route to specialist agent</span>
+<span class="cm">// Confidence &lt; 0.5 → default to RAGAgent (safe)</span></div>
+      <div class="callout mt16"><strong>Routing Logic:</strong> If confidence ≥ 0.5 → specialized agent. Otherwise → RAGAgent handles safely with grounded factual search. This prevents classification errors from degrading user experience.</div>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">Keyword Fallback (when LLM unavailable)</div>
+      <table>
+        <thead><tr><th>Intent</th><th>Arabic Triggers</th><th>English Triggers</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag green">greeting</span></td><td>مرحبا، أهلاً، سلام</td><td>hello, hi, hey</td></tr>
+          <tr><td><span class="tag purple">concept_map</span></td><td>خريطة مفاهيم، ذهنية</td><td>mindmap, concept map</td></tr>
+          <tr><td><span class="tag orange">python</span></td><td>شغل الكود، نفذ</td><td>run python, sandbox</td></tr>
+          <tr><td><span class="tag pink">socratic</span></td><td>سقراط، ناقشني</td><td>socratic, guide me</td></tr>
+          <tr><td><span class="tag blue">tutor</span></td><td>فهمني، اشرح، بسّط</td><td>explain, what is, how</td></tr>
+          <tr><td><span class="tag green">quiz</span></td><td>اختبرني، امتحني</td><td>quiz me, test me</td></tr>
+          <tr><td><span class="tag blue">research</span></td><td colspan="2" style="text-align:center">Default — no keywords matched</td></tr>
+        </tbody>
+      </table>
+      <div class="card purple mt16" style="padding:14px">
+        <div class="card-title" style="font-size:13px">Why Custom Prompts vs Tool Routing?</div>
+        <div class="card-body" style="font-size:12px">Built-in tool-routing APIs vary across model families and break on non-English queries. Custom prompts give deterministic bilingual routing with an explainable reasoning trace logged in MongoDB for debugging.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 15: LLM FACTORY -->
+<div class="slide" data-title="LLM Provider Factory & Integration">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">AI Infrastructure</div>
+    <h1 class="slide-h1">LLM Provider Factory &amp; Integration</h1>
+    <div class="sec-divider"></div>
+    <p class="slide-lead">A Factory Pattern abstraction that decouples LLM providers from business logic. Swap GPT-3.5 for Gemini without changing a single agent line of code.</p>
+  </div>
+  <div class="split wide stagger">
+    <div>
+      <div class="slide-h3 mb12">Factory Architecture</div>
+      <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:12px;padding:20px;text-align:center">
+        <div style="background:rgba(79,172,254,.1);border:1px solid rgba(79,172,254,.3);border-radius:8px;padding:10px;font-size:13px;font-weight:700;color:#4facfe;margin-bottom:14px">get_settings() → reads .env config file</div>
+        <div style="font-size:20px;color:var(--c-dim);margin-bottom:14px">↓</div>
+        <div style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);border-radius:8px;padding:10px;font-size:13px;font-weight:700;color:#a78bfa;margin-bottom:14px">LLMProviderFactory — lazy imports by config</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+          <div style="background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);border-radius:6px;padding:8px;font-size:12px;font-weight:600;color:#34d399;text-align:center">OpenAI<br>GPT-3.5-turbo</div>
+          <div style="background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.3);border-radius:6px;padding:8px;font-size:12px;font-weight:600;color:#fb923c;text-align:center">Gemini<br>gemini-2.0-flash</div>
+          <div style="background:rgba(244,114,182,.08);border:1px solid rgba(244,114,182,.3);border-radius:6px;padding:8px;font-size:12px;font-weight:600;color:#f472b6;text-align:center">Ollama<br>Local LLMs</div>
+        </div>
+        <div style="font-size:20px;color:var(--c-dim);margin-bottom:14px">↓ All expose same interface ↓</div>
+        <div style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:8px;padding:10px;font-size:13px;font-weight:700;color:#34d399">LLMWrapper — Unified Interface<br><span style="font-size:11px;font-weight:400;color:var(--c-muted)">embed_text() · generate_text() · construct_prompt()</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">Configuration</div>
+      <div class="code-block" style="font-size:11px"><span class="cm"># Generation backend</span>
+GENERATION_BACKEND = <span class="str">"OPENAI"</span>
+GENERATION_MODEL_ID = <span class="str">"gpt-3.5-turbo-0125"</span>
+
+<span class="cm"># Embeddings</span>
+EMBEDDING_BACKEND = <span class="str">"COHERE"</span>
+EMBEDDING_MODEL_ID = <span class="str">"embed-multilingual-light-v3.0"</span>
+EMBEDDING_MODEL_SIZE = <span class="num">384</span>
+
+<span class="cm"># OCR backend</span>
+OCR_BACKEND = <span class="str">"surya"</span>  <span class="cm"># or gemini, local</span>
+GEMINI_VISION_MODEL = <span class="str">"gemini-2.0-flash"</span>
+
+<span class="cm"># LLM temperatures</span>
+EXAM_TEMP = <span class="num">0.7</span>   <span class="cm"># variety in questions</span>
+RAG_TEMP  = <span class="num">0.2</span>   <span class="cm"># factual accuracy</span></div>
+      <div class="card green mt12" style="padding:14px">
+        <div class="card-title" style="font-size:13px">Async/Sync Handling</div>
+        <div class="card-body" style="font-size:12px">Synchronous SDKs (Cohere, Ollama) run inside <code style="font-family:var(--font-mono)">asyncio.to_thread()</code> — main FastAPI event loop never blocks under concurrent load.</div>
+      </div>
+      <div class="card orange mt10" style="padding:14px">
+        <div class="card-title" style="font-size:13px">Rate Limit Resilience</div>
+        <div class="card-body" style="font-size:12px">Exponential backoff retry on all API calls. Local Ollama serves as zero-cost fallback when cloud APIs are throttled or down.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 16: ADAPTIVE LEARNING ENGINE -->
+<div class="slide" data-title="Adaptive Learning Engine — IRT + ELO">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Educational AI</div>
+    <h1 class="slide-h1">Adaptive Learning Engine (IRT + ELO)</h1>
+    <div class="sec-divider"></div>
+    <p class="slide-lead">Real educational science — not just question generation. A mathematical engine that dynamically adjusts to every student's mastery level in real time.</p>
+  </div>
+  <div class="split">
+    <div>
+      <div class="slide-h3 mb12">Item Response Theory (IRT) — Mastery Model</div>
+      <div class="card blue" style="padding:20px">
+        <div style="font-size:13px;color:var(--c-muted);margin-bottom:16px">Student mastery M ∈ [0.0, 1.0] — updated after every answer submission:</div>
+        <div style="background:rgba(79,172,254,.08);border:1px solid rgba(79,172,254,.2);border-radius:8px;padding:14px;margin-bottom:10px">
+          <div style="font-size:13px;font-weight:700;color:#4facfe;margin-bottom:8px">✅ Correct Answer:</div>
+          <div style="font-family:var(--font-mono);font-size:15px;color:var(--c-text);text-align:center">M<sub>new</sub> = M<sub>old</sub> + α × (1.0 − M<sub>old</sub>)</div>
+        </div>
+        <div style="background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.2);border-radius:8px;padding:14px;margin-bottom:16px">
+          <div style="font-size:13px;font-weight:700;color:#fb923c;margin-bottom:8px">❌ Wrong Answer:</div>
+          <div style="font-family:var(--font-mono);font-size:15px;color:var(--c-text);text-align:center">M<sub>new</sub> = M<sub>old</sub> − α × M<sub>old</sub></div>
+        </div>
+        <div style="font-size:12px;color:var(--c-muted);font-weight:700;margin-bottom:8px">Learning Rate (α) by Difficulty:</div>
+        <div style="display:flex;gap:10px">
+          <div style="text-align:center;padding:8px 12px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);border-radius:8px;font-size:12px;font-weight:700;color:#34d399">Easy<br>α = 0.08</div>
+          <div style="text-align:center;padding:8px 12px;background:rgba(79,172,254,.08);border:1px solid rgba(79,172,254,.3);border-radius:8px;font-size:12px;font-weight:700;color:#4facfe">Medium<br>α = 0.12</div>
+          <div style="text-align:center;padding:8px 12px;background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.3);border-radius:8px;font-size:12px;font-weight:700;color:#fb923c">Hard<br>α = 0.18</div>
+        </div>
+      </div>
+      <div class="card purple mt16" style="padding:14px">
+        <div class="card-title">Difficulty Transition Rules</div>
+        <div class="card-body mt8">
+          <div style="font-size:13px">⬆️ Upgrade: <span class="hl">3 consecutive correct</span> → difficulty increases (STREAK_TO_UPGRADE = 3)</div>
+          <div style="font-size:13px;margin-top:6px">⬇️ Downgrade: <span class="hl">2 consecutive wrong</span> → difficulty decreases (STREAK_TO_DOWNGRADE = 2)</div>
+          <div style="font-size:12px;color:var(--c-dim);margin-top:6px">Streak counter resets after every level transition</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">Spaced Repetition Scheduler</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);border-radius:10px;padding:14px;display:flex;align-items:center;gap:14px"><div style="font-size:24px">🏆</div><div><div style="font-weight:700;color:#34d399;font-size:14px">Mastered (≥ 85%)</div><div style="color:var(--c-muted);font-size:12px;margin-top:3px">Review in <strong style="color:var(--c-text)">14 days</strong></div></div></div>
+        <div style="background:rgba(79,172,254,.08);border:1px solid rgba(79,172,254,.3);border-radius:10px;padding:14px;display:flex;align-items:center;gap:14px"><div style="font-size:24px">📈</div><div><div style="font-weight:700;color:#4facfe;font-size:14px">Learning (60–85%)</div><div style="color:var(--c-muted);font-size:12px;margin-top:3px">Review in <strong style="color:var(--c-text)">3 days</strong></div></div></div>
+        <div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.3);border-radius:10px;padding:14px;display:flex;align-items:center;gap:14px"><div style="font-size:24px">⚠️</div><div><div style="font-weight:700;color:#a78bfa;font-size:14px">Struggling (30–60%)</div><div style="color:var(--c-muted);font-size:12px;margin-top:3px">Review in <strong style="color:var(--c-text)">24 hours</strong></div></div></div>
+        <div style="background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.3);border-radius:10px;padding:14px;display:flex;align-items:center;gap:14px"><div style="font-size:24px">🆕</div><div><div style="font-weight:700;color:#fb923c;font-size:14px">New Material (&lt; 30%)</div><div style="color:var(--c-muted);font-size:12px;margin-top:3px">Review in <strong style="color:var(--c-text)">1 hour</strong></div></div></div>
+      </div>
+      <div class="card green mt16" style="padding:14px">
+        <div class="card-title" style="font-size:13px">WhatsApp Notifications</div>
+        <div class="card-body" style="font-size:12px">Background workers monitor student inactivity. If last practice exceeds their spaced repetition window → WhatsApp reminder sent via Meta Graph API to both student and guardian.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 17: EXAM ENGINE -->
+<div class="slide" data-title="AI Exam Engine">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Assessment AI</div>
+    <h1 class="slide-h1">AI Exam Engine — Generation to Grading</h1>
+    <div class="sec-divider"></div>
+    <p class="slide-lead">Auto-generates unique, context-grounded exams from actual course material. Three post-generation quality validators. LLM-powered essay grading with rubric.</p>
+  </div>
+  <div class="split">
+    <div>
+      <div class="slide-h3 mb12">Generation Pipeline</div>
+      <div class="vflow stagger">
+        <div class="vflow-node primary">Fetch lecture chunks (prioritize student weak areas)</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node purple">Sample pages for broad topic coverage</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node accent">LLM Prompt: MCQ / True-False / Essay (T=0.7 for variety)</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node warn">Truncate context at 3000 chars (memory safety)</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node pink">LLM generates structured JSON questions array</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node primary">3 Validation Filters applied (see right →)</div>
+        <div class="vflow-arrow">↓</div>
+        <div class="vflow-node purple">Save as draft exam in MongoDB → Teacher review</div>
+      </div>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">Post-Generation Validators</div>
+      <div class="card blue" style="padding:16px;margin-bottom:12px"><div class="card-title">🔍 Validator 1: Answer Key Verification</div><div class="card-body mt8" style="font-size:13px">Checks correct_answer key exists in options list. Mismatched questions silently discarded — never shown to students.</div></div>
+      <div class="card orange" style="padding:16px;margin-bottom:12px"><div class="card-title">⚖️ Validator 2: A-Bias Prevention</div><div class="card-body mt8" style="font-size:13px">LLMs systematically place correct answer as "A". Filter checks key distribution. If biased → redistributes correct positions across A, B, C, D randomly.</div></div>
+      <div class="card purple" style="padding:16px"><div class="card-title">🔧 Validator 3: Truncation Repair</div><div class="card-body mt8" style="font-size:13px">When LLM hits token limit mid-JSON: <code style="font-family:var(--font-mono);font-size:11px">_repair_truncated_json()</code> extracts all fully-formed question objects. Partial exams salvaged, not discarded.</div></div>
+      <div class="slide-h3 mt16 mb12">Essay Grading Rubric (LLM)</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="flex:0 0 auto;text-align:center;padding:10px 12px;background:rgba(79,172,254,.12);border:1px solid rgba(79,172,254,.3);border-radius:8px;font-size:13px;font-weight:800;color:#4facfe">40%<br><span style="font-size:10px;font-weight:400;color:var(--c-muted)">Concept<br>Accuracy</span></div>
+        <div style="flex:0 0 auto;text-align:center;padding:10px 12px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);border-radius:8px;font-size:13px;font-weight:800;color:#34d399">30%<br><span style="font-size:10px;font-weight:400;color:var(--c-muted)">Complete-<br>ness</span></div>
+        <div style="flex:0 0 auto;text-align:center;padding:10px 12px;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);border-radius:8px;font-size:13px;font-weight:800;color:#a78bfa">20%<br><span style="font-size:10px;font-weight:400;color:var(--c-muted)">Clarity</span></div>
+        <div style="flex:0 0 auto;text-align:center;padding:10px 12px;background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.3);border-radius:8px;font-size:13px;font-weight:800;color:#fb923c">10%<br><span style="font-size:10px;font-weight:400;color:var(--c-muted)">Extra<br>Details</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 18: ASYNC ARCHITECTURE -->
+<div class="slide" data-title="Async Architecture & Background Processing">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Performance Engineering</div>
+    <h1 class="slide-h1">Async Architecture &amp; Background Processing</h1>
+    <div class="sec-divider"></div>
+    <p class="slide-lead">Every heavy operation is offloaded from the main event loop. Users receive instant responses; work happens asynchronously behind the scenes.</p>
+  </div>
+  <div class="grid-2 stagger">
+    <div class="card blue"><div class="card-icon" style="font-size:24px">⚡</div><div class="card-title">FastAPI Async Event Loop</div><div class="card-body"><ul class="bullet-list mt8"><li>All routes declared <code style="font-family:var(--font-mono)">async def</code> — no thread blocking</li><li>LLM API calls wrapped in <code style="font-family:var(--font-mono)">asyncio.to_thread()</code></li><li>MongoDB Motor: fully async driver</li><li>SSE streaming: <code style="font-family:var(--font-mono)">StreamingResponse</code> + async generator</li><li>Client disconnect: socket broken → task cancelled → resources released</li></ul></div></div>
+    <div class="card orange"><div class="card-icon" style="font-size:24px">🔄</div><div class="card-title">Celery + Redis Task Queue</div><div class="card-body"><ul class="bullet-list mt8"><li><strong style="color:var(--c-text)">process_file_task:</strong> Parse → OCR → clean → chunk → MongoDB</li><li><strong style="color:var(--c-text)">index_project_task:</strong> Embed chunks → Qdrant upsert</li><li>Soft: <span class="hl">10 min</span> warning · Hard: <span class="hl">11 min</span> kill</li><li>Client polls <code style="font-family:var(--font-mono)">/task/{task_id}</code> for progress</li><li>202 Accepted immediately — no blocking</li></ul></div></div>
+  </div>
+  <div class="mt20">
+    <div class="slide-h3 mb12">Concurrency Flow Diagram</div>
+    <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:12px;padding:20px;overflow-x:auto">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:nowrap;min-width:600px">
+        <div style="text-align:center;padding:12px;background:rgba(79,172,254,.08);border:1px solid rgba(79,172,254,.3);border-radius:8px;font-size:12px;font-weight:700;color:#4facfe;min-width:110px">Client<br>Upload</div>
+        <div style="color:var(--c-dim)">→</div>
+        <div style="text-align:center;padding:12px;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.3);border-radius:8px;font-size:12px;font-weight:700;color:#a78bfa;min-width:110px">FastAPI<br>Async Loop</div>
+        <div style="color:var(--c-dim)">→</div>
+        <div style="text-align:center;padding:12px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);border-radius:8px;font-size:12px;font-weight:700;color:#34d399;min-width:110px">202 + task_id<br>Immediate</div>
+        <div style="flex:1;border-top:2px dashed var(--c-dim);margin:0 8px"></div>
+        <div style="text-align:center;padding:12px;background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.3);border-radius:8px;font-size:12px;font-weight:700;color:#fb923c;min-width:110px">Redis Queue<br>→ Celery Worker</div>
+        <div style="color:var(--c-dim)">→</div>
+        <div style="text-align:center;padding:12px;background:rgba(244,114,182,.08);border:1px solid rgba(244,114,182,.3);border-radius:8px;font-size:12px;font-weight:700;color:#f472b6;min-width:130px">OCR → Embed<br>→ Qdrant Indexed</div>
+      </div>
+    </div>
+  </div>
+  <div class="grid-2 mt16">
+    <div class="callout"><strong>Thread Pool Isolation:</strong> Synchronous OCR and LLM calls run via <code style="font-family:var(--font-mono)">asyncio.to_thread</code> — off the event loop. 100 concurrent uploads never block 100 concurrent chat requests.</div>
+    <div class="callout" style="border-left-color:var(--c-accent)"><strong>Scale Path:</strong> Add more Celery worker Docker containers for OCR capacity. Add FastAPI web server instances behind load balancer. Zero architectural changes needed — just horizontal scaling.</div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 19: USER FLOWS -->
+<div class="slide" data-title="Complete User Flows">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">System Flows</div>
+    <h1 class="slide-h1">Complete End-to-End User Flows</h1>
+    <div class="sec-divider"></div>
+  </div>
+  <div class="grid-2 stagger">
+    <div>
+      <div class="slide-h3 mb8">Flow 1: Teacher Uploads Course Material</div>
+      <div class="flow" style="flex-wrap:wrap;gap:4px;margin-bottom:16px">
+        <div class="flow-node" style="font-size:11px">Upload PDF</div><div class="flow-arrow">→</div>
+        <div class="flow-node primary" style="font-size:11px">Django validates</div><div class="flow-arrow">→</div>
+        <div class="flow-node accent" style="font-size:11px">Celery task</div><div class="flow-arrow">→</div>
+        <div class="flow-node warn" style="font-size:11px">OCR→Chunk</div><div class="flow-arrow">→</div>
+        <div class="flow-node purple" style="font-size:11px">Embed→Qdrant</div>
+      </div>
+      <div class="slide-h3 mb8">Flow 2: Student Uses Smart Ask</div>
+      <div class="flow" style="flex-wrap:wrap;gap:4px;margin-bottom:16px">
+        <div class="flow-node" style="font-size:11px">Types question</div><div class="flow-arrow">→</div>
+        <div class="flow-node primary" style="font-size:11px">Intent classified</div><div class="flow-arrow">→</div>
+        <div class="flow-node accent" style="font-size:11px">Agent selected</div><div class="flow-arrow">→</div>
+        <div class="flow-node warn" style="font-size:11px">RAG search</div><div class="flow-arrow">→</div>
+        <div class="flow-node purple" style="font-size:11px">SSE + sources</div>
+      </div>
+      <div class="slide-h3 mb8">Flow 3: AI Exam Generation</div>
+      <div class="flow" style="flex-wrap:wrap;gap:4px;margin-bottom:16px">
+        <div class="flow-node" style="font-size:11px">Teacher requests</div><div class="flow-arrow">→</div>
+        <div class="flow-node primary" style="font-size:11px">Fetch chunks</div><div class="flow-arrow">→</div>
+        <div class="flow-node accent" style="font-size:11px">LLM generates</div><div class="flow-arrow">→</div>
+        <div class="flow-node warn" style="font-size:11px">3 validators</div><div class="flow-arrow">→</div>
+        <div class="flow-node purple" style="font-size:11px">Draft saved</div>
+      </div>
+      <div class="slide-h3 mb8">Flow 4: Student Takes Exam → IRT Update</div>
+      <div class="flow" style="flex-wrap:wrap;gap:4px">
+        <div class="flow-node" style="font-size:11px">Submit answers</div><div class="flow-arrow">→</div>
+        <div class="flow-node primary" style="font-size:11px">MCQ auto-grade</div><div class="flow-arrow">→</div>
+        <div class="flow-node accent" style="font-size:11px">Essay LLM grade</div><div class="flow-arrow">→</div>
+        <div class="flow-node warn" style="font-size:11px">IRT updates M</div><div class="flow-arrow">→</div>
+        <div class="flow-node purple" style="font-size:11px">Recommendations</div>
+      </div>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">Smart Ask — Full Request Lifecycle</div>
+      <div class="timeline stagger">
+        <div class="tl-item"><div class="tl-title">1. Request Ingress</div><div class="tl-body">POST /api/v1/agent/ask → Pydantic validates → JWT decoded → user context attached</div></div>
+        <div class="tl-item"><div class="tl-title">2. Memory Retrieval</div><div class="tl-body">AgentMemory fetches last N conversation turns for context continuity</div></div>
+        <div class="tl-item"><div class="tl-title">3. Intent Classification</div><div class="tl-body">IntentClassifier calls LLM → JSON {intent, confidence, reasoning, entities}</div></div>
+        <div class="tl-item"><div class="tl-title">4. Agent Dispatch</div><div class="tl-body">Confidence ≥ 0.5 → TutorAgent / SocraticAgent / QuizAgent / RAGAgent selected</div></div>
+        <div class="tl-item"><div class="tl-title">5. ReAct Tool Loop</div><div class="tl-body">Agent reasons → calls KnowledgeSearch / Calculator / Python → observes → max 5 steps</div></div>
+        <div class="tl-item"><div class="tl-title">6. Response Enrichment</div><div class="tl-body">Adds intent metadata, confidence score, reasoning trace to response payload</div></div>
+        <div class="tl-item"><div class="tl-title">7. Follow-up Generation</div><div class="tl-body">LLM generates 3 contextual follow-up questions asynchronously</div></div>
+        <div class="tl-item"><div class="tl-title">8. SSE Stream + Citations</div><div class="tl-body">Answer streamed token-by-token. Citations: {source_file, page, score} for each chunk used</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 20: ANALYTICS -->
+<div class="slide" data-title="Analytics & Performance Intelligence">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Insights</div>
+    <h1 class="slide-h1">Analytics &amp; Performance Intelligence</h1>
+    <div class="sec-divider"></div>
+  </div>
+  <div class="grid-2 stagger">
+    <div>
+      <div class="slide-h3 mb12">Student Analytics Dashboard</div>
+      <ul class="check-list">
+        <li>Overall average grade across all exams and quiz attempts</li>
+        <li>Weak chunk aggregation — maps specific document sections to failure patterns</li>
+        <li>Personalized LLM study recommendations from performance data</li>
+        <li>Spaced repetition scheduling auto-updated after each session</li>
+        <li>Inactivity detection → WhatsApp reminder trigger</li>
+      </ul>
+      <div class="mt20">
+        <div class="slide-h3 mb12">Risk Forecasting Model</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);border-radius:8px"><span style="font-size:18px">✅</span><div><div style="font-size:13px;font-weight:700;color:#34d399">Low Risk</div><div style="font-size:12px;color:var(--c-muted)">Average grade ≥ 70% — on track</div></div></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.3);border-radius:8px"><span style="font-size:18px">⚠️</span><div><div style="font-size:13px;font-weight:700;color:#fb923c">Medium Risk</div><div style="font-size:12px;color:var(--c-muted)">50% ≤ Average &lt; 70% — needs attention</div></div></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:8px"><span style="font-size:18px">🚨</span><div><div style="font-size:13px;font-weight:700;color:#ef4444">High Risk</div><div style="font-size:12px;color:var(--c-muted)">Average &lt; 50% — immediate intervention</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">Teacher Dashboard Analytics</div>
+      <ul class="check-list">
+        <li>Class-wide average grade computation across all students</li>
+        <li>Pass rate: percentage of students scoring ≥ 50%</li>
+        <li>Score distribution data (histogram-ready)</li>
+        <li>Weak chunk frequency counter — most-missed concepts across entire class</li>
+        <li>Signals which topics need re-teaching based on data</li>
+      </ul>
+      <div class="card blue mt20" style="padding:16px">
+        <div class="card-title">Weakness-to-Material Mapping</div>
+        <div class="card-body mt8" style="font-size:13px">When a student misses a question, the chunk_ref is logged. Frontend highlights the exact document page containing the missed concept. Students click → jump directly to source material for targeted review.</div>
+      </div>
+      <div class="card purple mt12" style="padding:16px">
+        <div class="card-title">Attendance Intelligence</div>
+        <div class="card-body mt8" style="font-size:13px">Session attendance tracked per student per session. After threshold consecutive absences → WhatsApp notification to guardian via Meta Graph API with session report.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 21: DEPLOYMENT -->
+<div class="slide" data-title="Deployment Architecture">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Infrastructure</div>
+    <h1 class="slide-h1">Containerized Deployment Architecture</h1>
+    <div class="sec-divider"></div>
+  </div>
+  <div class="split stagger">
+    <div>
+      <div class="slide-h3 mb12">Docker Compose Stack (6 Services)</div>
+      <div class="arch-box">
+        <div class="arch-layer l1"><span>🌐</span><div class="arch-layer-items"><span class="tag blue">Nginx :80/:443</span><span style="color:var(--c-muted);font-size:12px">Reverse proxy, SSL termination, load balance</span></div></div>
+        <div class="arch-arrow-row">proxy_pass → internal network</div>
+        <div class="arch-layer l3"><span>🚀</span><div class="arch-layer-items"><span class="tag green">satr-app :8000</span><span style="color:var(--c-muted);font-size:12px">FastAPI + Uvicorn (python:3.10-slim)</span></div></div>
+        <div class="arch-arrow-row">enqueue tasks → Redis</div>
+        <div class="arch-layer l4"><span>⚙️</span><div class="arch-layer-items"><span class="tag orange">celery-worker</span><span style="color:var(--c-muted);font-size:12px">Same codebase, background jobs only</span></div></div>
+        <div class="arch-arrow-row">TCP on satr_net bridge network</div>
+        <div class="arch-layer l2"><span>🗄️</span><div class="arch-layer-items"><span class="tag purple">Redis :6379</span><span class="tag purple">MongoDB :27017</span><span class="tag purple">Qdrant :6333</span></div></div>
+      </div>
+      <div class="callout mt16"><strong>Volume Persistence:</strong><br>MongoDB → <code style="font-family:var(--font-mono);font-size:11px">docker/data/mongodb/</code><br>Qdrant → <code style="font-family:var(--font-mono);font-size:11px">docker/data/qdrant_storage/</code><br>Files → <code style="font-family:var(--font-mono);font-size:11px">docker/data/minio_storage/</code></div>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">Deployment Options</div>
+      <div class="timeline stagger">
+        <div class="tl-item"><div class="tl-title">🖥️ Local Dev Mode</div><div class="tl-body">uvicorn main:app --reload. Local MongoDB, Redis, Ollama. Hot-reload for rapid development.</div></div>
+        <div class="tl-item"><div class="tl-title">🐳 Docker Compose</div><div class="tl-body">docker-compose up --build. restart:always for crash recovery. Single command full-stack.</div></div>
+        <div class="tl-item"><div class="tl-title">☁️ VPS (Hetzner / DigitalOcean / EC2)</div><div class="tl-body">Docker Compose on Linux. Nginx SSL via Let's Encrypt. systemd watchdog. External storage volumes.</div></div>
+        <div class="tl-item"><div class="tl-title">🚂 PaaS (Render / Railway)</div><div class="tl-body">GitHub CD. Managed MongoDB + Redis add-ons. Persistent disk for file uploads.</div></div>
+        <div class="tl-item"><div class="tl-title">🤗 Hugging Face Spaces</div><div class="tl-body">Custom Dockerfile. GPU hardware for Surya OCR + local embeddings. Zero cloud API cost mode.</div></div>
+      </div>
+      <div class="card green mt16" style="padding:14px"><div class="card-title" style="font-size:13px">Health Monitoring</div><div class="card-body" style="font-size:12px">GET /health checks: MongoDB connection, Qdrant status, Celery worker queue depth, Ollama availability. Returns structured JSON health summary for monitoring dashboards.</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 22: DESIGN PATTERNS -->
+<div class="slide" data-title="Design Patterns & SOLID Principles">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Software Engineering</div>
+    <h1 class="slide-h1">Design Patterns &amp; Engineering Principles</h1>
+    <div class="sec-divider"></div>
+    <p class="slide-lead">Enterprise-grade software engineering discipline — not just functional code, but maintainable, scalable, and testable architecture built to SOLID principles.</p>
+  </div>
+  <div class="grid-3 stagger">
+    <div class="card blue"><div class="card-icon">🏭</div><div class="card-title">Factory Pattern</div><div class="card-body">LLMProviderFactory, ParserFactory, ChunkerFactory. Add new provider = one class. Zero changes to callers. Open/Closed Principle in practice.</div></div>
+    <div class="card purple"><div class="card-icon">🔌</div><div class="card-title">Dependency Injection</div><div class="card-body">FastAPI Depends() for auth, DB clients, LLM providers. Testable, composable, zero global state. Resources pooled once at startup event.</div></div>
+    <div class="card green"><div class="card-icon">📦</div><div class="card-title">Domain-Driven Design</div><div class="card-body">routes/, controllers/, models/, agent/ — each directory owns exactly one domain. No cross-domain dependencies without explicit interfaces.</div></div>
+    <div class="card orange"><div class="card-icon">🔄</div><div class="card-title">ReAct Agent Pattern</div><div class="card-body">Agents are not hard-coded pipelines — they autonomously decide which tools to call at runtime based on reasoning. Flexible, extensible, debuggable.</div></div>
+    <div class="card pink"><div class="card-icon">🛡️</div><div class="card-title">Active Record + DAO</div><div class="card-body">Model classes encapsulate both Pydantic schema and Motor DB operations. Consistent insert_one / find / update interface across all entities.</div></div>
+    <div class="card blue"><div class="card-icon">📡</div><div class="card-title">Message Bus / Observer</div><div class="card-body">MessageBus logs agent transactions. Orchestrator observes results. Decoupled communication enables full tracing without coupling agent internals.</div></div>
+  </div>
+  <div class="mt20">
+    <div class="slide-h3 mb12">SOLID Principles Applied</div>
+    <table>
+      <thead><tr><th>Principle</th><th>Implementation in Satr Edu AI</th></tr></thead>
+      <tbody>
+        <tr><td><span class="hl">S</span>ingle Responsibility</td><td>Each controller owns one domain (AI, NLP, OCR, Process, Project). No god classes that do everything.</td></tr>
+        <tr><td><span class="hl">O</span>pen/Closed</td><td>Adding a new LLM provider = add one class to factory. Zero modifications to calling agents or controllers.</td></tr>
+        <tr><td><span class="hl">L</span>iskov Substitution</td><td>All agents inherit BaseAgent. All parsers inherit BaseParser. Orchestrator treats all agents identically.</td></tr>
+        <tr><td><span class="hl">I</span>nterface Segregation</td><td>BaseTool has one minimal run() interface. Agents don't need to know tool implementation details.</td></tr>
+        <tr><td><span class="hl">D</span>ependency Inversion</td><td>High-level orchestrator depends on BaseAgent abstraction, not on concrete TutorAgent or RAGAgent classes.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 23: CHALLENGES & SOLUTIONS -->
+<div class="slide" data-title="Engineering Challenges & Solutions">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Engineering Journey</div>
+    <h1 class="slide-h1">Key Challenges &amp; Engineering Solutions</h1>
+    <div class="sec-divider"></div>
+  </div>
+  <div class="grid-2 stagger">
+    <div class="card orange"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:24px">⚠️</span><div class="card-title">Arabic PDF Garbling</div></div><div class="card-body">Arabic letters extracted in wrong order, isolated, or reversed — completely unembeddable and unsearchable.</div><div class="callout mt10" style="border-left-color:var(--c-accent);margin:10px 0 0"><strong>Solution:</strong> arabic_reshaper (positional letter forms) + python-bidi (Unicode BiDi algorithm) run on every extracted text block before embedding.</div></div>
+    <div class="card blue"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:24px">⚠️</span><div class="card-title">LLM JSON Truncation</div></div><div class="card-body">Large exam generations hit token limits mid-JSON, causing parse failures and 500 errors returned to teachers.</div><div class="callout mt10" style="border-left-color:var(--c-accent);margin:10px 0 0"><strong>Solution:</strong> <code style="font-family:var(--font-mono)">_repair_truncated_json()</code> uses regex to extract all fully-formed question objects from broken payload. Partial exams salvaged.</div></div>
+    <div class="card purple"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:24px">⚠️</span><div class="card-title">Table Splitting in RAG</div></div><div class="card-body">Naive chunking split table rows across chunks, breaking data associations and producing nonsensical RAG context for the LLM.</div><div class="callout mt10" style="border-left-color:var(--c-accent);margin:10px 0 0"><strong>Solution:</strong> DeepDoc structure-aware chunker detects table grids from PDF coordinates and preserves entire tables as atomic chunks.</div></div>
+    <div class="card green"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:24px">⚠️</span><div class="card-title">Async Event Loop Blocking</div></div><div class="card-body">Synchronous OCR and LLM SDK calls blocked FastAPI's event loop, causing all concurrent requests to stall.</div><div class="callout mt10" style="border-left-color:var(--c-accent);margin:10px 0 0"><strong>Solution:</strong> Celery offloads all heavy processing. Sync SDK calls wrapped in asyncio.to_thread(). Event loop stays responsive.</div></div>
+    <div class="card pink"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:24px">⚠️</span><div class="card-title">LLM Exam Answer A-Bias</div></div><div class="card-body">LLMs systematically placed the correct answer as option "A" in 70%+ of generated MCQ questions — easily exploitable.</div><div class="callout mt10" style="border-left-color:var(--c-accent);margin:10px 0 0"><strong>Solution:</strong> Post-generation validator checks key distribution. If bias detected → redistributes correct positions across A, B, C, D.</div></div>
+    <div class="card orange"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:24px">⚠️</span><div class="card-title">Multi-tenant Vector Leakage</div></div><div class="card-body">Single Qdrant collection would allow course A's vectors to appear in course B's search results — a privacy and accuracy failure.</div><div class="callout mt10" style="border-left-color:var(--c-accent);margin:10px 0 0"><strong>Solution:</strong> Per-project collections named <code style="font-family:var(--font-mono);font-size:11px">collection_{dim}_{project_id}</code> physically partition vectors at the database layer.</div></div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 24: TECHNOLOGY DECISIONS -->
+<div class="slide" data-title="Technology Decision Matrix">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Engineering Decisions</div>
+    <h1 class="slide-h1">Technology Decisions &amp; Tradeoffs</h1>
+    <div class="sec-divider"></div>
+  </div>
+  <table class="stagger">
+    <thead><tr><th>Technology</th><th>Chosen</th><th>Alternative Considered</th><th>Decisive Reason</th></tr></thead>
+    <tbody>
+      <tr><td>Web Framework</td><td><span class="tag green">FastAPI</span></td><td>Flask, Django REST</td><td>Native async/await for concurrent AI streaming; auto Pydantic validation; zero-config OpenAPI docs</td></tr>
+      <tr><td>Vector Database</td><td><span class="tag green">Qdrant</span></td><td>pgvector, Pinecone, Weaviate</td><td>HNSW O(log N) search; native payload filters; per-collection isolation; self-hosted zero cost</td></tr>
+      <tr><td>Document Store</td><td><span class="tag blue">MongoDB</span></td><td>PostgreSQL only</td><td>Flexible schema for evolving doc metadata; built-in text index for Arabic+English bilingual search</td></tr>
+      <tr><td>Embedding Model</td><td><span class="tag purple">Cohere multilingual</span></td><td>OpenAI ada-002, BGE</td><td>Single model natively handles Arabic + English in shared vector space; 384 dims = memory-efficient</td></tr>
+      <tr><td>OCR Strategy</td><td><span class="tag orange">5-Layer Hybrid</span></td><td>Cloud-only (Gemini/Azure)</td><td>Zero cost primary (Surya local); cloud fallback for low-res; no single API point of failure</td></tr>
+      <tr><td>Chunking</td><td><span class="tag green">DeepDoc + Naive</span></td><td>Fixed-size only, LangChain</td><td>Layout-aware splitting preserves tables + headings intact; naive as fast fallback for simple docs</td></tr>
+      <tr><td>Task Queue</td><td><span class="tag blue">Celery + Redis</span></td><td>Background threads, RQ</td><td>Persistent task state; retry logic; independent scaling; soft/hard timeouts; no event loop blocking</td></tr>
+      <tr><td>Agent Framework</td><td><span class="tag purple">Custom ReAct</span></td><td>LangChain Agents, LlamaIndex</td><td>Full control over reasoning trace; bilingual intent routing; predictable step limit; no framework lock-in</td></tr>
+      <tr><td>Validation</td><td><span class="tag green">Pydantic v2</span></td><td>Pydantic v1, Marshmallow</td><td>Rust-based core: 5–17× faster serialization/validation; same API surface as v1 for migration</td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<!-- SLIDE 25: PROMPT ENGINEERING -->
+<div class="slide" data-title="Prompt Engineering Strategy">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">AI Engineering</div>
+    <h1 class="slide-h1">Prompt Engineering Strategy</h1>
+    <div class="sec-divider"></div>
+    <p class="slide-lead">Prompt engineering is not an afterthought — it is the interface between software and intelligence. Every prompt is a deliberate engineering decision with measurable consequences.</p>
+  </div>
+  <div class="grid-2 stagger">
+    <div>
+      <div class="slide-h3 mb12">Hallucination Prevention Prompt</div>
+      <div class="code-block" style="font-size:11px"><span class="kw">&lt;SYSTEM&gt;</span>
+You are an expert academic tutor.
+Rules (MUST follow strictly):
+1. Answer ONLY from provided documents.
+2. If answer not in context → say exactly:
+   <span class="str">"I cannot find this in course
+    materials."</span>
+3. Never extrapolate or assume facts.
+4. Cite every factual claim: [Doc X]
+5. Maintain full academic integrity.
+<span class="kw">&lt;/SYSTEM&gt;</span>
+<span class="kw">&lt;CONTEXT&gt;</span>
+--- DOCUMENT [Doc 1] ---
+Source: physics_ch1.pdf (Page 4)
+{chunk_text}
+<span class="kw">&lt;/CONTEXT&gt;</span>
+<span class="kw">&lt;USER&gt;</span>{student_query}<span class="kw">&lt;/USER&gt;</span></div>
+      <div class="callout mt12"><strong>Prompt Injection Defense:</strong> SYSTEM/CONTEXT/USER tags physically separate instructions from user input. A user typing "ignore all previous instructions" cannot escape the &lt;USER&gt; zone.</div>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">Agent-Specific Prompt Strategies</div>
+      <div class="card green" style="padding:14px;margin-bottom:10px"><div class="card-title" style="font-size:13px">Tutor Prompt Strategy</div><div class="card-body" style="font-size:12px">Adapts depth to student mastery level. Beginner: real-world analogies + step-by-step. Advanced: technical formalism + edge cases. Bilingual templates: TUTOR_PROMPT_AR / TUTOR_PROMPT_EN.</div></div>
+      <div class="card purple" style="padding:14px;margin-bottom:10px"><div class="card-title" style="font-size:13px">Socratic Prompt Constraints</div><div class="card-body" style="font-size:12px">FORBIDDEN: giving direct answers. REQUIRED: ask exactly ONE guiding question per turn. After 2 failed attempts: provide a subtle hint. Temperature: 0.6 (some creativity in questioning).</div></div>
+      <div class="card orange" style="padding:14px;margin-bottom:10px"><div class="card-title" style="font-size:13px">Exam Generation Prompt</div><div class="card-body" style="font-size:12px">FORBIDDEN: questions about page numbers, dates, copyright. REQUIRED: model answer per question. Temperature 0.7 for variety. Strict JSON schema enforced with 3 validators.</div></div>
+      <div class="card blue" style="padding:14px"><div class="card-title" style="font-size:13px">Temperature Strategy</div><div class="card-body" style="font-size:12px">RAG answers: T=0.2 (factual accuracy). Exam generation: T=0.7 (question variety). Socratic: T=0.6 (creative guiding). Intent classification: T=0.1 (deterministic routing).</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 26: PERFORMANCE METRICS -->
+<div class="slide" data-title="Performance Metrics & Evaluation">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Results</div>
+    <h1 class="slide-h1">Performance Metrics &amp; Evaluation</h1>
+    <div class="sec-divider"></div>
+  </div>
+  <div class="grid-4 stagger">
+    <div class="card blue stat-block"><div class="stat-val">384</div><div class="stat-lbl">Embedding Dimensions (Cohere multilingual)</div></div>
+    <div class="card green stat-block"><div class="stat-val">5</div><div class="stat-lbl">OCR Fallback Layers (zero downtime)</div></div>
+    <div class="card purple stat-block"><div class="stat-val">&lt;2s</div><div class="stat-lbl">Gemini Vision OCR per page</div></div>
+    <div class="card orange stat-block"><div class="stat-val">O(log N)</div><div class="stat-lbl">Qdrant HNSW Search Complexity</div></div>
+  </div>
+  <div class="grid-2 mt20 stagger">
+    <div>
+      <div class="slide-h3 mb12">OCR Engine Comparison</div>
+      <table>
+        <thead><tr><th>Engine</th><th>Speed/Page</th><th>Arabic Acc.</th><th>Cost</th></tr></thead>
+        <tbody>
+          <tr><td>Surya (GPU)</td><td>0.5–1.5s</td><td>~95%</td><td>$0</td></tr>
+          <tr><td>Surya (CPU)</td><td>3–8s</td><td>~95%</td><td>$0</td></tr>
+          <tr><td>Gemini Vision</td><td>1–2.5s</td><td>~92%</td><td>Paid</td></tr>
+          <tr><td>DeepSeek</td><td>2–5s</td><td>~82%</td><td>$0 (rate-lim.)</td></tr>
+          <tr><td>PaddleOCR</td><td>1–3s</td><td>~65%</td><td>$0</td></tr>
+          <tr><td>Tesseract</td><td>2–4s</td><td>~42%</td><td>$0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">RAG Quality Indicators</div>
+      <div class="metric-bar-wrap"><div class="metric-bar-header"><span class="metric-bar-name">Dense Search Semantic Coverage</span><span class="metric-bar-val">High ~90%</span></div><div class="metric-bar-bg"><div class="metric-bar-fill" style="width:90%"></div></div></div>
+      <div class="metric-bar-wrap"><div class="metric-bar-header"><span class="metric-bar-name">Sparse Search Exact Term Recall</span><span class="metric-bar-val">High ~85%</span></div><div class="metric-bar-bg"><div class="metric-bar-fill" style="width:85%"></div></div></div>
+      <div class="metric-bar-wrap"><div class="metric-bar-header"><span class="metric-bar-name">Reranker Quality Lift</span><span class="metric-bar-val">+~15%</span></div><div class="metric-bar-bg"><div class="metric-bar-fill" style="width:75%"></div></div></div>
+      <div class="metric-bar-wrap"><div class="metric-bar-header"><span class="metric-bar-name">Intent Classification Accuracy</span><span class="metric-bar-val">~92%</span></div><div class="metric-bar-bg"><div class="metric-bar-fill" style="width:92%"></div></div></div>
+      <div class="metric-bar-wrap"><div class="metric-bar-header"><span class="metric-bar-name">Exam JSON Repair Success Rate</span><span class="metric-bar-val">~95%</span></div><div class="metric-bar-bg"><div class="metric-bar-fill" style="width:95%"></div></div></div>
+      <div class="card purple mt16" style="padding:14px"><div class="card-title" style="font-size:13px">Evaluation Methodology</div><div class="card-body" style="font-size:12px"><code style="font-family:var(--font-mono)">arabic_rag_benchmark.py</code> computes Faithfulness + Relevancy scores using LLM-as-a-judge. Future: integrate Ragas / TruLens standardized evaluation frameworks for rigorous benchmarking.</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 27: PROJECT STRENGTHS -->
+<div class="slide" data-title="Project Strengths & Weaknesses">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Self-Evaluation</div>
+    <h1 class="slide-h1">Strengths, Weaknesses &amp; Honest Assessment</h1>
+    <div class="sec-divider"></div>
+  </div>
+  <div class="grid-2 stagger">
+    <div>
+      <div class="slide-h3 mb12" style="color:#34d399">✅ Project Strengths</div>
+      <ul class="check-list">
+        <li><strong style="color:var(--c-text)">Multi-Agent Architecture:</strong> ReAct-based agents collaborate to solve complex student queries — not a simple chatbot wrapper</li>
+        <li><strong style="color:var(--c-text)">Hybrid Search System:</strong> Dense + Sparse + Cross-Encoder provides state-of-the-art retrieval accuracy</li>
+        <li><strong style="color:var(--c-text)">Adaptive Learning Engine:</strong> IRT + ELO + Spaced Repetition matches academic testing research standards</li>
+        <li><strong style="color:var(--c-text)">Layout-Aware Ingestion:</strong> DeepDoc preserves tables, lists, headings — maintaining semantic integrity</li>
+        <li><strong style="color:var(--c-text)">Cost-Effective Redundancy:</strong> 5-layer OCR fallback balances quality, cost, and reliability</li>
+        <li><strong style="color:var(--c-text)">Production-Ready Design:</strong> SOLID principles, DDD, Factory Pattern, async-first throughout</li>
+        <li><strong style="color:var(--c-text)">Bilingual Support:</strong> Arabic + English handled natively across OCR, embeddings, classification, and UI</li>
+      </ul>
+    </div>
+    <div>
+      <div class="slide-h3 mb12" style="color:#fb923c">⚠️ Known Weaknesses (Identified & Planned)</div>
+      <ul class="bullet-list">
+        <li><strong style="color:var(--c-text)">Cold-Start Latency:</strong> Local OCR + embedding models on CPU-only hardware cause initial delays → GPU deployment planned</li>
+        <li><strong style="color:var(--c-text)">File Storage:</strong> Relying on filesystem storage limits horizontal scaling → AWS S3 migration planned</li>
+        <li><strong style="color:var(--c-text)">Evaluation Framework:</strong> LLM-as-a-judge is not standardized → Ragas / TruLens integration roadmapped</li>
+        <li><strong style="color:var(--c-text)">No Caching Layer:</strong> Repeated identical queries trigger full RAG pipeline → Redis semantic cache planned</li>
+        <li><strong style="color:var(--c-text)">Text-Only Retrieval:</strong> Cannot reference diagrams or equations from lecture slides → Vision RAG roadmapped</li>
+        <li><strong style="color:var(--c-text)">Progress Tracking:</strong> Limited to test scores → engagement metrics (read time, search frequency) planned</li>
+      </ul>
+      <div class="callout mt20" style="border-left-color:#34d399"><strong>Overall Assessment:</strong> The project goes beyond simple API wrappers. It implements a robust, self-hosted system that solves real-world educational challenges. Its multi-agent architecture, mathematical learning models, and engineering rigor make it a standout senior software engineering project.</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 28: FUTURE ROADMAP -->
+<div class="slide" data-title="Future Roadmap">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Future Vision</div>
+    <h1 class="slide-h1">Future Roadmap &amp; Improvement Plan</h1>
+    <div class="sec-divider"></div>
+  </div>
+  <div class="grid-2 stagger">
+    <div>
+      <div class="slide-h3 mb16">Short-Term (0–3 Months)</div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-title">🔴 Redis Semantic Cache</div><div class="tl-body">Cache queries by embedding similarity. Estimated 60–70% API cost reduction for repeated questions on the same material.</div></div>
+        <div class="tl-item"><div class="tl-title">📊 Standardized RAG Evaluation</div><div class="tl-body">Integrate Ragas + TruLens for automated faithfulness, relevancy, and groundedness metrics. Replace ad-hoc LLM judge.</div></div>
+        <div class="tl-item"><div class="tl-title">☁️ Cloud Storage (AWS S3)</div><div class="tl-body">Replace filesystem storage with S3. Enables true horizontal scaling without shared volume dependencies.</div></div>
+        <div class="tl-item"><div class="tl-title">📱 Mobile Application</div><div class="tl-body">React Native companion with offline study mode and local embedding cache for students without consistent internet.</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="slide-h3 mb16">Long-Term (6–12 Months)</div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-title">🎯 Multi-Modal RAG</div><div class="tl-body">Extract and reference diagrams, charts, and mathematical equations. Vision-language models for figure understanding and cross-modal retrieval.</div></div>
+        <div class="tl-item"><div class="tl-title">🧠 Fine-Tuned Arabic Educational LLM</div><div class="tl-body">Fine-tune a base model on domain-specific Arabic academic content. Reduce hallucination without full RAG dependency for common concepts.</div></div>
+        <div class="tl-item"><div class="tl-title">📈 Advanced Student Profiling</div><div class="tl-body">Add engagement metrics: read time, search frequency, re-open patterns. Build richer behavioral profiles beyond test scores.</div></div>
+        <div class="tl-item"><div class="tl-title">🤝 LMS Integration (LTI)</div><div class="tl-body">Learning Tools Interoperability standard integration with Moodle, Blackboard, Canvas for institutional deployment at scale.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 29: VIVA Q&A PREP -->
+<div class="slide" data-title="Key Viva Questions — Quick Reference">
+<div class="slide-inner">
+  <div class="sec-header">
+    <div class="slide-tag">Committee Preparation</div>
+    <h1 class="slide-h1">Key Viva Questions — Quick Reference</h1>
+    <div class="sec-divider"></div>
+  </div>
+  <div class="grid-2 stagger">
+    <div>
+      <div class="slide-h3 mb12">Architecture Questions</div>
+      <table>
+        <thead><tr><th>Question</th><th>Core Answer</th></tr></thead>
+        <tbody>
+          <tr><td>Why FastAPI not Django?</td><td>Native async/await for concurrent AI streaming + LLM calls; auto OpenAPI docs</td></tr>
+          <tr><td>Why MongoDB + Qdrant?</td><td>Each optimized for its role: MongoDB for transactional/text-search, Qdrant for HNSW vector search</td></tr>
+          <tr><td>Why Celery not threads?</td><td>Persistent state, retry logic, independent scaling, soft/hard timeouts — threads have none of these</td></tr>
+          <tr><td>How JWT tokens scale?</td><td>Stateless — no DB lookup per request; role decoded from token payload directly</td></tr>
+          <tr><td>How prevent infinite loops?</td><td>Hard MAX_STEPS=5 limit on all agent ReAct loops; always returns best available answer</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div class="slide-h3 mb12">AI / RAG Questions</div>
+      <table>
+        <thead><tr><th>Question</th><th>Core Answer</th></tr></thead>
+        <tbody>
+          <tr><td>What is ReAct?</td><td>Reason → Act → Observe loop. Agent generates Thought before Tool Call, improving multi-step accuracy</td></tr>
+          <tr><td>Dense vs Sparse search?</td><td>Dense=semantic meaning (Qdrant); Sparse=exact keywords (MongoDB text index). Both needed for bilingual Arabic docs</td></tr>
+          <tr><td>What is IRT?</td><td>Mathematical model: α × difficulty factor updates mastery M after each answer, not just raw score counts</td></tr>
+          <tr><td>How prevent hallucination?</td><td>RAG + strict system prompt: "Answer ONLY from provided documents"; prompt injection tags separate zones</td></tr>
+          <tr><td>Why Cohere embeddings?</td><td>Only model natively supporting Arabic + English in same vector space; 384 dims = memory-efficient</td></tr>
+        </tbody>
+      </table>
+      <div class="callout mt16"><strong>Quick Reference:</strong> The full committee preparation document contains 100 categorized viva questions with detailed professional answers covering Architecture, Database, AI, OCR, Educational Features, Security, and Scalability.</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SLIDE 30: CLOSING -->
+<div class="slide hero-slide" data-title="Summary & Thank You">
+<div class="slide-inner">
+  <div class="hero-badge">🎓 Satr Edu AI — Graduation Project 2025</div>
+  <h1 class="hero-title" style="font-size:clamp(32px,4vw,58px)">Engineering Excellence<br>in Educational AI</h1>
+  <p class="hero-subtitle" style="max-width:820px">This project goes beyond simple API wrappers. It implements a robust, self-hosted AI system that solves real-world educational challenges through mathematically grounded adaptive learning and multi-agent intelligence — built to production software engineering standards.</p>
+  <div class="hero-meta stagger">
+    <div class="hero-meta-item"><span class="val">3-Tier</span><span class="lbl">Distributed Architecture</span></div>
+    <div class="hero-meta-item"><span class="val">ReAct</span><span class="lbl">Multi-Agent System</span></div>
+    <div class="hero-meta-item"><span class="val">Hybrid</span><span class="lbl">RAG + Cross-Encoder</span></div>
+    <div class="hero-meta-item"><span class="val">IRT</span><span class="lbl">Adaptive Learning Engine</span></div>
+    <div class="hero-meta-item"><span class="val">5-Layer</span><span class="lbl">OCR Fallback Chain</span></div>
+  </div>
+  <div class="mt32 grid-auto stagger" style="max-width:840px;width:100%">
+    <div class="card blue" style="text-align:left"><div class="card-title">💻 Software Engineering</div><div class="card-body">DDD, SOLID, Factory + ReAct patterns, async-first, containerized deployment, domain-driven modular codebase</div></div>
+    <div class="card green" style="text-align:left"><div class="card-title">🧠 AI Systems</div><div class="card-body">Hybrid dense+sparse retrieval, Cross-Encoder reranking, bilingual LLM orchestration, structured prompt engineering, hallucination prevention</div></div>
+    <div class="card purple" style="text-align:left"><div class="card-title">📚 Educational Technology</div><div class="card-body">Item Response Theory, ELO mastery tracking, spaced repetition scheduling, Socratic method AI, adaptive exam generation</div></div>
+  </div>
+  <div class="mt32" style="font-size:18px;color:var(--c-muted)">Thank you for your attention &nbsp;·&nbsp; Questions are welcome</div>
+</div>
+</div>
+
+</div><!-- #deck -->
+
+<nav id="nav">
+  <div id="nav-left">
+    <button class="nav-btn" onclick="toggleTOC()">☰ Slides</button>
+    <button class="nav-btn" onclick="goSlide(0)">⏮</button>
+    <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">← Prev</button>
+  </div>
+  <div id="nav-center">Slide 1 of 30</div>
+  <div id="nav-right">
+    <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next →</button>
+    <button class="nav-btn" onclick="goSlide(slides.length - 1)">⏭</button>
+    <button id="fs-btn" onclick="toggleFullscreen()" title="Fullscreen (F)">⛶</button>
+  </div>
+</nav>
+
+<script>
+const slides = Array.from(document.querySelectorAll('.slide'));
+let current = 0;
+
+function goSlide(n, fromTOC) {
+  if (n < 0 || n >= slides.length || n === current) return;
+  slides[current].classList.remove('active');
+  slides[current].classList.add('exit');
+  const old = current;
+  setTimeout(() => slides[old].classList.remove('exit'), 500);
+  current = n;
+  slides[current].classList.add('active');
+  slides[current].querySelector('.slide-inner').scrollTop = 0;
+  updateNav();
+  if (fromTOC) toggleTOC();
+}
+
+function navigate(dir) { goSlide(current + dir); }
+
+function updateNav() {
+  const t = slides.length;
+  document.getElementById('nav-center').textContent = 'Slide ' + (current+1) + ' of ' + t;
+  document.getElementById('slide-num-badge').textContent = (current+1) + ' / ' + t;
+  document.getElementById('progress-bar').style.width = ((current+1)/t*100) + '%';
+}
+
+document.addEventListener('keydown', e => {
+  if (document.getElementById('toc-overlay').classList.contains('open')) { if(e.key==='Escape') toggleTOC(); return; }
+  if (e.key==='ArrowRight'||e.key===' '||e.key==='PageDown') { e.preventDefault(); navigate(1); }
+  if (e.key==='ArrowLeft'||e.key==='PageUp') { e.preventDefault(); navigate(-1); }
+  if (e.key==='Home') { e.preventDefault(); goSlide(0); }
+  if (e.key==='End') { e.preventDefault(); goSlide(slides.length-1); }
+  if (e.key==='t'||e.key==='T') toggleTOC();
+  if (e.key==='f'||e.key==='F') toggleFullscreen();
+});
+
+let tx=0;
+document.getElementById('deck').addEventListener('touchstart',e=>{ tx=e.touches[0].clientX; },{passive:true});
+document.getElementById('deck').addEventListener('touchend',e=>{ const dx=tx-e.changedTouches[0].clientX; if(Math.abs(dx)>50) navigate(dx>0?1:-1); },{passive:true});
+
+function toggleTOC() { document.getElementById('toc-overlay').classList.toggle('open'); }
+
+const tocGrid = document.getElementById('toc-grid');
+slides.forEach((s,i) => {
+  const d = document.createElement('div');
+  d.className = 'toc-item';
+  d.innerHTML = '<div class="toc-num">'+(i+1)+'</div><div class="toc-name">'+(s.dataset.title||'Slide '+(i+1))+'</div>';
+  d.onclick = () => goSlide(i, true);
+  tocGrid.appendChild(d);
+});
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+  else document.exitFullscreen();
+}
+
+updateNav();
+</script>
+</body>
+</html>

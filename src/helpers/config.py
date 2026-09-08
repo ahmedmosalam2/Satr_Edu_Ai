@@ -91,9 +91,13 @@ class Settings(BaseSettings):
     ABSENCE_THRESHOLD: int = 3               # عدد مرات الغياب قبل الإشعار
     ABSENCE_COOLDOWN_DAYS: int = 7           # كم يوم بين كل إشعار والتالي (anti-spam)
 
+    # Internal Service Auth
+    INTERNAL_API_KEY: str = ""
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"
 
 def get_settings():
     return Settings()

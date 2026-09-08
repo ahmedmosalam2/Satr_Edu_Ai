@@ -123,13 +123,19 @@ class RAGAgent(BaseAgent):
         if self.language == "ar":
             system_prompt = (
                 "أنت مساعد تعليمي ذكي. استخدم المعلومات التالية للإجابة على السؤال. "
-                "إذا كانت المعلومات غير كافية، اذكر ذلك. "
+                "إذا كانت المعلومات المتاحة فارغة أو غير متوفرة (مثل 'No relevant documents found' أو 'No information found')، "
+                "فأخبر الطالب بوضوح ولطف أنه لا توجد مستندات مرفوعة في قاعدة معرفة الكورس حالياً، "
+                "واطلب منه رفع مستندات تعليمية (مثل كتب أو محاضرات PDF) عبر زر المرفقات لتتمكن من البحث فيها وإجابته بدقة، "
+                "ولا تقم باختراع أو شرح إجابات عامة خارج سياق الكورس. "
                 "أجب بشكل واضح ومنظم."
             )
         else:
             system_prompt = (
                 "You are an intelligent educational assistant. Use the following information to answer the question. "
-                "If the information is insufficient, state that. "
+                "If the information is empty or unavailable (e.g. 'No relevant documents found' or 'No information found'), "
+                "clearly and politely inform the student that no documents are uploaded to the course knowledge base yet, "
+                "and ask them to upload educational materials (like PDF slides or books) using the attachment button so you can search and answer from them. "
+                "Do not make up general answers from outside the syllabus. "
                 "Answer clearly and in an organized manner."
             )
 

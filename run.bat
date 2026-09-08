@@ -12,7 +12,7 @@ echo.
 
 :: 2. شغّل Celery Worker في تيرمنال منفصل
 echo [2/3] Starting Celery Worker in a new window...
-start "Celery Worker" cmd /k "celery -A src.tasks.process_tasks worker --loglevel=info"
+start "Celery Worker" cmd /k "python -m celery -A src.tasks.process_tasks worker --loglevel=info"
 echo.
 
 :: انتظر ثانيتين عشان Celery يتجهّز
@@ -23,8 +23,8 @@ echo [3/3] Starting FastAPI Server...
 echo.
 echo ================================
 echo  Server running at:
-echo  http://localhost:8000
-echo  http://localhost:8000/docs
+echo  http://localhost:8001
+echo  http://localhost:8001/docs
 echo ================================
 echo.
-uvicorn main:app --reload --reload-exclude "docker/data/*"
+python -m uvicorn main:app --reload --port 8001 --reload-exclude "docker/data/*"

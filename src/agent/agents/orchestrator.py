@@ -138,7 +138,30 @@ class Orchestrator:
 
         # ── 3. Handle special intents ────────────────────────────────────
         if intent == "greeting":
-            answer = self._generate_greeting_response(self.language)
+            try:
+                # Let the LLM generate a dynamic greeting response
+                prompt = (
+                    "You are an intelligent educational AI assistant/tutor. "
+                    "The student greeted you or asked who you are.\n"
+                    f"Student message: '{query}'\n\n"
+                    "Respond to the student dynamically, politely, and in a friendly and encouraging manner. "
+                    f"Use the language: {self.language}. "
+                    "Explain that you are their virtual learning assistant, ready to help them explain lessons, generate quizzes, "
+                    "and answer any questions based on the course materials they upload. "
+                    "Keep your response warm, interactive, and concise."
+                )
+                import inspect
+                res = self.generation_client.generate_text(prompt=prompt, max_tokens=250)
+                if inspect.isawaitable(res):
+                    answer = await res
+                else:
+                    answer = res
+                if not answer:
+                    answer = self._generate_greeting_response(self.language)
+            except Exception as e:
+                logger.warning(f"[Orchestrator] Dynamic greeting failed: {e}")
+                answer = self._generate_greeting_response(self.language)
+
             self.memory.add_turn("assistant", answer)
             return OrchestratorResult(
                 answer=answer,
@@ -388,6 +411,17 @@ class Orchestrator:
 
     @staticmethod
     def _generate_greeting_response(language: str) -> str:
+        if language == "ar":
+            return (
+                "أهلاً بك! أنا مساعدك التعليمي والبرمجي الذكي.\n\n"
+                "يمكنني مساعدتك في:\n"
+                "- البحث والإجابة من محتوى المنهج والمستندات المرفوعة.\n"
+                "- شرح وتبسيط المفاهيم والدروس البرمجية الصعبة.\n"
+                "- توليد خرائط مفاهيمية وذهنية لمساعدتك على المذاكرة.\n"
+                "- تشغيل وتجربة أكواد بايثون البرمجية مباشرة في البيئة البرمجية.\n"
+                "- المناقشة بالطريقة السقراطية التفاعلية وتوليد اختبارات سريعة.\n\n"
+                "تفضل بطرح أي سؤال تعليمي أو برمجي لنبدأ معاً!"
+            )
         return (
             "Hello. I am the advanced educational assistant.\n\n"
             "Capabilities include:\n"
@@ -402,6 +436,11 @@ class Orchestrator:
 
     @staticmethod
     def _generate_off_topic_response(language: str) -> str:
+        if language == "ar":
+            return (
+                "عذراً، ينحصر نطاق عملي في الأسئلة والمواضيع التعليمية والبرمجية الخاصة بهذا الكورس فقط.\n"
+                "يرجى طرح سؤال أكاديمي أو برمجي ذي صلة."
+            )
         return (
             "My scope is restricted to educational queries within this domain.\n"
             "Please ask a relevant academic or technical question."

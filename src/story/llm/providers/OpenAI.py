@@ -72,6 +72,21 @@ class OpenAIProvider(LLMInference):
 
         return response.choices[0].message.content
 
+    async def generate_text(self, prompt: str, chat_history: list = None,
+                            max_tokens: int = None, temperature: float = None) -> str:
+        """Async alias for generate_story - required for compatibility with NLPClientWrapper."""
+        import asyncio
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(
+            None,
+            lambda: self.generate_story(
+                prompt=prompt,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                chat_history=chat_history or []
+            )
+        )
+
     def stream_generate_text(self, prompt: str):
         # We also need stream_generate_text specifically with this signature per the abstract class
         raise NotImplementedError("Streaming generation is not yet supported for OpenAI provider")

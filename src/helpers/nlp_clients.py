@@ -118,6 +118,8 @@ def get_embedding_client():
         provider = factory.create_provider(LLMEnums.ProviderType.COHERE)
     elif backend == "OLLAMA":
         provider = factory.create_provider(LLMEnums.ProviderType.OLLAMA)
+    elif backend == "GEMINI":
+        provider = factory.create_provider(LLMEnums.ProviderType.GEMINI)
     else:  # default: OPENAI
         provider = factory.create_provider(LLMEnums.ProviderType.OPENAI)
 

@@ -96,21 +96,27 @@ class GeminiProvider(LLMInference):
             return None
         try:
             task_type = "retrieval_document" if document_type == LLMEnums.DocumentTypeEnum.DOCUMENT.value else "retrieval_query"
+            
+            common_kwargs = {
+                "model": self.embedding_model_id,
+                "task_type": task_type,
+            }
+            if self.embedding_size:
+                common_kwargs["output_dimensionality"] = self.embedding_size
+
             if isinstance(text, list):
                 results = []
                 for t in text:
                     r = genai.embed_content(
-                        model=self.embedding_model_id,
                         content=t,
-                        task_type=task_type,
+                        **common_kwargs
                     )
                     results.append(r["embedding"])
                 return results
             else:
                 r = genai.embed_content(
-                    model=self.embedding_model_id,
                     content=text,
-                    task_type=task_type,
+                    **common_kwargs
                 )
                 return [r["embedding"]]
         except Exception as e:
