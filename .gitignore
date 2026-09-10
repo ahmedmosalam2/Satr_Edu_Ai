@@ -1,0 +1,69 @@
+# =====================
+# Python cache
+# =====================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+
+
+# =====================
+# Build / packaging
+# =====================
+dist/
+build/
+wheels/
+
+# =====================
+# Virtual environments
+# =====================
+venv/
+env/
+__venv__/
+
+# =====================
+# Environment variables
+# =====================
+.env
+.flaskenv
+
+# =====================
+# Logs
+# =====================
+logs/
+*.log
+
+# =====================
+# Data (VERY IMPORTANT for your project)
+# =====================
+data/
+qdrant_db/
+docker/data/
+
+# =====================
+# Jupyter
+# =====================
+.ipynb_checkpoints/
+
+# =====================
+# IDEs
+# =====================
+.idea/
+.vscode/
+*.swp
+*~
+
+# =====================
+# OS files
+# =====================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# =====================
+# PyInstaller
+# =====================
+*.spec
+

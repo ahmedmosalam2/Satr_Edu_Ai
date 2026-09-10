@@ -1,0 +1,59 @@
+# ══════════════════════════════════════════════════════════════
+# .dockerignore — يمنع نقل الملفات غير الضرورية لـ Docker
+# النتيجة: context = 10 KB بدل 1.36 GB
+# ══════════════════════════════════════════════════════════════
+
+# ── Git ───────────────────────────────────────────────────────
+.git
+.gitignore
+
+# ── Docker data (MongoDB, Qdrant, MinIO) ──────────────────────
+docker/data/
+data/
+
+# ── User uploaded files ───────────────────────────────────────
+src/assets/
+
+# ── Python cache ──────────────────────────────────────────────
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ── Virtual environments ──────────────────────────────────────
+venv/
+.venv/
+env/
+
+# ── IDE ───────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.code-workspace
+
+# ── OS ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Large files not needed in container ──────────────────────
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.gif
+Satar-EDU-logo.png
+satr-edu-logo-new.png
+satr-banner.svg
+
+# ── Dev/docs files ────────────────────────────────────────────
+*.postman_collection.json
+Readme.md
+installed_packages.txt
+approve_teachers.py
+list_users.py
+run.bat
+run.sh
+
+# ── Logs ──────────────────────────────────────────────────────
+*.log
+logs/

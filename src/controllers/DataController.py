@@ -1,5 +1,5 @@
 from .BaseController import BaseController
-from src.models.enums.Response import Response
+from src.models.enums.Response import ResponseSignal as Response
 from fastapi import HTTPException,UploadFile
 from .ProjectController import ProjectController
 import re
@@ -11,15 +11,19 @@ class DataController(BaseController):
         self.file_max_size=self.settings.FILE_MAX_SIZE
     
     def valied_upload(self,project_id:str, file:UploadFile):
-        if file.content_type not in self.settings.FILE_ALLOWED_EXTION:
-            raise HTTPException(status_code=400,detail=Response.FILE_TYPE_NOT_ALLOWED.value)
-        if file.size > self.file_max_size:
-            raise HTTPException(status_code=400,detail=Response.FILE_SIZE_TOO_LARGE.value)
+        file_ext = os.path.splitext(file.filename)[1].lower()
+        if file_ext not in self.settings.FILE_ALLOWED_EXTION and file_ext not in self.settings.IMAGE_ALLOWED_EXTION: # Assuming check both or just FILE based on your logic, let's fix the basic check first
+             
+             if file_ext not in self.settings.FILE_ALLOWED_EXTION:
+                raise HTTPException(status_code=400,detail=Response.FILE_TYPE_NOT_SUPPORTED.value)
+
+        if file.size is not None and file.size > self.file_max_size * 1024 * 1024:
+            raise HTTPException(status_code=400,detail=Response.FILE_SIZE_EXCEEDED.value)
 
         return True
     
     def generate_file_name(self,file_name:str,project_id:str):
-        random_filename=self.generate_random_string()
+        random_filename=self.generate_random_string(10)
         project_path=ProjectController().get_project_path(project_id=project_id)
         
         cleaned_file_name=self.get_clean_file_name(
@@ -28,11 +32,11 @@ class DataController(BaseController):
         )
         while os.path.exists(os.path.join(project_path,
                                         random_filename+"_"+cleaned_file_name)):
-            random_filename=self.generate_random_string()   
+            random_filename=self.generate_random_string(10)   
         new_file_name=os.path.join(project_path,
                                     random_filename+"_"+cleaned_file_name)
 
-        return new_file_name
+        return new_file_name, random_filename+"_"+cleaned_file_name
         
         
     def get_clean_file_name(self, orig_file_name: str):

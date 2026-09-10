@@ -1,0 +1,155 @@
+services:
+  # ── MongoDB ──────────────────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    volumes:
+      - ./data/mongodb:/data/db        # docker/data/mongodb
+    networks:
+      - backend
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    ports:
+      - "27017:27017"
+    restart: always
+
+  # ── Redis ─────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+    restart: always
+
+  # ── FastAPI Application ───────────────────────────────────────────────────
+  # يتبني مرة واحدة بس — الـ image اسمه satr_edu_image
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: satr_edu_image
+    container_name: satr_edu_app
+    env_file:
+      - ../.env
+    volumes:
+      - ../src:/app/src
+      - ../main.py:/app/main.py
+      - ./data/assets:/app/src/assets  # docker/data/assets
+    ports:
+      - "8001:8000"
+    networks:
+      - backend
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - mongodb
+      - redis
+      - qdrant
+    environment:
+      - MONGODB_URL=mongodb://admin:admin@mongodb:27017
+      - REDIS_URL=redis://redis:6379/0
+      - VECTOR_DB_PATH=http://qdrant:6333
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin123
+      - MINIO_SECURE=false
+      - OCR_BACKEND=surya
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_VISION_MODEL=${GEMINI_VISION_MODEL:-gemini-2.0-flash}
+      - SURYA_SERVICE_URL=http://host.docker.internal:8765
+    restart: always
+
+  # ── NGINX Load Balancer ───────────────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: satr_edu_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - backend
+    depends_on:
+      - app
+    restart: always
+
+  # ── Celery Worker ─────────────────────────────────────────────────────────
+  # نفس الـ image — مش build جديد!
+  celery_worker:
+    image: satr_edu_image
+    container_name: satr_edu_celery
+    command: celery -A src.tasks.process_tasks.celery_app worker --loglevel=info
+    env_file:
+      - ../.env
+    volumes:
+      - ../src:/app/src
+      - ../main.py:/app/main.py
+      - ./data/assets:/app/src/assets
+    networks:
+      - backend
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - mongodb
+      - redis
+      - qdrant
+      - app
+    environment:
+      - MONGODB_URL=mongodb://admin:admin@mongodb:27017
+      - REDIS_URL=redis://redis:6379/0
+      - VECTOR_DB_PATH=http://qdrant:6333
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin123
+      - MINIO_SECURE=false
+      - OCR_BACKEND=gemini
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_VISION_MODEL=${GEMINI_VISION_MODEL:-gemini-2.0-flash}
+    restart: always
+
+  # ── Qdrant Vector Database ────────────────────────────────────────────────
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: satr_edu_qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ./data/qdrant:/qdrant/storage  # docker/data/qdrant
+    networks:
+      - backend
+    restart: always
+
+  # ── MinIO Object Storage ──────────────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: satr_edu_minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin123
+    volumes:
+      - ./data/minio:/data             # docker/data/minio
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  backend:

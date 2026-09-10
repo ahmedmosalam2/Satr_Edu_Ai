@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Satr Edu AI — System Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0d0f1a;
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 20px;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 36px;
+    width: 100%;
+    max-width: 1400px;
+  }
+
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #00e5ff, #a855f7, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+
+  .badge {
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.3);
+    color: #00e5ff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  .canvas {
+    background: #f0f2f8;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 1400px;
+    padding: 40px;
+    box-shadow: 0 0 80px rgba(0,229,255,0.08), 0 40px 120px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+    overflow: visible;
+  }
+
+  /* ── LEGEND ── */
+  .legend {
+    position: absolute;
+    top: 24px; right: 24px;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 11.5px;
+    color: #374151;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .legend-title { font-weight: 700; margin-bottom: 8px; font-size: 11px; color: #111; letter-spacing: 0.5px; text-transform: uppercase; }
+  .legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .legend-line { width: 32px; height: 2px; border-radius: 2px; }
+  .legend-dash { width: 32px; height: 0; border-top: 2px dashed #9ca3af; }
+
+  /* ── GRID LAYOUT ── */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 140px 40px 200px 60px 1fr 60px 220px;
+    grid-template-rows: auto;
+    gap: 0;
+    align-items: start;
+    min-height: 700px;
+    position: relative;
+  }
+
+  /* ── BOXES ── */
+  .box {
+    background: white;
+    border-radius: 12px;
+    padding: 14px 16px;
+    border: 1.5px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+    position: relative;
+  }
+  .box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+  .box-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .box-sub {
+    font-size: 10.5px;
+    color: #6b7280;
+    line-height: 1.5;
+  }
+  .box-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .tag {
+    font-size: 9.5px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+  }
+
+  /* Color variants */
+  .box-teal  { border-color: #06b6d4; }
+  .box-purple{ border-color: #a855f7; }
+  .box-orange{ border-color: #f97316; }
+  .box-red   { border-color: #ef4444; }
+  .box-green { border-color: #22c55e; }
+  .box-blue  { border-color: #3b82f6; }
+  .box-pink  { border-color: #ec4899; }
+  .box-amber { border-color: #f59e0b; }
+  .box-gray  { border-color: #9ca3af; border-style: dashed; }
+
+  .tag-teal   { background: #e0f9ff; color: #0891b2; }
+  .tag-purple { background: #f3e8ff; color: #9333ea; }
+  .tag-orange { background: #fff7ed; color: #ea580c; }
+  .tag-green  { background: #f0fdf4; color: #16a34a; }
+  .tag-red    { background: #fef2f2; color: #dc2626; }
+  .tag-blue   { background: #eff6ff; color: #2563eb; }
+  .tag-pink   { background: #fdf2f8; color: #db2777; }
+  .tag-amber  { background: #fffbeb; color: #d97706; }
+  .tag-gray   { background: #f3f4f6; color: #6b7280; }
+
+  .icon { font-size: 16px; }
+
+  /* ── FULL LAYOUT ── */
+  .layout {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+    width: 100%;
+    position: relative;
+  }
+
+  /* Columns */
+  .col { display: flex; flex-direction: column; gap: 14px; }
+  .col-clients { width: 140px; flex-shrink: 0; gap: 10px; }
+  .col-gateway { width: 190px; flex-shrink: 0; }
+  .col-core    { width: 280px; flex-shrink: 0; }
+  .col-storage { width: 220px; flex-shrink: 0; }
+
+  /* arrow connectors */
+  .connector { flex-shrink: 0; display: flex; align-items: center; justify-content: center; position: relative; }
+  .conn-h { width: 60px; }
+  .conn-h-sm { width: 40px; }
+
+  /* SVG arrows */
+  svg.arrows { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 5; }
+
+  /* ── OCR chain inside box ── */
+  .ocr-chain {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px;
+    margin-top: 6px;
+    font-size: 9.5px;
+    color: #374151;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .ocr-step {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 9px;
+  }
+  .ocr-arrow { color: #9ca3af; font-size: 10px; }
+
+  /* Client group */
+  .client-group {
+    border: 1.5px dashed #9ca3af;
+    border-radius: 12px;
+    padding: 10px;
+    background: rgba(156,163,175,0.05);
+  }
+  .group-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #6b7280;
+    text-align: center;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #6b7280;
+    text-align: center;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .divider { width: 1px; background: #e5e7eb; margin: 0 20px; align-self: stretch; flex-shrink: 0; }
+
+  /* responsive scroll */
+  .scroll-wrap { overflow-x: auto; width: 100%; }
+
+  /* highlight dot */
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  /* tech pill row */
+  .tech-row { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+  .tech-pill {
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .section-group {
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 14px 12px 12px;
+    background: rgba(0,0,0,0.015);
+  }
+
+  .storage-group {
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 14px 12px 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🎓 Satr Edu AI — System Architecture</h1>
+  <span class="badge">v2.0 · Enterprise</span>
+  <span class="badge" style="border-color:rgba(168,85,247,0.3);color:#a855f7;background:rgba(168,85,247,0.08);">Multi-Agent RAG</span>
+</div>
+
+<div class="canvas">
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-title">Legend</div>
+    <div class="legend-row"><div class="legend-dash"></div> Client Request</div>
+    <div class="legend-row"><div class="legend-line" style="background:#06b6d4"></div> Data / AI Flow</div>
+    <div class="legend-row"><div class="legend-line" style="background:#a855f7"></div> Storage Access</div>
+    <div class="legend-row"><div class="legend-line" style="background:#f97316"></div> Async Task</div>
+    <div class="legend-row"><div class="legend-line" style="background:#22c55e"></div> Search Pipeline</div>
+  </div>
+
+  <div class="scroll-wrap">
+  <div style="display:flex; gap:0; align-items:flex-start; min-width:1200px; position:relative;">
+
+    <!-- SVG for arrows -->
+    <svg class="arrows" id="arrow-svg"></svg>
+
+    <!-- ══════════ COL 1: CLIENTS ══════════ -->
+    <div style="width:150px; flex-shrink:0; padding-top:60px;">
+      <div class="client-group">
+        <div class="group-label">Clients</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+
+          <div class="box box-gray" id="client-student">
+            <div class="box-title"><span class="icon">🎓</span> Student</div>
+            <div class="box-sub">Web / Mobile</div>
+          </div>
+
+          <div class="box box-gray" id="client-teacher">
+            <div class="box-title"><span class="icon">👨‍🏫</span> Teacher</div>
+            <div class="box-sub">Dashboard</div>
+          </div>
+
+          <div class="box box-gray" id="client-admin">
+            <div class="box-title"><span class="icon">⚙️</span> Admin</div>
+            <div class="box-sub">Control Panel</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- spacer -->
+    <div style="width:55px; flex-shrink:0;"></div>
+
+    <!-- ══════════ COL 2: GATEWAY ══════════ -->
+    <div style="width:185px; flex-shrink:0; display:flex; flex-direction:column; gap:12px; padding-top:30px;">
+      <div class="section-label">Gateway</div>
+
+      <div class="box" id="box-nginx" style="border-color:#4ade80;">
+        <div class="box-title">
+          <span style="width:18px;height:18px;background:#009900;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:900;">N</span>
+          NGINX
+        </div>
+        <div class="box-sub">Reverse Proxy · SSL · Load Balancer</div>
+      </div>
+
+      <div class="box box-teal" id="box-fastapi" style="border-width:2px;">
+        <div class="box-title"><span class="icon">🐍</span> FastAPI Backend</div>
+        <div class="box-sub">83 Endpoints · JWT Auth · Async I/O · SSE Streaming · Pydantic v2</div>
+        <div class="box-tags">
+          <span class="tag tag-teal">Auth</span>
+          <span class="tag tag-teal">Chat</span>
+          <span class="tag tag-teal">Exam</span>
+          <span class="tag tag-teal">Pipeline</span>
+          <span class="tag tag-teal">Admin</span>
+          <span class="tag tag-teal">RAG</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- spacer -->
+    <div style="width:55px; flex-shrink:0;"></div>
+
+    <!-- ══════════ COL 3: CORE SERVICES ══════════ -->
+    <div style="width:300px; flex-shrink:0; display:flex; flex-direction:column; gap:12px;">
+      <div class="section-label">Core Services</div>
+
+      <!-- Celery -->
+      <div class="box box-red" id="box-celery">
+        <div class="box-title"><span class="icon">⚙️</span> Celery Workers</div>
+        <div class="box-sub">Background async processing engine</div>
+        <div class="box-tags">
+          <span class="tag tag-red">OCR</span>
+          <span class="tag tag-red">Embedding</span>
+          <span class="tag tag-red">Indexing</span>
+          <span class="tag tag-red">File Parse</span>
+        </div>
+        <div class="tech-row">
+          <span class="tech-pill" style="border-color:#ef4444;color:#ef4444;background:#fef2f2;">Redis Broker</span>
+          <span class="tech-pill" style="border-color:#f97316;color:#ea580c;background:#fff7ed;">Soft: 10min</span>
+        </div>
+      </div>
+
+      <!-- Multi-Agent -->
+      <div class="box box-purple" id="box-agents" style="border-width:2px;">
+        <div class="box-title"><span class="icon">🤖</span> Multi-Agent Orchestrator</div>
+        <div class="box-sub">ReAct (Reasoning + Acting) · Intent Routing</div>
+        <div class="box-tags">
+          <span class="tag tag-purple">🔍 RAG Agent</span>
+          <span class="tag tag-purple">🧑‍🏫 Tutor Agent</span>
+          <span class="tag tag-purple">📝 Quiz Agent</span>
+          <span class="tag tag-purple">🤔 Socratic Agent</span>
+          <span class="tag tag-purple">🎯 Intent Classifier</span>
+        </div>
+        <div class="tech-row">
+          <span class="tech-pill" style="border-color:#a855f7;color:#9333ea;background:#f3e8ff;">MAX_STEPS=5</span>
+          <span class="tech-pill" style="border-color:#a855f7;color:#9333ea;background:#f3e8ff;">AgentMemory</span>
+        </div>
+      </div>
+
+      <!-- LLM Engine -->
+      <div class="box box-blue" id="box-llm">
+        <div class="box-title"><span class="icon">🧠</span> LLM Engine</div>
+        <div class="box-sub">Unified provider abstraction (LLMWrapper)</div>
+        <div class="box-tags">
+          <span class="tag tag-blue">✦ Gemini 1.5 Flash</span>
+          <span class="tag tag-blue">🦙 Llama3 / Ollama</span>
+          <span class="tag tag-blue">Cohere</span>
+        </div>
+        <div class="tech-row">
+          <span class="tech-pill" style="border-color:#3b82f6;color:#2563eb;background:#eff6ff;">Temp 0.2 (RAG)</span>
+          <span class="tech-pill" style="border-color:#3b82f6;color:#2563eb;background:#eff6ff;">Temp 0.7 (Quiz)</span>
+        </div>
+      </div>
+
+      <!-- Doc Processor -->
+      <div class="box box-orange" id="box-docproc">
+        <div class="box-title"><span class="icon">📄</span> Document Processor</div>
+        <div class="box-sub">Format: PDF · PPTX · DOCX · Images · Video</div>
+        <div class="ocr-chain">
+          <b style="color:#374151;font-size:9px;">OCR:</b>
+          <span class="ocr-step">Surya</span>
+          <span class="ocr-arrow">→</span>
+          <span class="ocr-step">Gemini</span>
+          <span class="ocr-arrow">→</span>
+          <span class="ocr-step">DeepSeek</span>
+          <span class="ocr-arrow">→</span>
+          <span class="ocr-step">Paddle</span>
+          <span class="ocr-arrow">→</span>
+          <span class="ocr-step">Tesseract</span>
+        </div>
+        <div class="box-tags" style="margin-top:8px;">
+          <span class="tag tag-orange">DeepDoc Layout</span>
+          <span class="tag tag-orange">Semantic Chunker</span>
+          <span class="tag tag-orange">Naive Chunker</span>
+        </div>
+      </div>
+
+      <!-- Hybrid Search -->
+      <div class="box box-green" id="box-search" style="border-width:2px;">
+        <div class="box-title"><span class="icon">🔍</span> Hybrid Search Engine</div>
+        <div class="box-sub">Multi-retriever fusion pipeline</div>
+        <div class="box-tags">
+          <span class="tag tag-purple">Dense (Qdrant HNSW)</span>
+          <span class="tag tag-green">Sparse (MongoDB)</span>
+          <span class="tag tag-blue">Cross-Encoder Reranker</span>
+        </div>
+        <div class="tech-row">
+          <span class="tech-pill" style="border-color:#22c55e;color:#16a34a;background:#f0fdf4;">Cosine Similarity</span>
+          <span class="tech-pill" style="border-color:#22c55e;color:#16a34a;background:#f0fdf4;">RRF Fusion</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- spacer -->
+    <div style="width:55px; flex-shrink:0;"></div>
+
+    <!-- ══════════ COL 4: STORAGE ══════════ -->
+    <div style="width:220px; flex-shrink:0; display:flex; flex-direction:column; gap:12px;">
+      <div class="section-label">Storage Layer</div>
+
+      <!-- Qdrant -->
+      <div class="box box-purple" id="box-qdrant">
+        <div class="box-title">
+          <span style="display:inline-block;width:16px;height:16px;background:linear-gradient(135deg,#a855f7,#7c3aed);border-radius:50%;"></span>
+          Qdrant Vector DB
+        </div>
+        <div class="box-sub">Dense semantic embeddings store</div>
+        <div class="box-tags">
+          <span class="tag tag-purple">HNSW Index</span>
+          <span class="tag tag-purple">Payload Filter</span>
+          <span class="tag tag-purple">collection_{dim}_{proj}</span>
+        </div>
+      </div>
+
+      <!-- MongoDB -->
+      <div class="box box-green" id="box-mongo">
+        <div class="box-title">
+          <span style="color:#22c55e;font-size:15px;">🍃</span> MongoDB
+        </div>
+        <div class="box-sub">Primary NoSQL document store</div>
+        <div class="box-tags">
+          <span class="tag tag-green">Users</span>
+          <span class="tag tag-green">Projects</span>
+          <span class="tag tag-green">Chunks</span>
+          <span class="tag tag-green">Exams</span>
+          <span class="tag tag-green">Chat History</span>
+          <span class="tag tag-green">ELO / IRT</span>
+          <span class="tag tag-green">Analytics</span>
+        </div>
+        <div class="tech-row">
+          <span class="tech-pill" style="border-color:#22c55e;color:#16a34a;background:#f0fdf4;">Motor Async</span>
+          <span class="tech-pill" style="border-color:#22c55e;color:#16a34a;background:#f0fdf4;">Text Index</span>
+        </div>
+      </div>
+
+      <!-- Redis -->
+      <div class="box box-red" id="box-redis">
+        <div class="box-title">
+          <span style="display:inline-block;width:16px;height:16px;background:#ef4444;border-radius:3px;"></span>
+          Redis
+        </div>
+        <div class="box-sub">In-memory broker & cache</div>
+        <div class="box-tags">
+          <span class="tag tag-red">Celery Broker</span>
+          <span class="tag tag-red">Task Queue</span>
+          <span class="tag tag-red">Result Backend</span>
+        </div>
+      </div>
+
+      <!-- Adaptive Engine -->
+      <div class="box box-amber" id="box-adaptive">
+        <div class="box-title"><span class="icon">📊</span> Adaptive Engine</div>
+        <div class="box-sub">Student proficiency tracking</div>
+        <div class="box-tags">
+          <span class="tag tag-amber">ELO Rating</span>
+          <span class="tag tag-amber">IRT Model</span>
+          <span class="tag tag-amber">Spaced Repetition</span>
+          <span class="tag tag-amber">Risk Analytics</span>
+        </div>
+      </div>
+
+      <!-- Python Sandbox -->
+      <div class="box box-pink" id="box-sandbox">
+        <div class="box-title"><span class="icon">🔒</span> Python Sandbox</div>
+        <div class="box-sub">Isolated code execution</div>
+        <div class="box-tags">
+          <span class="tag tag-pink">subprocess</span>
+          <span class="tag tag-pink">3s Timeout</span>
+          <span class="tag tag-pink">Env Scrub</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- end flex -->
+  </div><!-- end scroll-wrap -->
+
+</div><!-- end canvas -->
+
+<script>
+// Draw SVG arrows between elements
+function getCenter(el) {
+  const canvas = document.querySelector('.canvas');
+  const cr = canvas.getBoundingClientRect();
+  const r = el.getBoundingClientRect();
+  return {
+    x: r.left - cr.left + r.width / 2,
+    y: r.top - cr.top + r.height / 2,
+    top: r.top - cr.top,
+    bottom: r.top - cr.top + r.height,
+    left: r.left - cr.left,
+    right: r.left - cr.left + r.width,
+    w: r.width,
+    h: r.height
+  };
+}
+
+function arrowMarker(svg, id, color) {
+  const defs = svg.querySelector('defs') || svg.appendChild(document.createElementNS('http://www.w3.org/2000/svg','defs'));
+  const m = document.createElementNS('http://www.w3.org/2000/svg','marker');
+  m.setAttribute('id', id);
+  m.setAttribute('markerWidth', '8');
+  m.setAttribute('markerHeight', '8');
+  m.setAttribute('refX', '6');
+  m.setAttribute('refY', '3');
+  m.setAttribute('orient', 'auto');
+  const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d', 'M0,0 L0,6 L8,3 z');
+  p.setAttribute('fill', color);
+  m.appendChild(p);
+  defs.appendChild(m);
+}
+
+function drawArrow(svg, x1, y1, x2, y2, color, markerId, dashed=false, bend=0) {
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  let mid = (x1 + x2) / 2 + bend;
+  const d = `M${x1},${y1} C${mid},${y1} ${mid},${y2} ${x2},${y2}`;
+  path.setAttribute('d', d);
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke', color);
+  path.setAttribute('stroke-width', '1.8');
+  path.setAttribute('marker-end', `url(#${markerId})`);
+  if (dashed) path.setAttribute('stroke-dasharray', '5,4');
+  svg.appendChild(path);
+}
+
+function drawStraightArrow(svg, x1, y1, x2, y2, color, markerId, dashed=false) {
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+  line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+  line.setAttribute('stroke', color);
+  line.setAttribute('stroke-width', '1.8');
+  line.setAttribute('marker-end', `url(#${markerId})`);
+  if (dashed) line.setAttribute('stroke-dasharray', '5,4');
+  svg.appendChild(line);
+}
+
+window.addEventListener('load', () => {
+  const svg = document.getElementById('arrow-svg');
+  // update svg size to canvas
+  const canvas = document.querySelector('.canvas');
+  svg.setAttribute('viewBox', `0 0 ${canvas.offsetWidth} ${canvas.offsetHeight}`);
+
+  // define markers
+  arrowMarker(svg, 'arr-teal',   '#06b6d4');
+  arrowMarker(svg, 'arr-purple', '#a855f7');
+  arrowMarker(svg, 'arr-orange', '#f97316');
+  arrowMarker(svg, 'arr-red',    '#ef4444');
+  arrowMarker(svg, 'arr-green',  '#22c55e');
+  arrowMarker(svg, 'arr-blue',   '#3b82f6');
+  arrowMarker(svg, 'arr-gray',   '#9ca3af');
+  arrowMarker(svg, 'arr-amber',  '#f59e0b');
+  arrowMarker(svg, 'arr-pink',   '#ec4899');
+
+  const clients  = document.querySelector('.client-group');
+  const nginx    = document.getElementById('box-nginx');
+  const fastapi  = document.getElementById('box-fastapi');
+  const celery   = document.getElementById('box-celery');
+  const agents   = document.getElementById('box-agents');
+  const llm      = document.getElementById('box-llm');
+  const docproc  = document.getElementById('box-docproc');
+  const search   = document.getElementById('box-search');
+  const qdrant   = document.getElementById('box-qdrant');
+  const mongo    = document.getElementById('box-mongo');
+  const redis    = document.getElementById('box-redis');
+  const adaptive = document.getElementById('box-adaptive');
+  const sandbox  = document.getElementById('box-sandbox');
+
+  const c  = getCenter;
+
+  // Clients → NGINX (dashed gray)
+  drawArrow(svg, c(clients).right, c(clients).y, c(nginx).left, c(nginx).y, '#9ca3af', 'arr-gray', true);
+
+  // NGINX → FastAPI (teal)
+  drawArrow(svg, c(nginx).right, c(nginx).y, c(fastapi).left, c(fastapi).y, '#06b6d4', 'arr-teal');
+
+  // FastAPI → Celery (orange)
+  drawArrow(svg, c(fastapi).right, c(fastapi).y - 80, c(celery).left, c(celery).y, '#f97316', 'arr-orange');
+
+  // FastAPI → Agents (teal)
+  drawArrow(svg, c(fastapi).right, c(fastapi).y - 10, c(agents).left, c(agents).y, '#06b6d4', 'arr-teal');
+
+  // FastAPI → DocProc (orange)
+  drawArrow(svg, c(fastapi).right, c(fastapi).y + 60, c(docproc).left, c(docproc).y, '#f97316', 'arr-orange');
+
+  // Agents → LLM (blue)
+  drawStraightArrow(svg, c(agents).right + c(agents).w/2, c(agents).bottom, c(agents).right + c(agents).w/2, c(llm).top, '#3b82f6', 'arr-blue');
+
+  // Agents → Hybrid Search (green)
+  drawArrow(svg, c(agents).right + c(agents).w/2, c(search).top - 30, c(search).left, c(search).y, '#22c55e', 'arr-green');
+
+  // Celery → Redis (red)
+  drawArrow(svg, c(celery).right, c(celery).y, c(redis).left, c(redis).y, '#ef4444', 'arr-red');
+
+  // Celery → Qdrant (purple dashed)
+  drawArrow(svg, c(celery).right, c(celery).y - 15, c(qdrant).left, c(qdrant).y, '#a855f7', 'arr-purple', true);
+
+  // Celery → MongoDB (green dashed)
+  drawArrow(svg, c(celery).right, c(celery).y + 15, c(mongo).left, c(mongo).y - 20, '#22c55e', 'arr-green', true);
+
+  // Search → Qdrant (purple)
+  drawArrow(svg, c(search).right, c(search).y - 15, c(qdrant).left, c(qdrant).bottom - 20, '#a855f7', 'arr-purple');
+
+  // Search → MongoDB (green)
+  drawArrow(svg, c(search).right, c(search).y, c(mongo).left, c(mongo).y + 20, '#22c55e', 'arr-green');
+
+  // Agents → Adaptive Engine (amber)
+  drawArrow(svg, c(agents).right, c(agents).y + 30, c(adaptive).left, c(adaptive).y, '#f59e0b', 'arr-amber');
+
+  // LLM → Sandbox (pink dashed)
+  drawArrow(svg, c(llm).right, c(llm).y + 20, c(sandbox).left, c(sandbox).y, '#ec4899', 'arr-pink', true);
+
+  // DocProc → Celery (gray)
+  drawArrow(svg, c(docproc).left - 20, c(docproc).top, c(celery).left - 20, c(celery).bottom, '#9ca3af', 'arr-gray', false, -30);
+
+});
+</script>
+</body>
+</html>

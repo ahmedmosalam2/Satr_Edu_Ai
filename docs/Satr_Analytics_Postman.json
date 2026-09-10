@@ -1,0 +1,160 @@
+{
+  "info": {
+    "_postman_id": "99ea78b8-6a5d-4f11-893d-426b3a3b5c65",
+    "name": "Satr Edu - Analytics",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0. Login (Get Token)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_email\": \"teacher@satr.ai\",\n  \"user_password\": \"pass123456\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "1. Student Analytics",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer YOUR_TOKEN_HERE"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/analytics/student/student_123",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "v1",
+            "analytics",
+            "student",
+            "student_123"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Project Leaderboard",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer YOUR_TOKEN_HERE"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/analytics/leaderboard/project_123",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "v1",
+            "analytics",
+            "leaderboard",
+            "project_123"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Teacher Overview",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer YOUR_TOKEN_HERE"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/analytics/teacher/teacher_123/overview",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "v1",
+            "analytics",
+            "teacher",
+            "teacher_123",
+            "overview"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Evaluation - Retrieval",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer YOUR_TOKEN_HERE"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"project_id\": \"project_123\",\n  \"query\": \"سؤال تجريبي لاختبار الاسترجاع\",\n  \"limit\": 2\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/eval/retrieval",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "v1",
+            "eval",
+            "retrieval"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

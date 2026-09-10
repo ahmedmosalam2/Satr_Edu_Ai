@@ -1,0 +1,162 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-1234-56789abcdef0",
+    "name": "Satr Edu - Core Pipeline",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0. Login (Teacher)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_email\": \"teacher@satr.ai\",\n  \"user_password\": \"pass123456\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/auth/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "auth", "login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "1. Create Project",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer YOUR_TOKEN_HERE"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"project_name\": \"مشروع الذكاء الاصطناعي\",\n  \"project_description\": \"تجربة النظام الكاملة\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/projects",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "projects"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Upload & Process Document",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer YOUR_TOKEN_HERE"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": []
+            },
+            {
+              "key": "chunk_strategy",
+              "value": "structure",
+              "type": "text"
+            },
+            {
+              "key": "chunk_size",
+              "value": "500",
+              "type": "text"
+            },
+            {
+              "key": "auto_process",
+              "value": "true",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/documents/YOUR_PROJECT_ID_HERE/upload",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "documents", "YOUR_PROJECT_ID_HERE", "upload"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Chat with Document (RAG)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer YOUR_TOKEN_HERE"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"لخص لي أهم النقاط الموجودة في الملف الذي قمت برفعه؟\",\n  \"limit\": 3\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/chat/YOUR_PROJECT_ID_HERE",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "chat", "YOUR_PROJECT_ID_HERE"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Generate Exam",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer YOUR_TOKEN_HERE"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"project_id\": \"YOUR_PROJECT_ID_HERE\",\n  \"title\": \"امتحان الذكاء الاصطناعي\",\n  \"difficulty\": \"medium\",\n  \"question_count\": 5,\n  \"question_types\": [\"mcq\", \"true_false\"]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/exam/generate",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "exam", "generate"]
+        }
+      },
+      "response": []
+    }
+  ]
+}
